@@ -1,103 +1,56 @@
-# Repository template
+# Work-CFA_Tokenomics
 
-A GitHub template repository. Create a repository from it, run one command,
-and the new repository has its governance files, review-app configuration,
-security workflows and labels in place.
+Customer-hosted cloud and AI FinOps platform with Microsoft Foundry, Amazon Bedrock, and Google Vertex AI usage tracking, guided setup, role-based access, customer-approved assessments, and validated full-data import/export.
 
-## Create a repository from it
+**Status: documentation and architecture foundation.** Application services, deployment packages, provider connectors, and product tests are not implemented yet. The capabilities below are requirements, not claims of a running or production-ready product. See [delivery status](docs/roadmap.md).
 
-1. On this repository's page choose **Use this template**, then **Create a
-   new repository**. Name it and create it.
-2. Clone the new repository and open a shell in its root folder.
-3. Run the initialize script once (next section).
-4. Work through `docs/TEMPLATE.md`, then delete that file.
+## Product boundaries
 
-## Initialize the checkout
+- Deploy the platform only in the customer's environment.
+- Keep customer data, credentials, configuration, and operational telemetry under customer control.
+- Support customer **admins**, **users**, and **readers** with server-enforced permissions.
+- Give vendor administrators/support **no standing customer-data access**. A customer-authorized **Assessment** grants only explicitly approved scope for a limited period.
+- Connect Foundry, Bedrock, and Vertex AI without requiring the customer to use all three.
+- Measure model-token usage with provider-specific semantics, visible coverage, and no double-counting.
+- Make setup clear, concise, resumable, and independently verifiable.
+- Support full export/import with integrity, compatibility, relationship, and authorization validation.
+- Leave retention, deletion, backup policy, and data ownership with the customer.
 
-PowerShell (Windows):
+Customer-hosted does not mean no external processing: configured provider requests go to customer-approved cloud endpoints. Support access and any diagnostic transfer require separate, explicit authorization.
 
-```powershell
-.\scripts\Initialize-Repo.ps1 -Stack node-typescript -Prune
-```
+## Start here
 
-Bash (Git Bash, macOS, Linux; needs Python 3):
+| Audience | Read first |
+| --- | --- |
+| Product and architecture | [Requirements](docs/requirements.md), [architecture](docs/architecture.md), [decisions](docs/adr/README.md) |
+| Customer administrators | [Deployment contract](docs/deployment.md), [guided setup](docs/onboarding.md), [data ownership](docs/data-ownership.md) |
+| Security and support | [Roles and identity](docs/access-control.md), [Assessment access](docs/assessment.md), [security policy](.github/SECURITY.md) |
+| Provider and FinOps engineers | [Provider integration](docs/providers.md), [token accounting](docs/token-accounting.md) |
+| Migration and operations | [Export/import](docs/portability.md), [operations](docs/operations.md), [acceptance tests](docs/testing.md) |
+| Contributors and maintainers | [Contributing](CONTRIBUTING.md), [agent instructions](AGENTS.md), [repository setup](docs/TEMPLATE.md) |
+
+[Full documentation index](docs/README.md) · [Roadmap](docs/roadmap.md) · [Risk register](docs/risk-register.md) · [Changelog](CHANGELOG.md)
+
+## Work with this repository
 
 ```bash
-bash scripts/initialize-repo.sh --prune node-typescript
+git clone https://github.com/saulpatinojr/Work-CFA_Tokenomics.git
+cd Work-CFA_Tokenomics
+git switch -c docs/your-change
 ```
 
-Both scripts do the same work. Run one of them, from the repository root,
-before committing any code of your own. Running it a second time is safe:
-every step checks whether it has already been done.
+Read the requirements and accepted ADRs before proposing implementation. There is no application install, start, or cloud deployment command yet. Do not treat template initialization scripts as product installers or rerun them against this customized checkout. Do not create cloud resources as part of documentation work.
 
-### Parameters
+The first implementation milestone is to choose the supported runtime/hosting profile and measurement mode, then build a minimal vertical slice with identity, roles, one provider adapter, usage persistence, and setup checks. All three provider integrations remain required for the product baseline; incremental delivery is not a scope reduction.
 
-| PowerShell | Bash | Meaning |
-| --- | --- | --- |
-| `-Stack <list>` | words after the flags | Technology in the repository: `node-typescript`, `python`, `terraform-ansible`. Give several, or none for a docs-only repository. |
-| `-Prune` | `--prune` | Delete `overlays/` and `scripts/` when done. Recommended. |
-| `-Name <repo>` | `--name <repo>` | Repository name. Default: read from the `origin` remote. |
-| `-Owner @login` | `--owner @login` | Code owner, a user or `@org/team`. Default: the account in the `origin` remote. |
-| `-SkipGitHub` | `--skip-github` | Do not call `gh`. Labels and Discussions must then be set up by hand. |
+## Explicit exclusions
 
-Full help: `Get-Help .\scripts\Initialize-Repo.ps1 -Detailed` or
-`bash scripts/initialize-repo.sh --help`.
+This baseline does not include subscriptions, payments, refunds, or other commercial operations. It does not impose vendor-owned deletion, a fixed vendor retention period, mandatory vendor telemetry, or a vendor credential repository. Earlier assumptions about iOS form processing, appointments, and a vendor-managed 90-day deletion workflow are not requirements for this repository.
 
-### What it does
+## Repository governance
 
-1. Replaces this README with the project README skeleton from
-   `docs/README.project.md`, titled with the repository name.
-2. Writes `* @<owner>` into `.github/CODEOWNERS`.
-3. Removes every `.github/dependabot.yml` block whose manifest is absent
-   (no `package.json`, no npm block), so Dependabot reports nothing missing.
-4. Points the issue chooser (`.github/ISSUE_TEMPLATE/config.yml`) and
-   `docs/TEMPLATE.md` at the new repository.
-5. Adds the stack's CodeQL languages to `.github/workflows/codeql.yml`.
-   Workflow files (`actions`) are always analysed.
-6. Appends the stack's Qlty plugins from `overlays/<stack>/qlty.toml.part`
-   to `.qlty/qlty.toml`.
-7. With `gh` signed in: creates the labels in `.github/labels.json` and
-   enables Discussions. Otherwise it says so and continues.
-8. With `-Prune`: deletes `overlays/` and `scripts/`.
+Use focused branches and pull requests. Preserve customer isolation, credential custody, and explicit Assessment consent in every change. Never commit real credentials, customer exports, account identifiers, prompts, or private infrastructure details.
 
-### What success looks like
+Existing security/review configurations are inherited from the repository template. Their presence is not proof that third-party apps, private reporting, repository rules, or paid security features are enabled. See [maintainer setup](docs/TEMPLATE.md).
 
-```text
-README.md: project README written for Demo_App
-CODEOWNERS: * @example-org
-dependabot.yml: kept npm, github-actions ; dropped pip, terraform, docker
-ISSUE_TEMPLATE/config.yml: links point at example-org/Demo_App
-codeql.yml: languages actions, javascript-typescript
-qlty.toml: appended node-typescript
-label: bug ... discussions: enabled on example-org/Demo_App
-pruned overlays/ and scripts/
-```
-
-The script stops at the first error and prints it. Fix the cause and run it
-again. Nothing it does needs input while it runs.
-
-### Requirements
-
-- Git, with the new repository's `origin` remote set (a normal clone has it).
-- PowerShell 5.1 or 7 for the `.ps1`; Bash and Python 3 for the `.sh`.
-- Optional: GitHub CLI signed in (`gh auth status`) for labels and Discussions.
-
-## What the template contains
-
-- Governance: `CONTRIBUTING.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`,
-  `.github/SECURITY.md`, `.github/CODEOWNERS`, `.github/PULL_REQUEST_TEMPLATE.md`.
-- Issues: `.github/ISSUE_TEMPLATE/` forms for bug, feature, ADR, FinOps
-  finding and infrastructure change; `.github/labels.json`;
-  `.github/release.yml` for generated release notes.
-- Writing templates in `.github/templates/` (blog, gist, task, workflow
-  document). GitHub does not load these; they are for copying.
-- Security: `.github/workflows/codeql.yml` with
-  `.github/codeql/codeql-config.yml`, `.github/workflows/dependency-review.yml`,
-  `.github/dependabot.yml`.
-- Review apps: `.coderabbit.yaml` (CodeRabbit), `.qlty/qlty.toml` plus
-  `overlays/` (Qlty), `.github/copilot-instructions.md`; lint configuration
-  `.yamllint.yaml` and `.markdownlint.yaml`.
-- Hygiene: `.editorconfig`, `.gitattributes`, `.gitignore`; `docs/adr/`
-  for decision records.
-- `docs/TEMPLATE.md`: the post-creation checklist for the steps no file can
-  carry (connecting the apps, repository settings).
+No license has been selected. Do not describe this project as open source or assume redistribution rights until the owner makes that decision. Report vulnerabilities using the [security policy](.github/SECURITY.md).
