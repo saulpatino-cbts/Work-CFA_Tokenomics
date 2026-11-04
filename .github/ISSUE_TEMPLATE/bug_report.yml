@@ -1,5 +1,5 @@
 name: Bug report
-description: Report a reproducible problem in application code, infrastructure, CI, or documentation
+description: Report a reproducible non-sensitive product, documentation, or tooling problem
 title: "[Bug]: "
 labels:
   - bug
@@ -8,9 +8,9 @@ body:
   - type: markdown
     attributes:
       value: |
-        Search existing issues first.
-        Do not include credentials, tokens, personal data, customer data, private URLs, or sensitive identifiers.
-
+        Search existing issues first. Read .github/SECURITY.md before reporting a vulnerability.
+        Do not post exploit details, credentials, customer content/exports, prompts, private URLs, or identifying provider data.
+        This repository is at documentation/architecture foundation stage; planned capabilities are not implemented features.
   - type: checkboxes
     id: duplicate_check
     attributes:
@@ -18,107 +18,77 @@ body:
       options:
         - label: I searched existing issues and did not find a duplicate.
           required: true
-
   - type: input
     id: summary
     attributes:
       label: Bug summary
-      description: Provide a short, clear description of the problem.
-      placeholder: A short description of what is broken
+      placeholder: Short description of the actual problem
     validations:
       required: true
-
   - type: dropdown
     id: affected_area
     attributes:
       label: Affected area
-      description: Choose the closest area.
       options:
-        - Application or user interface
-        - API or service
-        - Infrastructure or deployment
-        - CI/CD or repository policy
-        - Documentation or tooling
+        - Documentation or repository tooling
+        - Deployment or upgrade
+        - Setup or user interface
+        - Identity or role behavior (non-sensitive report only)
+        - Assessment (non-sensitive report only)
+        - Foundry connector
+        - Bedrock connector
+        - Vertex AI connector
+        - Usage normalization or reconciliation
+        - Export or import
+        - Customer data lifecycle
         - Other
     validations:
       required: true
-
   - type: textarea
     id: what_happened
     attributes:
       label: What happened?
-      description: Describe the observed behavior and include exact safe error text when available.
-      placeholder: What did you see?
+      description: State actual behavior, not an assumption that a planned feature exists.
     validations:
       required: true
-
   - type: textarea
     id: expected_behavior
     attributes:
       label: What should have happened?
-      placeholder: What result did you expect?
+      description: Link an applicable requirement, contract, or existing behavior.
     validations:
       required: true
-
   - type: textarea
     id: steps_to_reproduce
     attributes:
-      label: Steps to reproduce
-      description: Give the smallest reliable reproduction.
+      label: Safe reproduction
+      description: Use a sanitized test environment. Do not disclose a vulnerability here.
       placeholder: |
-        1. Start with ...
-        2. Configure ...
+        1. Start from this commit/version ...
+        2. Configure non-sensitive test inputs ...
         3. Run or click ...
         4. Observe ...
     validations:
       required: true
-
   - type: textarea
     id: environment
     attributes:
-      label: Environment
-      description: Include only information needed to reproduce the problem.
-      placeholder: |
-        - OS:
-        - Runtime, browser, device, or provider:
-        - Deployment or execution mode:
-        - Application version, tag, or commit:
-        - Relevant non-sensitive configuration or feature flag:
-
-  - type: input
-    id: first_bad_version
-    attributes:
-      label: First known bad version or commit
-      placeholder: Version, tag, or commit if known
-
+      label: Environment and version
+      description: Include only necessary non-sensitive details; omit real account IDs and private endpoints.
+      placeholder: Commit/tag, runtime/browser, configured adapter/API version, and relevant safe settings
   - type: textarea
     id: logs
     attributes:
-      label: Relevant error output
-      description: Paste sanitized logs or stack traces. Remove secrets and sensitive data.
+      label: Sanitized error output
+      description: Exclude tokens, credentials, provider payloads, and customer content.
       render: shell
-
-  - type: textarea
-    id: evidence
-    attributes:
-      label: Screenshots, traces, or links
-      description: >-
-        Attach sanitized screenshots or link to a failing CI run, dashboard, or reproduction when
-        appropriate.
-
   - type: textarea
     id: impact
     attributes:
       label: Impact and workaround
-      description: >-
-        Who or what is affected? Include availability, data, security, compatibility, and workaround
-        details when known.
-
-  - type: checkboxes
-    id: completion_expectations
+      description: Explain affected behavior and any safe workaround without disclosing private information.
+  - type: textarea
+    id: verification
     attributes:
-      label: Completion expectations
-      options:
-        - label: The reproduction is included or the reason it cannot be reproduced is explained.
-        - label: A regression test or durable verification will be added when practical.
-        - label: Documentation or release notes will be updated when needed.
+      label: Suggested regression check
+      description: Describe observable acceptance criteria and checks not yet run.

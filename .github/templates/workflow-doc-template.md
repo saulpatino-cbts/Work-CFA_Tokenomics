@@ -7,6 +7,8 @@ workflow_file: '.github/workflows/[filename].yml'
 last_updated: 'YYYY-MM-DD'
 ---
 
+<!-- markdownlint-configure-file {"MD025": {"front_matter_title": ""}} -->
+
 # [Repository or project] — [Workflow name]
 
 > **Purpose:** [One-sentence description of the problem this workflow solves.]
@@ -104,6 +106,6 @@ Typical duration: [Approximate duration or variable].
 
 ## Related tools and documentation
 
-- [Related workflow or tool](./related-tool.md) — [Relationship]
-- [Repository documentation](../README.md) — [Relevant context]
-- [Decision record or runbook](https://example.com) — [Why it matters]
+- Related workflow or tool: replace with a real source-controlled link before publishing.
+- [Product documentation](../../docs/README.md) — Requirements, architecture, and operational contracts.
+- [Decision records](../../docs/adr/README.md) — Accepted boundaries and open technical choices.

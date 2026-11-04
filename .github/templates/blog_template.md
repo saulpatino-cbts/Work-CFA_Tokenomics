@@ -8,6 +8,8 @@ excerpt: '[One- to two-sentence description of the value of this post]'
 last_reviewed: 'YYYY-MM-DD'
 ---
 
+<!-- markdownlint-configure-file {"MD025": {"front_matter_title": ""}} -->
+
 # [Your title]
 
 > **TL;DR:** [One sentence describing what the reader will learn or accomplish.]
