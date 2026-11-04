@@ -18,23 +18,33 @@
 - [ ] [Required version]
 - [ ] [Required permission or input]
 
-    # Use a safe, reproducible verification command.
-    tool --version
+Verify the selected tool:
+
+```bash
+# Use a safe, reproducible verification command.
+tool --version
+```
 
 ## The code
 
-    # Replace this block with the complete, tested example.
-    # Explain why important steps exist, not only what they do.
-    # Use placeholders; never include real secrets or private data.
+```bash
+# Replace this block with the complete, tested example.
+# Explain why important steps exist, not only what they do.
+# Use placeholders; never include real secrets or private data.
+```
 
 ## Usage
 
-    # Show a minimal invocation and representative arguments.
-    command --option EXAMPLE_VALUE
+```bash
+# Show a minimal invocation and representative arguments.
+command --option EXAMPLE_VALUE
+```
 
 Expected result:
 
-    [Sanitized representative output]
+```text
+[Sanitized representative output]
+```
 
 ## Error handling and limitations
 

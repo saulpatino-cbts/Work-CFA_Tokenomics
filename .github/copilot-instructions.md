@@ -1,31 +1,17 @@
 # Repository instructions for GitHub Copilot
 
-These apply to Copilot code review, Copilot coding agent and Copilot Chat in
-this repository. `CONTRIBUTING.md` is the contract; this file points at it.
+Follow [AGENTS.md](../AGENTS.md) and [CONTRIBUTING.md](../CONTRIBUTING.md). Read [requirements](../docs/requirements.md), [ADRs](../docs/adr/README.md), and the affected product contracts before writing or reviewing changes.
 
-## When reviewing a pull request
+## Writing changes
 
-- Put correctness, security and data handling first. Skip style that a
-  formatter or linter already enforces.
-- Name the input or state that triggers a defect, the wrong result, and the
-  fix. A finding without a failure path is a suggestion, not a blocker.
-- Check the description against `.github/PULL_REQUEST_TEMPLATE.md`: every
-  section present, verification stated as commands and results, checks not
-  run named.
-- Flag any credential, token, connection string, personal data or private
-  endpoint in code, tests, fixtures, examples, workflow files or comments.
-- Flag a GitHub Action referenced by tag or branch instead of a commit SHA,
-  and a workflow whose `permissions` are wider than its steps need.
-- For Terraform, Bicep or other infrastructure, ask for the plan or preview
-  and for the rollback step when the diff does not state them.
+This is a customer-hosted platform at documentation-foundation stage. Do not invent a working runtime or choose unresolved architecture silently. Keep customer credentials/data local, preserve customer-owned lifecycle policy, enforce roles, and give vendor support no access outside an explicit Assessment grant.
 
-## When writing code
+Provider usage requires source-specific normalization, deduplication, and visible coverage. Import/export must validate integrity and authority and must not reactivate historical access. No commercial workflows or vendor retention timer.
 
-- Follow the existing structure, naming and tooling of the directory you
-  are in; do not introduce a second formatter, test runner or lint config.
-- Do not add a dependency, base image or Action without stating why and
-  pinning it.
-- Keep secrets out of source; read them from the environment or the
-  platform's secret store.
-- Add or update tests with the change, including the failure path.
-- Do not merge, approve, publish, deploy or rewrite history.
+Use existing tooling conventions; justify and pin dependencies/actions/images. Add failure and denial tests with code. Never add real secrets, customer content, archives, private endpoints, or identifiable telemetry. Do not run inherited template initialization scripts. Do not merge, deploy, publish, change repository settings, or rewrite history.
+
+## Reviewing changes
+
+Prioritize correctness, authorization, credential custody, usage accuracy, and migration safety. Describe the triggering input/state, wrong outcome, and fix; distinguish a concrete defect from an optional design suggestion.
+
+Check requirement/ADR links, tests, unrun checks, and claimed status. Flag broadened support scope, secret exposure, missing authorization, overlapping usage totals, blind imports, false verification UI, and vendor-controlled data policy. Infrastructure changes need plan/state/recovery evidence. Workflow permissions must be minimal and Actions pinned consistently with repository policy.

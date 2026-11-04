@@ -1,49 +1,36 @@
 # Security policy
 
-## Reporting a vulnerability
+## Reporting privately
 
-Use GitHub private vulnerability reporting or the private security contact documented in this repository's Security page or README. Do not open a public issue containing exploit details, credentials, tokens, private endpoints, tenant identifiers, personal data, or customer data.
+Use GitHub private vulnerability reporting **if enabled** for this repository: [security reporting](https://github.com/saulpatinojr/Work-CFA_Tokenomics/security/advisories/new). Its availability has not been verified. Do not open public issues with exploit details, credentials, customer data, private endpoints, or sensitive account information.
 
-If no private reporting channel is available, open a minimal public issue asking maintainers for a secure contact method without describing the vulnerability. Do not test systems or data you do not own or have explicit authorization to assess.
+If private reporting is unavailable, open a minimal issue requesting a private contact method from the maintainer without describing the exploit. No verified private email or guaranteed response-time SLA is established. Repository maintainers are identified in [CODEOWNERS](CODEOWNERS).
 
-Include the following in a private report when safe:
-
-- affected version, branch, component, or commit;
-- concise impact and preconditions;
-- reproduction steps or a minimal proof of concept with sensitive values removed;
-- sanitized logs, traces, or screenshots; and
-- known mitigation, workaround, or disclosure deadline.
+Only test systems you own or are explicitly authorized to assess. A software repository is not authorization to test customer environments or provider accounts.
 
 ## Scope
 
-Report issues affecting:
+Report defects in identity/authorization, support Assessment, credentials, data isolation, imports/exports, provider endpoints, normalization/data integrity, deployment/migrations, dependencies, CI/release artifacts, and logs/telemetry. A documented design risk does not excuse a working bypass or broader vulnerability.
 
-- application and library source;
-- infrastructure, deployment, build, and configuration;
-- CI/CD workflows, actions, release automation, and artifact handling;
-- authentication, authorization, tenancy, data handling, and integrations;
-- logging, telemetry, error handling, and monitoring; and
-- examples, tests, fixtures, generated files, and documentation that can expose secrets or sensitive data.
+Include affected commit/version, impact/preconditions, sanitized reproduction, and minimal safe evidence. Never attach customer archives, raw prompts/completions, live credentials, or identifiable provider payloads.
 
-Known limitations already documented in the repository's risk register do not need to be reported again unless the report identifies a missing control, materially broader impact, or bypass.
+## Product boundaries
+
+Customer-hosted software must not require vendor-held secrets or standing vendor data access. Customer roles and temporary Assessment grants must be enforced server-side. Full imports must not revive historical sessions/grants or introduce privilege escalation. Customer controls retention and deletion; the product must accurately describe its mechanisms and limits.
 
 ## Secret exposure
 
-Treat any secret or sensitive value found in a commit, issue, log, artifact, or documentation as disclosed. Notify maintainers privately, preserve only the minimum evidence needed for investigation, and rotate or revoke the value through the incident process.
-
-## Triage and disclosure
-
-Maintainers will acknowledge and triage reports as soon as practical. Timelines depend on severity, affected versions, maintainer availability, and coordination with users or upstream projects. Keep reports private until maintainers confirm that coordinated disclosure is appropriate.
+Treat an exposed secret as compromised. Notify the customer/authorized owner through a private route, revoke or rotate locally, and preserve minimum evidence. Removing a value from the latest file does not remove historical exposure. Do not copy the secret into a public report or support transcript.
 
 ## Supported versions
 
-Replace this section with the repository's actual support policy.
-
-| Version or branch | Supported |
+| Version/branch | Status |
 | --- | --- |
-| [Current release or default branch] | [Yes/No] |
-| [Older release] | [Yes/No] |
+| `main` | Pre-release documentation/design; reports accepted, no production-support guarantee. |
+| Released product versions | None published by this documentation baseline. |
 
-## Maintainer contact and response target
+Maintainers must publish supported release ranges and a verified reporting channel before production distribution. Do not represent inherited scanners or unverified repository settings as security certification.
 
-Replace this section with a verified private contact, ownership group, and response target. Do not invent an email address or promise an SLA that the repository cannot meet.
+## Coordination
+
+Maintainers triage based on severity and available evidence without a promised SLA. Coordinate disclosure privately. Customer incidents remain customer-controlled; vendor investigation still requires explicit Assessment or another separately authorized access path.

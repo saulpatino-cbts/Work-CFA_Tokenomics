@@ -1,70 +1,55 @@
 ## Summary
 
-<!-- What changed, why, and who or what is affected? Link the related issue,
-decision record, task, finding, or review item when one exists. -->
+<!-- Describe the outcome and distinguish documented/proposed/implemented/verified behavior. -->
 
-## Related issue or decision
+## Related requirement or decision
 
-<!-- Use a closing keyword only when this pull request completes the issue. -->
-
-Closes #
+<!-- Link REQ IDs, issue, risk, or ADR. Use a closing keyword only for work actually completed. -->
 
 ## Type of change
 
-- [ ] Feature or behavior change
-- [ ] Bug fix
-- [ ] Refactor or performance improvement
-- [ ] Documentation or process change
-- [ ] Dependency update
-- [ ] CI/CD or repository policy change
-- [ ] Infrastructure or deployment change
-- [ ] Security or privacy change
+- [ ] Documentation or process
+- [ ] Application or API
+- [ ] Provider connector or accounting
+- [ ] Identity, roles, or Assessment
+- [ ] Data, import/export, or migration
+- [ ] Infrastructure, CI, dependencies, or release
 - [ ] Breaking change
 
 ## Scope and impact
 
-<!-- Describe affected components, APIs, data, permissions, tenancy, migrations,
-operations, rollout, compatibility, and rollback considerations. Say "None"
-where a category does not apply. -->
+<!-- Address APIs, data, permissions, resource isolation, compatibility, operations, and cost. State None when not applicable. -->
 
 ## Verification
 
-<!-- List exact commands or checks and what each result proves. State checks not
-run and why. Distinguish static, local, CI, staging, and production evidence. -->
-
-- Checks run:
-- Important result or evidence:
+- Exact commands/checks run:
+- Results and what they prove:
 - Checks not run and why:
-- Evidence level: [ ] Static [ ] Local [ ] CI [ ] Staging [ ] Production
+- Evidence level: [ ] Static [ ] Local [ ] CI [ ] Authorized integration [ ] Production
 
-## Infrastructure changes only
+## Product boundary review
 
-<!-- Remove this section when infrastructure is untouched. -->
+- [ ] Customer data and credentials remain customer-controlled; no mandatory vendor data/control plane added.
+- [ ] Admin/user/reader and resource denial paths covered where applicable.
+- [ ] Vendor has no standing data access; Assessment approval/scope/revocation preserved.
+- [ ] Usage semantics, provenance, unknown values, and deduplication preserved where applicable.
+- [ ] Import/export validates data and authority; historical access is not reactivated.
+- [ ] Customer owns data lifecycle; no commercial workflows or vendor retention policy added.
+- [ ] No real secrets, customer content/exports, private identifiers, or sensitive telemetry included.
 
-- [ ] Plan or preview was reviewed; no unexpected destroy/recreate operations exist.
-- [ ] Resource addresses were not renamed without the required moved-state handling.
-- [ ] Secrets, state files, saved plans, and real variable values are not included.
-- [ ] Required tags, policies, networking, backup, identity, and security settings are preserved.
-- [ ] Rollout, monitoring, rollback, and recovery steps are documented.
+## Infrastructure and dependency review
 
-## Security and data review
+<!-- Mark not applicable if untouched. -->
 
-- [ ] No credentials, private keys, tokens, connection strings, personal data, customer data, or sensitive content was added.
-- [ ] Telemetry is content-free and uses correlation identifiers rather than paths, query strings, route values, document identifiers, or payloads.
-- [ ] Authorization, tenant isolation, least privilege, and denial paths were tested where applicable.
-- [ ] New dependencies, base images, and GitHub Actions are pinned or controlled according to repository policy.
-- [ ] No automated path can activate, approve, sign, file, or make an authoritative write unless explicitly approved.
+- [ ] Plan/preview and expected resource/cost changes reviewed.
+- [ ] State, credentials, migrations, rollback/recovery, and compatibility documented.
+- [ ] No unexpected destructive operations or unsafe resource renames.
+- [ ] Dependencies/images/Actions justified and pinned; workflow permissions minimal.
+- [ ] No cloud deployment or repository-setting change without explicit authorization.
 
-## Documentation and operations
+## Documentation and delivery
 
-- [ ] User-facing or developer documentation updated when needed.
-- [ ] Release notes, changelog, runbook, architecture record, migration notes, or security records updated when needed.
-- [ ] Remaining work is recorded in the repository's established tracker.
-- [ ] Rollout and rollback owners are identified when the change affects a shared environment.
-
-## Author checklist
-
-- [ ] The pull request is focused and unrelated edits were removed.
-- [ ] Tests cover changed behavior and important failure, boundary, and denial paths.
-- [ ] The final diff contains no local configuration, generated artifacts, or secrets that do not belong.
-- [ ] Required reviewers, approvals, environments, and CI checks are complete or explicitly called out.
+- [ ] README/index and affected contracts updated.
+- [ ] ADR/risk/roadmap/changelog updated where relevant.
+- [ ] Remaining work and limitations named; no unrun checks presented as passed.
+- [ ] Required review/CI status reported accurately; merge authorization not assumed.
