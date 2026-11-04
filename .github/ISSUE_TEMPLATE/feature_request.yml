@@ -1,0 +1,103 @@
+name: Feature request
+description: Suggest a new capability or improvement
+title: "[Feature]: "
+labels:
+  - enhancement
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Describe the user or operational outcome you want.
+        Do not include credentials, tokens, personal data, customer data, private URLs, or sensitive identifiers.
+
+  - type: checkboxes
+    id: duplicate_check
+    attributes:
+      label: Duplicate check
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
+
+  - type: input
+    id: summary
+    attributes:
+      label: Feature summary
+      description: Provide a short, clear description of the proposed capability.
+      placeholder: A short description of the feature
+    validations:
+      required: true
+
+  - type: dropdown
+    id: target_area
+    attributes:
+      label: Target area
+      options:
+        - Application or user interface
+        - API or service
+        - Infrastructure or deployment
+        - CI/CD or repository policy
+        - Documentation or tooling
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem statement
+      description: What problem does this solve, who is affected, and how is it handled today?
+      placeholder: Describe the problem or opportunity.
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: Proposed solution
+      description: Describe the behavior or capability you would like.
+      placeholder: Describe the desired solution and a small example if useful.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      placeholder: Describe alternatives, workarounds, or trade-offs you considered.
+
+  - type: input
+    id: domain_or_phase
+    attributes:
+      label: Domain or lifecycle phase
+      description: Optional. Include the relevant business or delivery phase when the repository uses one.
+      placeholder: Domain, phase, or Not applicable
+
+  - type: textarea
+    id: impact_and_risks
+    attributes:
+      label: Impact and risks
+      description: >-
+        Describe effects on users, APIs, data, permissions, cost, performance, operations, security,
+        and compatibility.
+      placeholder: Include migration, rollout, and rollback considerations when relevant.
+    validations:
+      required: true
+
+  - type: textarea
+    id: acceptance_criteria
+    attributes:
+      label: Acceptance criteria
+      description: Define observable conditions for completion.
+      placeholder: |
+        - Given ...
+        - When ...
+        - Then ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: additional_context
+    attributes:
+      label: Additional context
+      description: Add sanitized screenshots, diagrams, links, constraints, or related issues.

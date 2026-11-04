@@ -1,0 +1,72 @@
+# Qlty project configuration. Holds only plugins that need no project config;
+# the stack plugins (eslint, prettier, ruff, tflint, bandit) are appended by
+# the initialize script from overlays/. Reference: https://docs.qlty.sh/cli/qlty-toml
+config_version = "0"
+
+exclude_patterns = [
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/build/**",
+  "**/coverage/**",
+  "**/.terraform/**",
+  "**/__pycache__/**",
+  "**/*.min.*",
+  "**/vendor/**",
+  "**/generated/**",
+]
+
+test_patterns = [
+  "**/test/**",
+  "**/tests/**",
+  "**/__tests__/**",
+  "**/e2e/**",
+  "**/*.test.*",
+  "**/*.spec.*",
+  "**/test_*.*",
+]
+
+# Smells go to the dashboard, not to PR comments. A ruleset that requires
+# every review thread resolved turns an inline "too many returns" note into a
+# merge blocker. Flip to "comment" only on a repo that wants that.
+[smells]
+mode = "monitor"
+
+[[source]]
+name = "default"
+default = true
+
+# Security and supply chain, no project config needed
+[[plugin]]
+name = "trufflehog"
+
+[[plugin]]
+name = "gitleaks"
+
+[[plugin]]
+name = "osv-scanner"
+
+[[plugin]]
+name = "trivy"
+
+[[plugin]]
+name = "checkov"
+
+# Workflow and config hygiene
+[[plugin]]
+name = "actionlint"
+
+[[plugin]]
+name = "zizmor"
+
+[[plugin]]
+name = "yamllint"
+
+[[plugin]]
+name = "markdownlint"
+
+[[plugin]]
+name = "shellcheck"
+
+[[plugin]]
+name = "ripgrep"
+mode = "comment"

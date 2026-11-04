@@ -1,0 +1,13 @@
+---
+# Read by Qlty's yamllint plugin and by yamllint locally. Keeps workflow files
+# with long `run:` lines from failing the default 80-column rule.
+extends: default
+rules:
+  line-length:
+    max: 120
+    allow-non-breakable-inline-mappings: true
+  document-start: disable
+  truthy:
+    allowed-values: ["true", "false", "on"]   # GitHub Actions uses `on:`
+  comments:
+    min-spaces-from-content: 1

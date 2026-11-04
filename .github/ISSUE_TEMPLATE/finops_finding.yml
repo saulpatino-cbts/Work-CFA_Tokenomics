@@ -1,0 +1,108 @@
+name: FinOps finding
+description: Document a FinOps assessment finding, optimization opportunity, or governance gap
+title: "[FinOps]: "
+labels:
+  - finops-finding
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Use this form for an assessment finding, anomaly investigation, optimization opportunity, or governance gap.
+        Do not include credentials, account secrets, tenant identifiers, personal data, or confidential customer data.
+
+  - type: input
+    id: finding_title
+    attributes:
+      label: Finding title
+      placeholder: Short descriptive title
+    validations:
+      required: true
+
+  - type: dropdown
+    id: phase
+    attributes:
+      label: FinOps phase
+      options:
+        - Inform
+        - Optimize
+        - Operate
+        - Cross-phase
+    validations:
+      required: true
+
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Severity
+      options:
+        - Critical
+        - High
+        - Medium
+        - Low
+    validations:
+      required: true
+
+  - type: dropdown
+    id: provider
+    attributes:
+      label: Cloud provider
+      options:
+        - Azure
+        - AWS
+        - GCP
+        - OCI
+        - Multi-cloud
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: Finding description
+      description: Describe the cost, value, risk, governance gap, or optimization opportunity.
+      placeholder: What was observed and why does it matter?
+    validations:
+      required: true
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Provide sanitized metrics, dates, queries, screenshots, or links supporting the finding.
+      placeholder: Include measurement period, assumptions, and data-quality limitations.
+
+  - type: textarea
+    id: recommendation
+    attributes:
+      label: Recommendation
+      description: What action, decision, or follow-up should be taken?
+      placeholder: Describe the proposed action and expected result.
+    validations:
+      required: true
+
+  - type: input
+    id: estimated_monthly_savings
+    attributes:
+      label: Estimated monthly savings or impact
+      description: Use the repository's reporting currency and state whether the estimate is a range.
+      placeholder: e.g. 1200 USD/month or 500–800 USD/month
+
+  - type: textarea
+    id: assumptions
+    attributes:
+      label: Assumptions and confidence
+      placeholder: State the calculation basis, confidence level, and conditions that could change the estimate.
+
+  - type: input
+    id: suggested_owner
+    attributes:
+      label: Suggested owner
+      placeholder: Team or role responsible
+
+  - type: textarea
+    id: verification
+    attributes:
+      label: Verification and next step
+      placeholder: How will the recommendation be tested, approved, implemented, and measured?

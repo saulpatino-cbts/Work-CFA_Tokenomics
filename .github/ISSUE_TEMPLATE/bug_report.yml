@@ -1,0 +1,124 @@
+name: Bug report
+description: Report a reproducible problem in application code, infrastructure, CI, or documentation
+title: "[Bug]: "
+labels:
+  - bug
+  - needs-triage
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Search existing issues first.
+        Do not include credentials, tokens, personal data, customer data, private URLs, or sensitive identifiers.
+
+  - type: checkboxes
+    id: duplicate_check
+    attributes:
+      label: Duplicate check
+      options:
+        - label: I searched existing issues and did not find a duplicate.
+          required: true
+
+  - type: input
+    id: summary
+    attributes:
+      label: Bug summary
+      description: Provide a short, clear description of the problem.
+      placeholder: A short description of what is broken
+    validations:
+      required: true
+
+  - type: dropdown
+    id: affected_area
+    attributes:
+      label: Affected area
+      description: Choose the closest area.
+      options:
+        - Application or user interface
+        - API or service
+        - Infrastructure or deployment
+        - CI/CD or repository policy
+        - Documentation or tooling
+        - Other
+    validations:
+      required: true
+
+  - type: textarea
+    id: what_happened
+    attributes:
+      label: What happened?
+      description: Describe the observed behavior and include exact safe error text when available.
+      placeholder: What did you see?
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: What should have happened?
+      placeholder: What result did you expect?
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps_to_reproduce
+    attributes:
+      label: Steps to reproduce
+      description: Give the smallest reliable reproduction.
+      placeholder: |
+        1. Start with ...
+        2. Configure ...
+        3. Run or click ...
+        4. Observe ...
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environment
+      description: Include only information needed to reproduce the problem.
+      placeholder: |
+        - OS:
+        - Runtime, browser, device, or provider:
+        - Deployment or execution mode:
+        - Application version, tag, or commit:
+        - Relevant non-sensitive configuration or feature flag:
+
+  - type: input
+    id: first_bad_version
+    attributes:
+      label: First known bad version or commit
+      placeholder: Version, tag, or commit if known
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: Relevant error output
+      description: Paste sanitized logs or stack traces. Remove secrets and sensitive data.
+      render: shell
+
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Screenshots, traces, or links
+      description: >-
+        Attach sanitized screenshots or link to a failing CI run, dashboard, or reproduction when
+        appropriate.
+
+  - type: textarea
+    id: impact
+    attributes:
+      label: Impact and workaround
+      description: >-
+        Who or what is affected? Include availability, data, security, compatibility, and workaround
+        details when known.
+
+  - type: checkboxes
+    id: completion_expectations
+    attributes:
+      label: Completion expectations
+      options:
+        - label: The reproduction is included or the reason it cannot be reproduced is explained.
+        - label: A regression test or durable verification will be added when practical.
+        - label: Documentation or release notes will be updated when needed.

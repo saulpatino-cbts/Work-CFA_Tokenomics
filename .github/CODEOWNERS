@@ -1,0 +1,26 @@
+# Standardized CODEOWNERS baseline
+#
+# Replace every placeholder owner before enabling required code-owner review.
+# Owners must be real GitHub users or visible teams with explicit write access.
+# The last matching rule wins. Paths are case-sensitive.
+#
+# Until replaced, this file intentionally creates no review requests.
+
+# Required repository-wide ownership:
+# * @ORG/REPOSITORY-MAINTAINERS
+
+# Protect governance and security configuration:
+# /.github/ @ORG/REPOSITORY-MAINTAINERS
+# /.github/CODEOWNERS @ORG/REPOSITORY-MAINTAINERS
+# /.github/SECURITY.md @ORG/SECURITY-TEAM
+# /.github/dependabot.yml @ORG/PLATFORM-TEAM
+# /.github/codeql/ @ORG/SECURITY-TEAM
+
+# Add only ownership boundaries that exist in the repository:
+# /src/ @ORG/ENGINEERING-TEAM
+# /app/ @ORG/ENGINEERING-TEAM
+# /infra/ @ORG/PLATFORM-TEAM
+# /modules/ @ORG/PLATFORM-TEAM
+# /docs/ @ORG/DOCS-TEAM
+
+# Validate the file in GitHub's CODEOWNERS error view after replacement.

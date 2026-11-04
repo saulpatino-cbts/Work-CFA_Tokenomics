@@ -1,0 +1,51 @@
+# Standardized CodeQL configuration
+#
+# The CodeQL workflow must pass this file through the CodeQL Action init step's
+# config-file input when using advanced setup. The workflow still controls
+# languages, build mode, permissions, triggers, runners, and SARIF upload.
+#
+# Exclude only paths that are demonstrably outside the first-party security
+# boundary. Review every active exclusion after copying this baseline.
+
+name: "Repository CodeQL config"
+
+# These directories are intentionally source-controlled in some repositories
+# but contain vendored agent harnesses or security-demonstration material that
+# is not imported or executed by the application. Keep these only when true.
+paths-ignore:
+  - ".claude"
+  - ".agents"
+
+  # Common generated or dependency output. Remove any entry that can contain
+  # first-party source in the target repository.
+  - "**/node_modules"
+  - "**/dist"
+  - "**/build"
+  - "**/coverage"
+
+# Optional: restrict analysis to known first-party directories only after
+# confirming that the full security-relevant surface is covered. Do not enable
+# this solely to reduce alert volume.
+#
+# paths:
+#   - "src"
+#   - "app"
+#   - "services"
+
+# Optional: add the broader built-in suite after reviewing alert volume and
+# remediation ownership. Omitting queries preserves the workflow/default
+# selection.
+#
+# queries:
+#   - uses: security-and-quality
+
+# Optional: add reviewed query packs or filters. Pin external packs when the
+# repository's dependency policy requires it and document every exclusion.
+#
+# packs:
+#   - scope/pack-name@1.2.3
+#
+# query-filters:
+#   - exclude:
+#       id: example/query-id
+#       reason: "Documented false positive; tracked in ISSUE-123"

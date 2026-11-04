@@ -1,0 +1,9 @@
+# Append to .qlty/qlty.toml for Terraform and Ansible repositories.
+# checkov and trivy are already in the base.
+
+[[plugin]]
+name = "tflint"
+
+[[plugin]]
+name = "radarlint-iac"
+mode = "monitor"

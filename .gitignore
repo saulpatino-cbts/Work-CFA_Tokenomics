@@ -1,0 +1,61 @@
+# Operating system and editors
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# Secrets and local configuration. Commit *.example files only.
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.jks
+.netrc
+.npmrc
+.pypirc
+
+# Logs and scratch
+*.log
+logs/
+tmp/
+.tmp/
+
+# Node.js
+node_modules/
+dist/
+coverage/
+.eslintcache
+.npm/
+.turbo/
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+build/
+
+# Terraform and Ansible. Keep .terraform.lock.hcl committed.
+.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+*.tfvars
+!*.tfvars.example
+crash.log
+*.retry
+
+# Tooling caches
+.qlty/cache/
+.qlty/logs/

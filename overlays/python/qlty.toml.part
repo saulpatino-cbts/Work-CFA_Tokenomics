@@ -1,0 +1,12 @@
+# Append to .qlty/qlty.toml for a Python repository.
+
+[[plugin]]
+name = "ruff"
+drivers = ["lint"]
+
+[[plugin]]
+name = "bandit"
+
+[[plugin]]
+name = "radarlint-python"
+mode = "comment"

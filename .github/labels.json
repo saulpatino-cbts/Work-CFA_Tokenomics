@@ -1,0 +1,20 @@
+[
+  { "name": "bug", "color": "d73a4a", "description": "Something is not working" },
+  { "name": "enhancement", "color": "a2eeef", "description": "New capability or improvement" },
+  { "name": "needs-triage", "color": "fbca04", "description": "Not yet reviewed by a maintainer" },
+  { "name": "task", "color": "c5def5", "description": "Defined piece of implementation or maintenance work" },
+  { "name": "architecture", "color": "5319e7", "description": "Architecture or design topic" },
+  { "name": "decision", "color": "0e8a16", "description": "Architecture decision record" },
+  { "name": "infrastructure", "color": "1d76db", "description": "Infrastructure, deployment or platform change" },
+  { "name": "finops-finding", "color": "0052cc", "description": "FinOps assessment finding or optimisation" },
+  { "name": "security", "color": "b60205", "description": "Security or privacy relevant" },
+  { "name": "documentation", "color": "0075ca", "description": "Documentation only" },
+  { "name": "breaking-change", "color": "e11d21", "description": "Incompatible change for users or operators" },
+  { "name": "skip-changelog", "color": "ededed", "description": "Exclude from generated release notes" },
+  { "name": "dependencies", "color": "0366d6", "description": "Dependency update" },
+  { "name": "javascript", "color": "f1e05a", "description": "npm ecosystem" },
+  { "name": "python", "color": "3572a5", "description": "pip ecosystem" },
+  { "name": "github-actions", "color": "2088ff", "description": "GitHub Actions ecosystem" },
+  { "name": "terraform", "color": "7b42bc", "description": "Terraform ecosystem" },
+  { "name": "docker", "color": "0db7ed", "description": "Docker ecosystem" }
+]

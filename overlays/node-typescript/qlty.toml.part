@@ -1,0 +1,19 @@
+# Append to .qlty/qlty.toml for a Node.js / TypeScript / React repository.
+# Each ESLint block runs with the package's own flat config; package_filters
+# keeps the install to what the config imports; a flat config that imports a
+# package missing from the filter fails every run.
+
+[[plugin]]
+name = "eslint"
+package_file = "package.json"
+package_filters = ["eslint", "globals", "react", "prettier"]
+# prefix = "frontend"   # set when the package lives in a subdirectory
+
+[[plugin]]
+name = "prettier"
+package_file = "package.json"
+package_filters = ["prettier"]
+
+[[plugin]]
+name = "editorconfig-checker"
+mode = "comment"

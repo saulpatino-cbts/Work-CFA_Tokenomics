@@ -1,0 +1,11 @@
+---
+# markdownlint configuration, read by Qlty's markdownlint plugin and editors.
+default: true
+# Templates and governance documents carry long sentences and HTML comments.
+MD013: false
+MD033: false
+# Writing templates start with front matter or a bracketed title.
+MD041: false
+# The same heading may repeat under different parents (templates, changelog).
+MD024:
+  siblings_only: true

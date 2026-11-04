@@ -1,0 +1,105 @@
+# Dependabot baseline
+#
+# Keep only update blocks whose manifest or definition files exist. A block
+# for a missing path causes configuration noise and does not provide coverage.
+# Review labels and ownership against the target repository before installation.
+
+version: 2
+updates:
+  # Root JavaScript or TypeScript manifests.
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "javascript"
+    groups:
+      javascript-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Root Python manifests such as requirements.txt, pyproject.toml, or poetry.lock.
+  - package-ecosystem: "pip"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "python"
+    groups:
+      python-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # GitHub Actions under .github/workflows.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "github-actions"
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # Root Terraform files. Keep this block for Terraform/OpenTofu IaC repos.
+  - package-ecosystem: "terraform"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 10
+    labels:
+      - "dependencies"
+      - "terraform"
+    groups:
+      terraform-minor-patch:
+        update-types:
+          - "minor"
+          - "patch"
+
+  # Root Dockerfiles or container metadata.
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "06:00"
+      timezone: "Etc/UTC"
+    open-pull-requests-limit: 5
+    labels:
+      - "dependencies"
+      - "docker"
+
+# Optional additional directories. Copy and adapt only when the paths exist.
+#
+#  - package-ecosystem: "npm"
+#    directory: "/apps/example"
+#    schedule:
+#      interval: "weekly"
+#    open-pull-requests-limit: 5
+#
+#  - package-ecosystem: "terraform"
+#    directory: "/infra/example"
+#    schedule:
+#      interval: "weekly"
+#    open-pull-requests-limit: 5

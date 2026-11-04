@@ -1,0 +1,124 @@
+name: Architecture decision record
+description: Record an architecture, infrastructure, security, or platform decision
+title: "[ADR]: "
+labels:
+  - architecture
+  - decision
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Do not include credentials, tokens, private keys, connection strings, state files, or sensitive identifiers.
+
+  - type: dropdown
+    id: status
+    attributes:
+      label: Status
+      description: Select the current state of this decision.
+      options:
+        - Proposed
+        - Accepted
+        - Rejected
+        - Superseded
+        - Deprecated
+    validations:
+      required: true
+
+  - type: input
+    id: decision_date
+    attributes:
+      label: Decision date
+      placeholder: YYYY-MM-DD
+    validations:
+      required: true
+
+  - type: input
+    id: owners_reviewers
+    attributes:
+      label: Decision owners and reviewers
+      description: Identify the people or teams accountable for this decision.
+    validations:
+      required: true
+
+  - type: textarea
+    id: context
+    attributes:
+      label: Context
+      description: Describe the problem, requirement, constraint, or change that requires a decision.
+    validations:
+      required: true
+
+  - type: textarea
+    id: decision
+    attributes:
+      label: Decision
+      description: State the decision clearly and describe the intended end state.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: List realistic alternatives, benefits, drawbacks, and why they were not selected.
+      placeholder: |
+        - Alternative:
+          Benefits:
+          Drawbacks:
+          Reason not selected:
+
+  - type: textarea
+    id: consequences
+    attributes:
+      label: Consequences and trade-offs
+      description: >-
+        Describe business, security, reliability, cost, performance, compliance, data, and operational
+        impacts.
+    validations:
+      required: true
+
+  - type: textarea
+    id: scope_dependencies
+    attributes:
+      label: Scope and dependencies
+      description: >-
+        Identify affected resources, repositories, services, environments, subscriptions,
+        dependencies, and prerequisites.
+
+  - type: textarea
+    id: implementation_validation
+    attributes:
+      label: Implementation and validation
+      description: Identify the implementation owner, validation evidence, and acceptance criteria.
+    validations:
+      required: true
+
+  - type: textarea
+    id: rollback_revisit
+    attributes:
+      label: Rollback or revisit trigger
+      description: Explain how the decision can be reversed, or what evidence would cause it to be revisited.
+    validations:
+      required: true
+
+  - type: textarea
+    id: references_evidence
+    attributes:
+      label: References and evidence
+      description: >-
+        Link requirements, plans, diagrams, policies, test results, decision records, and
+        authoritative documentation.
+
+  - type: checkboxes
+    id: review_checklist
+    attributes:
+      label: Review checklist
+      options:
+        - label: Design and alternatives have been reviewed.
+          required: true
+        - label: Required security, cost, and operational reviews are complete.
+          required: true
+        - label: Validation or preview evidence is attached.
+          required: true
+        - label: Documentation and runbooks have been updated where needed.
+          required: true

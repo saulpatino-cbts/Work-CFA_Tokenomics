@@ -1,0 +1,145 @@
+---
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+#
+# Complete on its own: a repository created from the template needs no central
+# configuration. inheritance: true is still set so that, if a repository named
+# "coderabbit" is ever added to the account, its file merges underneath this
+# one (scalars here win, arrays are concatenated and de-duplicated by path).
+# Reference: https://docs.coderabbit.ai/reference/configuration
+inheritance: true
+language: en-US
+tone_instructions: >-
+  Put security, correctness and data integrity first. Skip style points a
+  formatter or linter already enforces. Name the failure, the input that
+  causes it, and the fix.
+
+reviews:
+  profile: chill
+  high_level_summary: false
+  high_level_summary_in_walkthrough: true
+  poem: false
+  sequence_diagrams: false
+  suggested_labels: false
+  review_status: true
+  collapse_walkthrough: true
+  # The author cannot clear CodeRabbit's own findings.
+  allow_author_approval: false
+  # Off by default. Turn on only where CodeRabbit's approval is the ruleset's
+  # required review and the app has "Pull requests: Read and write".
+  request_changes_workflow: false
+
+  auto_review:
+    enabled: true
+    drafts: false
+    # One review on the opening push, then pause after two reviewed commits;
+    # every later push would otherwise spend one review from the hourly
+    # allowance. Ask with "@coderabbitai review" when the branch is ready.
+    # Public repositories under 10 stars are reviewed only when asked.
+    auto_incremental_review: true
+    auto_pause_after_reviewed_commits: 2
+    ignore_usernames:
+      - "dependabot[bot]"
+    ignore_title_keywords:
+      - WIP
+
+  path_filters:
+    - "!**/node_modules/**"
+    - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/coverage/**"
+    - "!**/*.min.*"
+    - "!**/package-lock.json"
+    - "!**/*.lock"
+    - "!CHANGELOG.md"
+
+  # Stack guidance keyed by glob. A glob that matches nothing in a repository
+  # costs nothing, so every stack is listed and none needs enabling.
+  path_instructions:
+    - path: "**/*.{ts,tsx,js,jsx,mjs,cjs}"
+      instructions: >-
+        Flag unhandled promise rejections, missing await on async calls, any
+        `any` that widens a public contract, and secrets or tokens read
+        outside the configured credential store.
+    - path: "**/*.py"
+      instructions: >-
+        Flag subprocess calls built from untrusted input, shell=True, unpinned
+        dependencies, and broad `except Exception` that hides failures.
+    - path: "**/*.tf"
+      instructions: >-
+        Flag any change that would replace or destroy a stateful resource, any
+        secret that would land in state or a plan, and providers or modules
+        without a version pin.
+    - path: "**/ansible/**"
+      instructions: >-
+        Tasks must be idempotent or say why not. Flag shell/command modules
+        where a native module exists, and any credential outside the vault.
+    - path: "**/*.ps1"
+      instructions: >-
+        Scripts must fail closed under $ErrorActionPreference = 'Stop' and
+        carry no placeholder values in lines meant to be pasted.
+    - path: ".github/workflows/**"
+      instructions: >-
+        Require pinned action SHAs, a least-privilege permissions block, and
+        persist-credentials: false on checkout. Flag any new secret usage.
+    - path: "**/*.test.*"
+      instructions: >-
+        Confirm the test exercises the behavior the PR claims, not only that
+        it passes.
+
+  tools:
+    # Linters that need a project config run only where one exists.
+    eslint:
+      enabled: true
+    biome:
+      enabled: false
+    ruff:
+      enabled: true
+    tflint:
+      enabled: true
+    checkov:
+      enabled: true
+    psscriptanalyzer:
+      enabled: true
+    hadolint:
+      enabled: true
+    # Need no project config.
+    actionlint:
+      enabled: true
+    zizmor:
+      enabled: true
+    gitleaks:
+      enabled: true
+    trufflehog:
+      enabled: true
+    osv:
+      enabled: true
+    yamllint:
+      enabled: true
+    shellcheck:
+      enabled: true
+    markdownlint:
+      enabled: true
+    github-checks:
+      enabled: true
+    languagetool:
+      enabled: false
+
+  pre_merge_checks:
+    docstrings:
+      mode: "off"
+    title:
+      mode: warning
+    description:
+      mode: warning
+
+knowledge_base:
+  code_guidelines:
+    enabled: true
+    filePatterns:
+      - "CONTRIBUTING.md"
+      - ".github/copilot-instructions.md"
+      - "AGENTS.md"
+  learnings:
+    scope: local
+  pull_requests:
+    scope: local
