@@ -12,7 +12,7 @@ This is the source-controlled documentation for Work-CFA_Tokenomics. It describe
 6. [Marketplace distribution](marketplace.md), [Deployment](deployment.md) and [onboarding](onboarding.md): installation prerequisites and guided verification.
 7. [Portability](portability.md) and [data ownership](data-ownership.md): full migrations and customer policy.
 8. [Operations](operations.md) and [testing](testing.md): day-two procedures and release evidence.
-9. [Roadmap](roadmap.md), [risks](risk-register.md), and [ADRs](adr/README.md): delivery order, decisions, and blockers.
+9. [UI concepts](ui-concepts.md), [Roadmap](roadmap.md), [risks](risk-register.md), and [ADRs](adr/README.md): delivery order, decisions, and blockers.
 
 ## Documentation conventions
 
