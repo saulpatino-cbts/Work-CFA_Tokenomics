@@ -1,7 +1,10 @@
 from datetime import datetime
+from pathlib import Path
 from typing import Annotated
+from urllib.parse import urlsplit
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Response, status
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -30,8 +33,46 @@ class RoleBody(BaseModel):
     role: Role
 
 
+def _origin(url: str) -> str:
+    parts = urlsplit(url)
+    return f"{parts.scheme}://{parts.netloc}"
+
+
+def _issuer(app: FastAPI) -> str | None:
+    """Issuer for the CSP connect-src. A bad config must never break a response."""
+    try:
+        getter = app.dependency_overrides.get(get_settings, get_settings)
+        return getter().oidc_issuer
+    except Exception:
+        return None
+
+
 def create_app() -> FastAPI:
     app = FastAPI(title="CFA Tokenomics API", version=__version__, docs_url=None, redoc_url=None)
+
+    @app.middleware("http")
+    async def security_headers(request, call_next):
+        response = await call_next(request)
+        issuer = _issuer(app)
+        connect = "'self'" + (f" {_origin(issuer)}" if issuer else "")
+        response.headers.setdefault(
+            "Content-Security-Policy",
+            "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+            f"img-src 'self' data:; connect-src {connect}; frame-ancestors 'none'; "
+            "base-uri 'self'; form-action 'self'",
+        )
+        response.headers.setdefault("X-Content-Type-Options", "nosniff")
+        response.headers.setdefault("Referrer-Policy", "no-referrer")
+        return response
+
+    @app.get("/config.json")
+    def public_config(settings: Settings = Depends(get_settings)) -> dict[str, str | None]:
+        """Public browser settings only. Never secrets."""
+        return {
+            "oidc_issuer": settings.oidc_issuer,
+            "oidc_client_id": settings.oidc_client_id,
+            "oidc_audience": settings.oidc_audience,
+        }
 
     @app.get("/healthz")
     def healthz() -> dict[str, str]:
@@ -151,7 +192,17 @@ def create_app() -> FastAPI:
         if not scope.revoke(db, actor, issuer, subject, provider, account):
             raise HTTPException(status.HTTP_404_NOT_FOUND, "no such grant")
 
+    web_dir = get_settings().web_dir if _web_enabled() else None
+    if web_dir and Path(web_dir).is_dir():
+        app.mount("/", StaticFiles(directory=web_dir, html=True), name="web")
     return app
+
+
+def _web_enabled() -> bool:
+    try:
+        return get_settings().web_dir is not None
+    except Exception:  # invalid production config is reported at startup elsewhere
+        return False
 
 
 app = create_app()

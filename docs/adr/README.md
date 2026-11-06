@@ -15,6 +15,7 @@ ADRs capture product boundaries and implementation choices. **Accepted** means t
 | [0007](0007-observation-mode-and-reconciliation.md) | Accepted decision; implementation started | Request observations and provider aggregates kept separate and reconciled, never added. |
 | [0008](0008-account-scoped-usage-access.md) | Proposed (implemented; needs confirmation) | Per-identity (provider, account) grants limit non-admin usage reads. |
 | [0009](0009-sku-source-dimensions-and-series.md) | Proposed (implemented; needs confirmation) | `sku` and `source_type` dimensions; bucketed series that never add sources. |
+| [0010](0010-vendor-and-genai-scope.md) | Accepted scope; nothing implemented | Vendor APIs for Claude Code, OpenAI Codex, Perplexity, Gemini, GitHub Copilot; cloud APIs; Microsoft Copilot via Graph and Viva. |
 
 ## Open technical decisions
 

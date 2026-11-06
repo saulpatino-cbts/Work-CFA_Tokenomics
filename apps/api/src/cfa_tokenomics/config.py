@@ -21,6 +21,10 @@ class Settings(BaseSettings):
     database_url: SecretStr | None = None
     oidc_issuer: str | None = Field(default=None, description="Customer OIDC issuer URL")
     oidc_audience: str | None = None
+    # Public client id of the browser app (authorization code + PKCE; no client secret).
+    oidc_client_id: str | None = None
+    # Directory of the built web app, served same-origin. Unset means API only.
+    web_dir: str | None = None
     oidc_jwks_uri: str | None = Field(default=None, description="Override; else OIDC discovery")
     # Role mapping from a customer-controlled claim. No match means no access.
     oidc_roles_claim: str = "groups"

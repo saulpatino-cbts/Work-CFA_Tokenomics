@@ -1,0 +1,49 @@
+/* [REVIEW REQUIRED] Brand approval pending. Tokens from CBTS Brand Guidelines v1.10 (see design/concepts/tokens.css). */
+:root {
+  --dark-teal: #004d3e; --teal: #009176; --bright-teal: #00ffd2; --light-teal: #e8fffb;
+  --dark-blue: #012639; --dark-gray: #393733; --gray: #dfdcd6; --light-gray: #f2f1ed; --white: #fff;
+  --s-orange: #feb101; --s-yellow: #fcfe0b; --s-lime: #bcf405; --s-green: #00fe87; --s-turquoise: #00e9bb; --s-blue: #00fbff;
+  --font: "Aeonik", "Aptos", Inter, system-ui, sans-serif;
+  --radius: 14px;
+}
+* { box-sizing: border-box; }
+body { margin: 0; font-family: var(--font); line-height: 1.2; color: var(--dark-blue); background: var(--light-gray);
+  background-image: radial-gradient(var(--gray) 1.4px, transparent 1.6px); background-size: 26px 22px; }
+h1, h2, p { margin: 0; }
+.page { max-width: 1440px; margin: 0 auto; padding: 38px; display: grid; gap: 22px; }
+.block { background: var(--white); border-radius: var(--radius); padding: 24px; min-width: 0; }
+.block.navy { background: var(--dark-blue); color: var(--white); }
+.eyebrow { font-size: 13px; font-weight: 700; }
+.note { font-size: 12px; color: var(--dark-gray); }
+.navy .note { color: var(--gray); }
+h1 { font-size: 34px; font-weight: 400; letter-spacing: -0.02em; line-height: 1; }
+.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; }
+.logo-ph { width: 120px; height: 44px; border-radius: 10px; background: var(--dark-teal); color: var(--bright-teal); display: grid; place-items: center; font-weight: 700; font-size: 12px; }
+.brand { display: flex; gap: 14px; align-items: center; }
+.group { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+button.sel, .chip { font: inherit; font-size: 13px; border: 2px solid var(--dark-blue); border-radius: 10px; padding: 7px 11px; background: var(--white); color: var(--dark-blue); cursor: pointer; }
+button.sel[aria-pressed="true"] { background: var(--dark-teal); color: var(--white); border-color: var(--dark-teal); }
+button.sel:focus-visible { outline: 3px solid var(--dark-blue); outline-offset: 2px; }
+button.primary { font: inherit; font-weight: 700; background: var(--dark-teal); color: var(--white); border: 0; border-radius: 10px; padding: 10px 16px; cursor: pointer; }
+.chip { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 700; border-radius: 999px; padding: 4px 10px; cursor: default; white-space: nowrap; }
+.chip.dashed { border-style: dashed; }
+.cats { display: grid; grid-template-columns: repeat(5, 1fr); gap: 18px; }
+.cat .num { font-size: 34px; letter-spacing: -0.02em; margin: 6px 0 4px; }
+.main { display: grid; grid-template-columns: 1.7fr 1fr; gap: 22px; }
+.two { display: grid; grid-template-columns: 1.1fr 1fr; gap: 22px; align-items: start; }
+.legend { display: flex; gap: 18px; flex-wrap: wrap; font-size: 12px; margin-top: 6px; }
+.lg { display: inline-flex; gap: 6px; align-items: center; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; padding: 7px 8px; border-bottom: 2px solid currentColor; font-weight: 700; }
+td { padding: 9px 8px; border-bottom: 1px solid var(--gray); vertical-align: middle; }
+.navy td { border-color: #26485c; }
+.n { text-align: right; font-variant-numeric: tabular-nums; } th.n { text-align: right; }
+.hb { display: grid; gap: 4px; margin: 12px 0; }
+.hbv { display: flex; gap: 10px; align-items: center; font-size: 13px; font-variant-numeric: tabular-nums; }
+.hbt { flex: 1; height: 14px; background: var(--light-gray); border-radius: 8px; border: 1px solid var(--gray); overflow: hidden; }
+.hbf { height: 100%; border-right: 1px solid var(--dark-blue); }
+.hbv span { min-width: 86px; text-align: right; }
+.state { display: grid; place-items: center; text-align: center; gap: 12px; min-height: 40vh; }
+.banner { background: var(--dark-blue); color: var(--white); border-radius: 999px; padding: 6px 12px; font-size: 12px; font-weight: 700; justify-self: start; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+@media (max-width: 1100px) { .cats { grid-template-columns: repeat(2, 1fr); } .main, .two { grid-template-columns: 1fr; } .page { padding: 16px; } }

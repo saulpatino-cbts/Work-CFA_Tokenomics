@@ -16,7 +16,7 @@ Built from the CBTS Brand Guidelines v1.10 (colour pp. 24-30, typography pp. 34-
 
 Product rules applied: provider and app figures are never added; the app figure is shown inside the provider figure; unknown is "unknown", never zero; the unattributed gap is counted only for fully reconciled models; every total sits next to its freshness; status never relies on colour alone.
 
-The backend for the telemetry view exists: `GET /v1/usage/series` (chart and heatmap data) and `GET /v1/usage` (breakdown table), both filterable by vendor, SKU and source. Top-consumer attribution and the cache panel have no endpoint yet.
+The telemetry view is built in [`apps/web`](../apps/web) against the read APIs (the setup wizard, top-consumers and cache panels are not built: they need endpoints that do not exist). The backend for it: `GET /v1/usage/series` (chart and heatmap data) and `GET /v1/usage` (breakdown table), both filterable by vendor, SKU and source. Top-consumer attribution and the cache panel have no endpoint yet.
 
 ## Placeholders and open questions
 
