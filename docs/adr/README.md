@@ -12,10 +12,11 @@ ADRs capture product boundaries and implementation choices. **Accepted** means t
 | [0004](0004-application-stack.md) | Accepted decision; implementation pending | Python/FastAPI, React/TypeScript. |
 | [0005](0005-container-packaging-and-marketplace.md) | Accepted decision; implementation pending | One signed OCI image set; AWS and Azure Marketplace as delivery channels. |
 | [0006](0006-persistence.md) | Accepted decision; implementation pending | PostgreSQL with versioned migrations. |
+| [0007](0007-observation-mode-and-reconciliation.md) | Accepted decision; implementation started | Request observations and provider aggregates kept separate and reconciled, never added. |
 
 ## Open technical decisions
 
-Stack, hosting/packaging and persistence are accepted in 0004-0006. Still open: observation mode and grain; Assessment transport; archive format and secret migration; compatible API/model versions; cost-data scope; and licensing. Propose records for these before implementing the affected boundary.
+Stack, hosting/packaging and persistence are accepted in 0004-0006. Observation mode is accepted in 0007. Still open: aggregate grain per provider; Assessment transport; archive format and secret migration; compatible API/model versions; cost-data scope; and licensing. Propose records for these before implementing the affected boundary.
 
 ## Workflow
 

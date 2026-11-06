@@ -10,7 +10,7 @@
 | Provider telemetry | Approved provider resource and time window | May be aggregated, delayed, overlapping, or missing user identity. |
 | Billing source | Approved reported charges/usage | Different timing, granularity, rates, and adjustments. |
 
-The initial observation mode is open. Design reconciliation before combining sources. Never add application observations and provider totals for the same traffic as separate consumption. Show source, resource scope, freshness, and completeness in the UI.
+The observation mode is decided in [ADR 0007](adr/0007-observation-mode-and-reconciliation.md): request observations and provider aggregates are both collected and reconciled. Never add application observations and provider totals for the same traffic as separate consumption. Show source, resource scope, freshness, and completeness in the UI.
 
 ## Proposed observation model
 
