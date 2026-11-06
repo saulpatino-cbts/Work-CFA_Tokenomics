@@ -1,8 +1,8 @@
 # 0005. Container packaging and marketplace distribution
 
-- **Status:** Proposed
+- **Status:** Accepted (owner approval 2026-11-06); implementation pending
 - **Date:** 2026-11-06
-- **Decision authority:** Product owner (approval pending)
+- **Decision authority:** Product owner
 - **Owners:** Platform
 - **Requirements:** REQ-001, REQ-002, REQ-004, REQ-009, REQ-012
 - **Issue:** No issue exists

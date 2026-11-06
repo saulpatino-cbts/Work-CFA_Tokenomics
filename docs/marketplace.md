@@ -20,19 +20,18 @@ Customers find the product in the AWS or Azure Marketplace, pull the container i
 | Requirements, architecture, ADRs 0001-0003 | Documented |
 | API skeleton (`apps/api`): health, config validation, role matrix, 20 unit tests | Implemented, not a product |
 | Dockerfile (skeleton), development-only compose | Exists; image build not run in this session (no Docker daemon) |
-| Proposed ADRs 0004-0006 | Awaiting owner approval |
+| ADRs 0004-0006 | Accepted by owner 2026-11-06; implementation pending |
 
 ## What is missing
 
 | Gap | Needed before |
 | --- | --- |
-| Owner approval of ADRs 0004-0006 | Any further build-out |
 | OIDC token verification, first-admin bootstrap, session handling | Exposing any route |
 | Database layer and migrations; secret-store reference resolution | Any data feature |
 | Provider adapters (Foundry, Bedrock, Vertex AI), usage ledger, reconciliation | Pilot |
 | Web UI and setup wizard (none scaffolded) | Pilot |
 | Export/import, Assessment grants and audit | Baseline completion |
-| CI: lint, tests, image build, vulnerability scan, SBOM, image signing and provenance | Any release |
+| CI lint, test and image build exist (`api-ci.yml`, not yet run on GitHub); vulnerability scan, SBOM, image signing and provenance do not | Any release |
 | Base image pinned by digest; dependency CVE review | Any release |
 | Install templates and preflight for AWS and for Azure | Marketplace submission |
 | Upgrade, rollback and recovery runbooks tested end to end | Marketplace submission |

@@ -13,7 +13,8 @@ Record notable changes under Unreleased in the same PR. No product release or ru
 - Root agent instructions for implementation and review.
 
 - API skeleton in `apps/api` (FastAPI health endpoints, configuration validation, deny-by-default role matrix, unit tests), skeleton Dockerfile, development-only compose file, and `.env.sample`.
-- Proposed ADRs 0004 (stack), 0005 (container packaging and marketplace), 0006 (persistence) and a [marketplace gap analysis](docs/marketplace.md).
+- `api-ci.yml` workflow (lint, tests, image build; Actions pinned by SHA).
+- Accepted ADRs 0004 (stack), 0005 (container packaging and marketplace), 0006 (persistence) and a [marketplace gap analysis](docs/marketplace.md).
 
 ### Changed
 

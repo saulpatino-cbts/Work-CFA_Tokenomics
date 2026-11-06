@@ -1,8 +1,8 @@
 # 0004. Application stack
 
-- **Status:** Proposed
+- **Status:** Accepted (owner approval 2026-11-06); implementation pending
 - **Date:** 2026-11-06
-- **Decision authority:** Product owner (approval pending)
+- **Decision authority:** Product owner
 - **Owners:** Architecture
 - **Requirements:** REQ-001, REQ-003, REQ-006, REQ-007, REQ-009
 - **Issue:** No issue exists

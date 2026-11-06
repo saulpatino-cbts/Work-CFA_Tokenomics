@@ -8,7 +8,7 @@ The repository began as a governance/security template. This documentation found
 | --- | --- | --- |
 | Product boundaries and role names | Documented | Owner review of requirements and accepted ADRs. |
 | Permission matrix and Assessment lifecycle | Proposed detailed contract | Scope approval, transport ADR, negative tests. |
-| Runtime and hosting | Proposed (ADRs 0004-0006) | Owner approval; install templates and a tested fresh install. |
+| Runtime and hosting | Accepted (ADRs 0004-0006) | Install templates and a tested fresh install. |
 | API skeleton | Started (`apps/api`) | OIDC verification, database layer, CI. |
 | Marketplace distribution | Gap analysis only | See [marketplace](marketplace.md). |
 | Provider adapters | Not implemented | Versioned capabilities and integration tests for all three. |

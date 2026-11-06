@@ -1,8 +1,8 @@
 # 0006. Persistence
 
-- **Status:** Proposed
+- **Status:** Accepted (owner approval 2026-11-06); implementation pending
 - **Date:** 2026-11-06
-- **Decision authority:** Product owner (approval pending)
+- **Decision authority:** Product owner
 - **Owners:** Architecture, Data
 - **Requirements:** REQ-010, REQ-011
 - **Issue:** No issue exists
