@@ -8,7 +8,9 @@ The repository began as a governance/security template. This documentation found
 | --- | --- | --- |
 | Product boundaries and role names | Documented | Owner review of requirements and accepted ADRs. |
 | Permission matrix and Assessment lifecycle | Proposed detailed contract | Scope approval, transport ADR, negative tests. |
-| Runtime and hosting | Open | Supported initial deployment profile and stack ADR. |
+| Runtime and hosting | Accepted (ADRs 0004-0006) | Install templates and a tested fresh install. |
+| API skeleton | Started (`apps/api`) | Real-IdP test, usage ledger, first CI run on GitHub. |
+| Marketplace distribution | Gap analysis only | See [marketplace](marketplace.md). |
 | Provider adapters | Not implemented | Versioned capabilities and integration tests for all three. |
 | Usage ledger/reconciliation | Proposed | Observation-mode ADR and normalization tests. |
 | Guided setup | Proposed | Interactive flow and real verification tests. |

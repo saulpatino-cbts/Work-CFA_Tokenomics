@@ -1,0 +1,8 @@
+# LOCAL DEVELOPMENT ONLY. Not an installer and not a supported hosting profile.
+services:
+  api:
+    build: ../apps/api
+    environment:
+      CFA_ENVIRONMENT: development
+    ports:
+      - "127.0.0.1:8080:8080"

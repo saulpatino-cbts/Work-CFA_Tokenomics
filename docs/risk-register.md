@@ -4,7 +4,7 @@
 
 | ID | Priority | Open issue | Proposed owner | Closure evidence |
 | --- | --- | --- | --- | --- |
-| R-01 | P0 | Initial hosting/runtime and persistence undecided | Architecture | Accepted ADR with install and recovery implications. |
+| R-01 | P0 | Initial hosting/runtime and persistence: ADRs 0004-0006 accepted; nothing implemented or tested yet | Architecture | Tested install and recovery on each marketplace target. |
 | R-02 | P0 | Assessment route into private installations unresolved | Security/platform | Approved transport, no standing access, tested revoke/expiry. |
 | R-03 | P0 | Observation coverage undecided | FinOps/connectors | Explicit source/grain/scope and reconciliation design. |
 | R-04 | P0 | Role scopes and first-admin recovery need approval | Identity | Permission contract and direct API denial tests. |

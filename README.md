@@ -2,7 +2,7 @@
 
 Customer-hosted cloud and AI FinOps platform with Microsoft Foundry, Amazon Bedrock, and Google Vertex AI usage tracking, guided setup, role-based access, customer-approved assessments, and validated full-data import/export.
 
-**Status: documentation and architecture foundation.** Application services, deployment packages, provider connectors, and product tests are not implemented yet. The capabilities below are requirements, not claims of a running or production-ready product. See [delivery status](docs/roadmap.md).
+**Status: documentation and architecture foundation, with a minimal API skeleton in [`apps/api`](apps/api).** The skeleton has health endpoints, config validation, and a role-permission matrix with unit tests only; there is no authentication, database, UI, provider connector, deployment package, or marketplace listing yet. The capabilities below are requirements, not claims of a running or production-ready product. See [delivery status](docs/roadmap.md).
 
 ## Product boundaries
 

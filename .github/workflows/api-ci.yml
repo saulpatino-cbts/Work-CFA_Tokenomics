@@ -1,0 +1,55 @@
+---
+# CI for apps/api. Uses only the runner's preinstalled Python and Docker so no
+# unpinned third-party Action is introduced. Image scan, SBOM and signing are
+# not added yet (docs/marketplace.md).
+
+name: API CI
+
+on:
+  pull_request:
+    branches: [main]
+    paths: ["apps/api/**", ".github/workflows/api-ci.yml"]
+  push:
+    branches: [main]
+    paths: ["apps/api/**", ".github/workflows/api-ci.yml"]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        # Tag-pinned, not digest-pinned: pin by digest before any release.
+        image: postgres:16
+        env:
+          POSTGRES_PASSWORD: ci-only-throwaway
+          POSTGRES_DB: cfa_test
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s
+          --health-timeout 5s --health-retries 10
+    defaults:
+      run:
+        working-directory: apps/api
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Install
+        run: |
+          python3 -m venv .venv
+          .venv/bin/pip install --no-cache-dir -e ".[dev]"
+      - name: Lint
+        run: |
+          .venv/bin/ruff check .
+          .venv/bin/ruff format --check .
+      - name: Test
+        env:
+          CFA_TEST_DATABASE_URL: postgresql+psycopg://postgres:ci-only-throwaway@localhost:5432/cfa_test
+        run: .venv/bin/python -m pytest -q
+      - name: Build image
+        run: docker build -t cfa-api-ci .
