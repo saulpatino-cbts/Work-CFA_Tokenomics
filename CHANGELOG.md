@@ -13,6 +13,7 @@ Record notable changes under Unreleased in the same PR. No product release or ru
 - Root agent instructions for implementation and review.
 
 - API skeleton in `apps/api` (FastAPI health endpoints, configuration validation, deny-by-default role matrix, unit tests), skeleton Dockerfile, development-only compose file, and `.env.sample`.
+- OIDC bearer-token verification (signature, issuer, audience, expiry, asymmetric algorithms only), IdP-group-to-role mapping, and a customer-set bootstrap admin identity; production config now requires an admin path. Dependencies PyJWT 2.15.1 and cryptography 50.0.2 pinned and checked with pip-audit.
 - `api-ci.yml` workflow (lint, tests, image build; Actions pinned by SHA).
 - Accepted ADRs 0004 (stack), 0005 (container packaging and marketplace), 0006 (persistence) and a [marketplace gap analysis](docs/marketplace.md).
 
@@ -30,4 +31,4 @@ Record notable changes under Unreleased in the same PR. No product release or ru
 
 ### Not implemented
 
-- OIDC verification, database layer, web UI, provider connectors, CI for the app, install templates, and marketplace listings. Previously listed as missing and still missing apart from the API skeleton: application runtime, deployable packages, provider connectors, data migrations, UI, and product tests. Existing security workflows and generic authoring templates remain in place.
+- Verification against a real identity provider, database layer, web UI, provider connectors, CI for the app, install templates, and marketplace listings. Previously listed as missing and still missing apart from the API skeleton: application runtime, deployable packages, provider connectors, data migrations, UI, and product tests. Existing security workflows and generic authoring templates remain in place.

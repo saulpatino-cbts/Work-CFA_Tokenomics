@@ -4,13 +4,16 @@ version = "0.0.0"
 description = "Work-CFA_Tokenomics API skeleton (proposed ADR 0004; not a product release)."
 requires-python = ">=3.12"
 dependencies = [
+  "cryptography==50.0.2",
   "fastapi==0.162.0",
+  "httpx==0.28.1",
+  "PyJWT==2.15.1",
   "pydantic-settings==2.16.2",
   "uvicorn==0.54.0",
 ]
 
 [project.optional-dependencies]
-dev = ["httpx==0.28.1", "pytest==9.2.0", "ruff==0.17.4"]
+dev = ["pytest==9.2.0", "ruff==0.17.4"]
 
 [build-system]
 requires = ["setuptools>=68"]

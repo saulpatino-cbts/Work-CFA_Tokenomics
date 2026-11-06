@@ -19,6 +19,14 @@ class Settings(BaseSettings):
     database_secret_ref: str | None = None
     oidc_issuer: str | None = Field(default=None, description="Customer OIDC issuer URL")
     oidc_audience: str | None = None
+    oidc_jwks_uri: str | None = Field(default=None, description="Override; else OIDC discovery")
+    # Role mapping from a customer-controlled claim. No match means no access.
+    oidc_roles_claim: str = "groups"
+    oidc_admin_group: str | None = None
+    oidc_user_group: str | None = None
+    oidc_reader_group: str | None = None
+    # First-admin / IdP-outage recovery: "<issuer>|<subject>", set by the customer operator.
+    bootstrap_admin: str | None = None
 
     @model_validator(mode="after")
     def _require_identity_in_production(self) -> "Settings":
@@ -34,6 +42,13 @@ class Settings(BaseSettings):
                 )
             if not (self.oidc_issuer or "").startswith("https://"):
                 raise ValueError("CFA_OIDC_ISSUER must be an https:// URL")
+            if self.oidc_jwks_uri and not self.oidc_jwks_uri.startswith("https://"):
+                raise ValueError("CFA_OIDC_JWKS_URI must be an https:// URL")
+            if not (self.bootstrap_admin or self.oidc_admin_group):
+                raise ValueError(
+                    "production needs CFA_OIDC_ADMIN_GROUP or CFA_BOOTSTRAP_ADMIN "
+                    "so a first administrator can exist"
+                )
         return self
 
 

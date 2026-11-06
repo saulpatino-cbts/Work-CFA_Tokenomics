@@ -2,11 +2,13 @@ import pytest
 from fastapi.testclient import TestClient
 
 from cfa_tokenomics.authz import Permission, Principal, Role, get_principal, is_allowed
+from cfa_tokenomics.config import Settings, get_settings
 from cfa_tokenomics.main import create_app
 
 
 def _client(role: Role | None) -> TestClient:
     app = create_app()
+    app.dependency_overrides[get_settings] = lambda: Settings(environment="development")
     if role is not None:
         app.dependency_overrides[get_principal] = lambda: Principal("https://idp.test", "s1", role)
     return TestClient(app)

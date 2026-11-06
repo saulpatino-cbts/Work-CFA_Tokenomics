@@ -27,6 +27,7 @@ def test_valid_production_config():
         oidc_issuer="https://idp.test",
         oidc_audience="a",
         database_secret_ref="ref",
+        oidc_admin_group="admins",
     )
     assert s.environment == "production"
 
