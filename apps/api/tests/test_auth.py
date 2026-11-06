@@ -37,7 +37,7 @@ def client(settings=SETTINGS):
     return TestClient(app)
 
 
-def get(token, path="/v1/usage", c=None):
+def get(token, path="/v1/whoami", c=None):
     h = {"Authorization": f"Bearer {token}"} if token else {}
     return (c or client()).get(path, headers=h)
 

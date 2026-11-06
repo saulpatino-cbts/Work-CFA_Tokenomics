@@ -15,12 +15,12 @@ def _client(role: Role | None) -> TestClient:
 
 
 def test_unauthenticated_is_denied():
-    assert _client(None).get("/v1/usage").status_code == 401
+    assert _client(None).get("/v1/whoami").status_code == 401
 
 
 @pytest.mark.parametrize("role", list(Role))
 def test_roles_with_usage_read_allowed(role):
-    assert _client(role).get("/v1/usage").status_code == 200
+    assert _client(role).get("/v1/whoami").status_code == 200
 
 
 @pytest.mark.parametrize("role", [Role.USER, Role.READER])

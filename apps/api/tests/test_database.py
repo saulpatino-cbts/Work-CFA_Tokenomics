@@ -89,7 +89,7 @@ def test_admin_assigns_role_and_it_takes_effect(db):
     c = api(settings())
     r = call(c, "PUT", "root", json={"issuer": ISS, "subject": "ann", "role": "reader"})
     assert r.status_code == 204
-    ok = c.get("/v1/usage", headers={"Authorization": f"Bearer {token('ann')}"})
+    ok = c.get("/v1/whoami", headers={"Authorization": f"Bearer {token('ann')}"})
     assert ok.status_code == 200
     # reader still cannot manage identity
     assert (
@@ -103,7 +103,7 @@ def test_admin_assigns_role_and_it_takes_effect(db):
 def test_unmapped_identity_has_no_access(db):
     assert (
         api(settings())
-        .get("/v1/usage", headers={"Authorization": f"Bearer {token('nobody')}"})
+        .get("/v1/whoami", headers={"Authorization": f"Bearer {token('nobody')}"})
         .status_code
         == 403
     )
