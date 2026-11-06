@@ -1,0 +1,53 @@
+/* CONCEPT ONLY. [REVIEW REQUIRED] Brand approval pending.
+   Values transcribed from CBTS Brand Guidelines v1.10 (pp. 24-30, 34-36, 52-61). */
+:root {
+  /* Primary palette */
+  --dark-teal: #004d3e;
+  --teal: #009176;
+  --bright-teal: #00ffd2; /* highlight only; never a large fill, never text on light backgrounds */
+  --light-teal: #e8fffb;
+  --dark-blue: #012639;
+  --dark-gray: #393733;
+  --gray: #dfdcd6;
+  --light-gray: #f2f1ed;
+  --white: #ffffff;
+  /* Secondary palette: charts and infographics only, on White, Light Gray or Dark Teal.
+     Dark Blue text only on these colours. */
+  --s-orange: #feb101;
+  --s-yellow: #fcfe0b;
+  --s-lime: #bcf405;
+  --s-green: #00fe87;
+  --s-turquoise: #00e9bb;
+  --s-blue: #00fbff;
+
+  /* Type. Aeonik/Eurocat are licensed (licence check pending); Aptos is the approved alternative.
+     Inter is only a renderer stand-in for these concept images. */
+  --font: "Aeonik", "Aptos", Inter, system-ui, sans-serif;
+  --lh: 1.2;
+
+  /* Shape: guide gives radius 1.5% and margins 3.7% of the shortest side for digital. */
+  --radius: 14px;
+  --margin: 38px;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; font-family: var(--font); line-height: var(--lh); color: var(--dark-blue);
+  background-color: var(--light-gray);
+  /* hex-grid dot motif: Light Gray ground, dots (guide is inconsistent on Gray vs Dark Gray) */
+  background-image: radial-gradient(var(--gray) 1.4px, transparent 1.6px);
+  background-size: 26px 22px;
+}
+h1, h2, h3, p { margin: 0; }
+.page { width: 1440px; min-height: 1024px; padding: var(--margin); display: grid; gap: 22px; align-content: start; }
+.block { background: var(--white); border-radius: var(--radius); padding: 24px; }
+.block.dark { background: var(--dark-teal); color: var(--white); }
+.block.navy { background: var(--dark-blue); color: var(--white); }
+.block.soft { background: var(--light-teal); }
+.hl { background: var(--bright-teal); color: var(--dark-blue); padding: 0 6px; border-radius: 6px; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 0; }
+.muted { color: var(--dark-gray); }
+.note { font-size: 12px; color: var(--dark-gray); }
+.chip { white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 700;
+  padding: 4px 10px; border-radius: 999px; border: 2px solid var(--dark-blue); background: var(--white); }
+.concept-flag { font-size: 12px; font-weight: 700; background: var(--dark-blue); color: var(--white);
+  padding: 6px 12px; border-radius: 999px; justify-self: start; }

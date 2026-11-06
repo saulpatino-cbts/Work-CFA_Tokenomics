@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>CFA Tokenomics: setup concept</title>
+<link rel="stylesheet" href="tokens.css">
+<style>
+ .brand { display:flex; gap:14px; align-items:center; }
+ .logo-ph { width:120px; height:44px; border-radius:10px; background:var(--dark-teal); color:var(--bright-teal); display:grid; place-items:center; font-weight:700; font-size:12px; }
+ h1 { font-size:34px; font-weight:400; letter-spacing:-0.02em; line-height:1; }
+ .wrap { display:grid; grid-template-columns: 300px 1fr; gap:22px; }
+ .steps { display:grid; gap:12px; align-content:start; }
+ .step { display:grid; grid-template-columns:34px 1fr; gap:12px; align-items:center; padding:12px 14px; border-radius:var(--radius); background:var(--white); }
+ .step .dot { width:34px; height:34px; border-radius:50%; display:grid; place-items:center; font-weight:700; border:2px solid var(--dark-blue); }
+ .step.done .dot { background:var(--dark-teal); color:var(--white); border-color:var(--dark-teal); }
+ .step.now { background:var(--dark-teal); color:var(--white); }
+ .step.now .dot { background:var(--bright-teal); color:var(--dark-blue); border-color:var(--bright-teal); }
+ .step .t { font-weight:700; font-size:15px; } .step .s { font-size:12px; opacity:.85; }
+ .cards { display:grid; grid-template-columns: repeat(3, 1fr); gap:18px; margin-top:16px; }
+ .card { border:2px solid var(--gray); border-radius:var(--radius); padding:18px; display:grid; gap:12px; align-content:start; }
+ .card.on { border-color:var(--dark-teal); }
+ .card h3 { font-size:20px; font-weight:700; }
+ .checks { display:grid; gap:8px; font-size:14px; }
+ .check { display:grid; grid-template-columns: 1fr auto; gap:8px; align-items:center; padding:8px 10px; border-radius:10px; background:var(--light-gray); }
+ .btn { display:inline-block; padding:10px 16px; border-radius:10px; font-weight:700; font-size:14px; background:var(--dark-teal); color:var(--white); }
+ .btn.ghost { background:var(--white); color:var(--dark-blue); border:2px solid var(--dark-blue); }
+ .row { display:flex; gap:12px; margin-top:18px; align-items:center; }
+</style></head>
+<body><div class="page">
+ <span class="concept-flag">CONCEPT · synthetic data · [REVIEW REQUIRED] brand approval pending</span>
+ <div class="brand"><div class="logo-ph">logo placeholder</div><div><div class="eyebrow">Guided setup</div><h1>Connect your providers</h1></div></div>
+ <div class="wrap">
+  <nav class="steps" aria-label="Setup steps">
+   <div class="step done"><div class="dot">✓</div><div><div class="t">Check prerequisites</div><div class="s">Passed. Nothing was changed.</div></div></div>
+   <div class="step done"><div class="dot">✓</div><div><div class="t">Sign-in and roles</div><div class="s">Your identity provider is verified.</div></div></div>
+   <div class="step now"><div class="dot">3</div><div><div class="t">Connect providers</div><div class="s">Connect any, or all three.</div></div></div>
+   <div class="step"><div class="dot">4</div><div><div class="t">Review and finish</div><div class="s">You can resume later.</div></div></div>
+  </nav>
+  <main class="block">
+   <div class="eyebrow">Step 3 of 4</div>
+   <h1 style="font-size:28px; margin-top:6px">Connect the providers you use</h1>
+   <p class="muted" style="margin-top:10px; max-width:760px">Each provider is checked in separate steps, so a failure tells you exactly what to fix. Credentials stay in your environment. You choose where they are stored, and we never ask you to paste a secret into this page.</p>
+   <div class="cards">
+    <div class="card on">
+     <h3>Amazon Bedrock</h3>
+     <div class="checks">
+      <div class="check"><span>Identity</span><span class="chip">✓ Passed</span></div>
+      <div class="check"><span>Network</span><span class="chip">✓ Passed</span></div>
+      <div class="check"><span>Model access</span><span class="chip">✓ Passed</span></div>
+      <div class="check"><span>Usage telemetry</span><span class="chip">✕ Needs permission</span></div>
+     </div>
+     <p class="note"><b>What to fix:</b> the role can invoke models but cannot read CloudWatch metrics. Add read access to the metrics, then re-run this check.</p>
+     <span class="btn ghost" style="justify-self:start">Re-run check</span>
+    </div>
+    <div class="card on">
+     <h3>Microsoft Foundry</h3>
+     <div class="checks">
+      <div class="check"><span>Identity</span><span class="chip">✓ Passed</span></div>
+      <div class="check"><span>Network</span><span class="chip">✓ Passed</span></div>
+      <div class="check"><span>Model access</span><span class="chip">✓ Passed</span></div>
+      <div class="check"><span>Usage telemetry</span><span class="chip">✓ Passed</span></div>
+     </div>
+     <p class="note">Connected. Usage appears on the dashboard after the first collection.</p>
+    </div>
+    <div class="card">
+     <h3>Google Vertex AI</h3>
+     <div class="checks">
+      <div class="check"><span>Identity</span><span class="chip">— Not started</span></div>
+      <div class="check"><span>Network</span><span class="chip">— Not started</span></div>
+      <div class="check"><span>Model access</span><span class="chip">— Not started</span></div>
+      <div class="check"><span>Usage telemetry</span><span class="chip">— Not started</span></div>
+     </div>
+     <p class="note">Optional. Skip it and add it later.</p>
+     <span class="btn" style="justify-self:start">Start connection</span>
+    </div>
+   </div>
+   <div class="row"><span class="btn ghost">Back</span><span class="btn">Continue</span><span class="note">Continue is available once at least one provider has passed identity and model access.</span></div>
+  </main>
+ </div>
+ <p class="note">Synthetic states for layout review only. No provider has been contacted.</p>
+</div></body></html>
