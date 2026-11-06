@@ -9,10 +9,13 @@ ADRs capture product boundaries and implementation choices. **Accepted** means t
 | [0001](0001-customer-hosted-boundary.md) | Accepted requirement | Customer-hosted runtime, customer credential/data ownership, no commercial operations. |
 | [0002](0002-roles-and-assessment.md) | Accepted requirement | Customer admin/user/reader roles and no standing vendor data access. |
 | [0003](0003-portability-and-provider-scope.md) | Accepted requirement | Three-provider token accounting and validated full portability. |
+| [0004](0004-application-stack.md) | Proposed | Python/FastAPI, React/TypeScript. |
+| [0005](0005-container-packaging-and-marketplace.md) | Proposed | One signed OCI image set; AWS and Azure Marketplace as delivery channels. |
+| [0006](0006-persistence.md) | Proposed | PostgreSQL with versioned migrations. |
 
 ## Open technical decisions
 
-Runtime/frontend/backend stack; initial hosting target; persistence; observation mode and grain; Assessment transport; archive format and secret migration; compatible API/model versions; cost-data scope; and licensing. Propose records for these before implementing the affected boundary.
+Stack, hosting/packaging and persistence are proposed in 0004-0006 awaiting approval. Still open: observation mode and grain; Assessment transport; archive format and secret migration; compatible API/model versions; cost-data scope; and licensing. Propose records for these before implementing the affected boundary.
 
 ## Workflow
 

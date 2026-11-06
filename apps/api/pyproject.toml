@@ -1,0 +1,34 @@
+[project]
+name = "cfa-tokenomics-api"
+version = "0.0.0"
+description = "Work-CFA_Tokenomics API skeleton (proposed ADR 0004; not a product release)."
+requires-python = ">=3.12"
+dependencies = [
+  "fastapi==0.162.0",
+  "pydantic-settings==2.16.2",
+  "uvicorn==0.54.0",
+]
+
+[project.optional-dependencies]
+dev = ["httpx==0.28.1", "pytest==9.2.0", "ruff==0.17.4"]
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["fastapi.Depends"]
