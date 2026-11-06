@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from fastapi import Depends, FastAPI, HTTPException, Response, status
 from pydantic import BaseModel, Field
 from sqlalchemy import text
@@ -7,6 +9,7 @@ from . import __version__, roles
 from .authz import Permission, Principal, Role, require
 from .config import Settings, get_settings
 from .db import get_engine, get_session
+from .usage import query as usage_query
 
 _READ_USAGE = Depends(require(Permission.READ_USAGE))
 _MANAGE_IDENTITY = Depends(require(Permission.MANAGE_IDENTITY))
@@ -42,10 +45,26 @@ def create_app() -> FastAPI:
             return {"status": "not_ready", "database": "unreachable"}
         return {"status": "ready", "database": "ok"}
 
+    @app.get("/v1/whoami")
+    def whoami(principal: Principal = _READ_USAGE) -> dict[str, str]:
+        """Authentication check: the caller's mapped role. No data access."""
+        return {"role": principal.role.value}
+
     @app.get("/v1/usage")
-    def usage(_: Principal = _READ_USAGE) -> dict[str, list]:
-        """Placeholder permission-gated route. No usage ledger exists yet."""
-        return {"observations": []}
+    def get_usage(
+        start: datetime,
+        end: datetime,
+        provider: str | None = None,
+        account: str | None = None,
+        model_id: str | None = None,
+        _: Principal = _READ_USAGE,
+        db: Session = Depends(get_session),
+    ) -> dict:
+        """Reconciled usage for a bounded range (see docs/token-accounting.md)."""
+        try:
+            return usage_query.usage(db, start, end, provider, account, model_id)
+        except usage_query.QueryError as exc:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
 
     @app.put("/v1/admin/roles", status_code=status.HTTP_204_NO_CONTENT)
     def put_role(
