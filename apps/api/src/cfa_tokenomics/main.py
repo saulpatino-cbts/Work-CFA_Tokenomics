@@ -1,6 +1,7 @@
 from datetime import datetime
+from typing import Annotated
 
-from fastapi import Depends, FastAPI, HTTPException, Response, status
+from fastapi import Depends, FastAPI, HTTPException, Query, Response, status
 from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -10,6 +11,7 @@ from .authz import Permission, Principal, Role, require
 from .config import Settings, get_settings
 from .db import get_engine, get_session
 from .usage import query as usage_query
+from .usage import series as usage_series
 
 _READ_USAGE = Depends(require(Permission.READ_USAGE))
 _MANAGE_IDENTITY = Depends(require(Permission.MANAGE_IDENTITY))
@@ -64,14 +66,43 @@ def create_app() -> FastAPI:
         provider: str | None = None,
         account: str | None = None,
         model_id: str | None = None,
+        sku: str | None = None,
+        source_type: str | None = None,
         principal: Principal = _READ_USAGE,
         db: Session = Depends(get_session),
     ) -> dict:
         """Reconciled usage for a bounded range, limited to the caller's account scope."""
         try:
             allowed = scope.allowed_accounts(db, principal)
-            return usage_query.usage(db, start, end, provider, account, model_id, allowed)
+            return usage_query.usage(
+                db, start, end, provider, account, model_id, allowed, sku, source_type
+            )
         except usage_query.QueryError as exc:
+            raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
+
+    @app.get("/v1/usage/series")
+    def get_series(
+        start: datetime,
+        end: datetime,
+        category: str,
+        bucket: str = "hour",
+        group_by: Annotated[list[str] | None, Query()] = None,
+        provider: str | None = None,
+        account: str | None = None,
+        model_id: str | None = None,
+        sku: str | None = None,
+        source_type: str | None = None,
+        principal: Principal = _READ_USAGE,
+        db: Session = Depends(get_session),
+    ) -> dict:
+        """Bucketed series for one token category, limited to the caller's account scope."""
+        try:
+            allowed = scope.allowed_accounts(db, principal)
+            return usage_series.series(
+                db, start, end, category, bucket, tuple(group_by or ["provider"]),
+                provider, account, model_id, sku, source_type, allowed,
+            )  # fmt: skip
+        except usage_series.SeriesError as exc:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
 
     @app.put("/v1/admin/roles", status_code=status.HTTP_204_NO_CONTENT)

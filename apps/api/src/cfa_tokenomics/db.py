@@ -82,6 +82,8 @@ class RequestObservationRow(Base):
     quality: Mapped[str] = mapped_column(String(16), nullable=False)
     normalization_version: Mapped[str] = mapped_column(String(32), nullable=False)
     usage_metadata: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
+    sku: Mapped[str] = mapped_column(String(24), default="unknown", nullable=False)
+    source_type: Mapped[str] = mapped_column(String(24), default="app_routed", nullable=False)
     ingested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
@@ -91,7 +93,15 @@ class AggregateObservationRow(Base):
     __tablename__ = "usage_aggregate_observations"
     __table_args__ = (
         UniqueConstraint(
-            "provider", "account", "model_id", "category", "window_start", "window_end", "statistic"
+            "provider",
+            "account",
+            "model_id",
+            "sku",
+            "source_type",
+            "category",
+            "window_start",
+            "window_end",
+            "statistic",
         ),
     )
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
@@ -106,6 +116,8 @@ class AggregateObservationRow(Base):
     quality: Mapped[str] = mapped_column(String(16), nullable=False)
     normalization_version: Mapped[str] = mapped_column(String(32), nullable=False)
     revision: Mapped[int] = mapped_column(Integer, default=1, nullable=False)
+    sku: Mapped[str] = mapped_column(String(24), default="unknown", nullable=False)
+    source_type: Mapped[str] = mapped_column(String(24), default="cloud_telemetry", nullable=False)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
