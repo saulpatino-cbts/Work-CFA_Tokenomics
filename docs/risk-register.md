@@ -19,6 +19,9 @@
 | R-13 | P1 | Repository rules, private reporting, and integrations unverified | Maintainers | Settings verified through maintainer checklist; no invented green checks. |
 | R-14 | P1 | License and release support policy undecided | Owner | Explicit license/support decision before distribution. |
 | R-15 | P1 | Billing, negotiated rates, and estimate scope unclear | Product/FinOps | Approved feature scope and source/currency/provenance rules. |
+| R-16 | P0 | Vendor usage/billing APIs for the five agentic vendors and Microsoft Copilot are unverified | Connectors | Per-vendor documented fields, permissions and grain, sanitized fixtures, authorized integration test. |
+| R-17 | P0 | Microsoft Copilot data via Graph and Viva can identify individuals; license data is sensitive | Security/privacy | Privacy review, data-minimizing design, customer consent model. |
+| R-18 | P1 | The same traffic appears in a cloud source and a vendor source | FinOps | Sources never added (done in UI and API); overlap guidance in the product. |
 
 ## Change discipline
 

@@ -9,6 +9,8 @@ The repository began as a governance/security template. This documentation found
 | Product boundaries and role names | Documented | Owner review of requirements and accepted ADRs. |
 | Permission matrix and Assessment lifecycle | Proposed detailed contract | Scope approval, transport ADR, negative tests. |
 | Runtime and hosting | Accepted (ADRs 0004-0006) | Install templates and a tested fresh install. |
+| Web app | Started (`apps/web`): telemetry page against the read APIs; OIDC sign-in written but untested against a real IdP | Real-IdP test; setup wizard (needs a setup API); accessibility review. |
+| Vendor and Gen AI sources | Scope accepted (ADR 0010); nothing implemented | Per-vendor API research, then adapters. |
 | API skeleton | Started (`apps/api`) | Real-IdP test, usage ledger, first CI run on GitHub. |
 | Marketplace distribution | Gap analysis only | See [marketplace](marketplace.md). |
 | Provider adapters | Bedrock metric normalizer only (no live calls, no credentials, no scheduler); Foundry and Vertex not started | Live collection with customer-granted access; adapters for the other two. |

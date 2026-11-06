@@ -4,11 +4,12 @@
 # for a missing path causes configuration noise and does not provide coverage.
 # Review labels and ownership against the target repository before installation.
 
+# Directories repointed from "/" to where the manifests actually live (apps/web, apps/api).
 version: 2
 updates:
   # Root JavaScript or TypeScript manifests.
   - package-ecosystem: "npm"
-    directory: "/"
+    directory: "/apps/web"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -26,7 +27,7 @@ updates:
 
   # Root Python manifests such as requirements.txt, pyproject.toml, or poetry.lock.
   - package-ecosystem: "pip"
-    directory: "/"
+    directory: "/apps/api"
     schedule:
       interval: "weekly"
       day: "monday"
@@ -79,7 +80,7 @@ updates:
 
   # Root Dockerfiles or container metadata.
   - package-ecosystem: "docker"
-    directory: "/"
+    directory: "/apps/api"
     schedule:
       interval: "weekly"
       day: "monday"
