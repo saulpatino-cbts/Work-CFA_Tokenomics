@@ -6,7 +6,7 @@
 | --- | --- | --- | --- | --- |
 | R-01 | P0 | Initial hosting/runtime and persistence: ADRs 0004-0006 accepted; nothing implemented or tested yet | Architecture | Tested install and recovery on each marketplace target. |
 | R-02 | P0 | Assessment route into private installations unresolved | Security/platform | Approved transport, no standing access, tested revoke/expiry. |
-| R-03 | P0 | Observation coverage undecided | FinOps/connectors | Explicit source/grain/scope and reconciliation design. |
+| R-03 | P0 | Observation mode decided (ADR 0007: both, reconciled); per-provider grain and live validation open | FinOps/connectors | Reconciliation tests (done, synthetic) plus authorized live-provider verification. |
 | R-04 | P0 | Role scopes and first-admin recovery need approval | Identity | Permission contract and direct API denial tests. |
 | R-05 | P0 | Full export secret/identity migration policy open | Security/data | Explicit exclusions or approved encrypted mechanism; no privilege restoration. |
 | R-06 | P0 | Provider token fields differ and may overlap | Connectors | Versioned normalization fixtures and tests per API/model. |

@@ -11,8 +11,8 @@ The repository began as a governance/security template. This documentation found
 | Runtime and hosting | Accepted (ADRs 0004-0006) | Install templates and a tested fresh install. |
 | API skeleton | Started (`apps/api`) | Real-IdP test, usage ledger, first CI run on GitHub. |
 | Marketplace distribution | Gap analysis only | See [marketplace](marketplace.md). |
-| Provider adapters | Not implemented | Versioned capabilities and integration tests for all three. |
-| Usage ledger/reconciliation | Proposed | Observation-mode ADR and normalization tests. |
+| Provider adapters | Bedrock metric normalizer only (no live calls, no credentials, no scheduler); Foundry and Vertex not started | Live collection with customer-granted access; adapters for the other two. |
+| Usage ledger/reconciliation | Started: tables, migration, reconciliation rules, tests (synthetic data) | Live-provider verification; ledger API and UI. |
 | Guided setup | Proposed | Interactive flow and real verification tests. |
 | Full portability | Proposed | Archive decision and validated fresh restore. |
 | Operations and recovery | Proposed | Executable runbooks and tested recovery targets. |

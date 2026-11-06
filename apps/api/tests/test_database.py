@@ -42,7 +42,12 @@ def db(monkeypatch):
     monkeypatch.setenv("CFA_DATABASE_URL", URL)
     engine = create_engine(URL)
     with engine.begin() as c:
-        c.execute(text("drop table if exists audit_events, role_assignments, alembic_version"))
+        c.execute(
+            text(
+                "drop table if exists collection_checkpoints, usage_aggregate_observations, "
+                "usage_request_observations, audit_events, role_assignments, alembic_version"
+            )
+        )
     migrate.main(["upgrade"])
     with Session(engine) as s:
         yield s
