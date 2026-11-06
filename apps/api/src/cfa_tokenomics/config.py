@@ -7,7 +7,7 @@ customer-controlled secret store) may be set here (REQ-002).
 from functools import lru_cache
 from typing import Literal
 
-from pydantic import Field, model_validator
+from pydantic import Field, SecretStr, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     environment: Literal["development", "production"] = "production"
     # Reference to the customer's database secret, not a connection string with a password.
     database_secret_ref: str | None = None
+    # Injected at runtime by the platform from the customer's secret store; never committed.
+    database_url: SecretStr | None = None
     oidc_issuer: str | None = Field(default=None, description="Customer OIDC issuer URL")
     oidc_audience: str | None = None
     oidc_jwks_uri: str | None = Field(default=None, description="Override; else OIDC discovery")

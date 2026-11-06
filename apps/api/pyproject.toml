@@ -7,7 +7,10 @@ dependencies = [
   "cryptography==50.0.2",
   "fastapi==0.162.0",
   "httpx==0.28.1",
+  "psycopg[binary]==3.3.8",
   "PyJWT==2.15.1",
+  "alembic==1.20.1",
+  "SQLAlchemy==2.1.8",
   "pydantic-settings==2.16.2",
   "uvicorn==0.54.0",
 ]
@@ -21,6 +24,9 @@ build-backend = "setuptools.build_meta"
 
 [tool.setuptools.packages.find]
 where = ["src"]
+
+[tool.setuptools.package-data]
+cfa_tokenomics = ["migrations/*.mako", "migrations/versions/*.py"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

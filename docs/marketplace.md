@@ -18,7 +18,7 @@ Customers find the product in the AWS or Azure Marketplace, pull the container i
 | Area | State |
 | --- | --- |
 | Requirements, architecture, ADRs 0001-0003 | Documented |
-| API skeleton (`apps/api`): health, config validation, role matrix, OIDC bearer verification, 35 unit tests | Implemented, not a product |
+| API skeleton (`apps/api`): health, config validation, role matrix, OIDC bearer verification, PostgreSQL role/audit layer, 45 tests (35 without a database) | Implemented, not a product |
 | Dockerfile (skeleton), development-only compose | Exists; image build not run in this session (no Docker daemon) |
 | ADRs 0004-0006 | Accepted by owner 2026-11-06; implementation pending |
 
@@ -27,7 +27,7 @@ Customers find the product in the AWS or Azure Marketplace, pull the container i
 | Gap | Needed before |
 | --- | --- |
 | OIDC verification and group-to-role mapping exist (unit-tested with locally signed tokens). Not done: test against a real IdP, JWKS fetch/caching behavior, last-admin protection (needs the database), automation API keys, UI sign-in flow | Exposing any route |
-| Database layer and migrations; secret-store reference resolution | Any data feature |
+| PostgreSQL schema (role assignments, audit events), Alembic migration with downgrade, admin role routes with last-admin protection exist and pass tests against PostgreSQL 16. Not done: usage ledger tables, secret-store reference resolution (the URL is injected at runtime by the platform), backup/restore and upgrade tests on RDS/Azure Database, audit read/export | Any data feature |
 | Provider adapters (Foundry, Bedrock, Vertex AI), usage ledger, reconciliation | Pilot |
 | Web UI and setup wizard (none scaffolded) | Pilot |
 | Export/import, Assessment grants and audit | Baseline completion |

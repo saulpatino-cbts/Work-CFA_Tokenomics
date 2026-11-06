@@ -12,4 +12,7 @@ def test_healthz_leaks_nothing():
 def test_readyz():
     app = create_app()
     app.dependency_overrides[get_settings] = lambda: Settings(environment="development")
-    assert TestClient(app).get("/readyz").json()["status"] == "ready"
+    assert TestClient(app).get("/readyz").json() == {
+        "status": "ready",
+        "database": "not_configured",
+    }
