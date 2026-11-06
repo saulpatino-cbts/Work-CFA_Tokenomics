@@ -13,6 +13,7 @@ ADRs capture product boundaries and implementation choices. **Accepted** means t
 | [0005](0005-container-packaging-and-marketplace.md) | Accepted decision; implementation pending | One signed OCI image set; AWS and Azure Marketplace as delivery channels. |
 | [0006](0006-persistence.md) | Accepted decision; implementation pending | PostgreSQL with versioned migrations. |
 | [0007](0007-observation-mode-and-reconciliation.md) | Accepted decision; implementation started | Request observations and provider aggregates kept separate and reconciled, never added. |
+| [0008](0008-account-scoped-usage-access.md) | Proposed (implemented; needs confirmation) | Per-identity (provider, account) grants limit non-admin usage reads. |
 
 ## Open technical decisions
 
