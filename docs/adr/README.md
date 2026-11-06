@@ -14,6 +14,7 @@ ADRs capture product boundaries and implementation choices. **Accepted** means t
 | [0006](0006-persistence.md) | Accepted decision; implementation pending | PostgreSQL with versioned migrations. |
 | [0007](0007-observation-mode-and-reconciliation.md) | Accepted decision; implementation started | Request observations and provider aggregates kept separate and reconciled, never added. |
 | [0008](0008-account-scoped-usage-access.md) | Proposed (implemented; needs confirmation) | Per-identity (provider, account) grants limit non-admin usage reads. |
+| [0009](0009-sku-source-dimensions-and-series.md) | Proposed (implemented; needs confirmation) | `sku` and `source_type` dimensions; bucketed series that never add sources. |
 
 ## Open technical decisions
 

@@ -48,6 +48,8 @@ class UsageRow:
     partial: bool
     aggregate_quality: str | None
     aggregate_revision: int | None
+    sku: str = "unknown"
+    source_type: str = "app_routed"
 
 
 def _to_obs(r: RequestObservationRow) -> RequestObservation:
@@ -67,12 +69,14 @@ def _to_obs(r: RequestObservationRow) -> RequestObservation:
     )
 
 
-def _row(key, start, end, rec: Reconciled, agg) -> UsageRow:
+def _row(
+    key, start, end, rec: Reconciled, agg, sku="unknown", source_type="app_routed"
+) -> UsageRow:
     provider, account, model = key
     return UsageRow(
         provider, account, model, rec.category, start, end, rec.status.value,
         rec.app_observed, rec.provider_reported, rec.total, rec.unattributed, rec.partial,
-        agg.quality if agg else None, agg.revision if agg else None,
+        agg.quality if agg else None, agg.revision if agg else None, sku, source_type,
     )  # fmt: skip
 
 
@@ -84,6 +88,8 @@ def usage(
     account: str | None = None,
     model_id: str | None = None,
     allowed: list[tuple[str, str]] | None = None,
+    sku: str | None = None,
+    source_type: str | None = None,
 ) -> dict:
     """``allowed`` is the caller's (provider, account) scope; None means unrestricted (admin).
 
@@ -97,7 +103,13 @@ def usage(
         raise QueryError(f"range exceeds {MAX_RANGE.days} days")
 
     def scoped(stmt, model):
-        for col, val in (("provider", provider), ("account", account), ("model_id", model_id)):
+        for col, val in (
+            ("provider", provider),
+            ("account", account),
+            ("model_id", model_id),
+            ("sku", sku),
+            ("source_type", source_type),
+        ):
             if val is not None:
                 stmt = stmt.where(getattr(model, col) == val)
         if allowed is not None:
@@ -145,7 +157,7 @@ def usage(
         covered.setdefault(key, set()).update(r.id for r in inside)
         obs = [_to_obs(r) for r in inside]
         rec = reconcile(a.category, obs, a.value)
-        rows.append(_row(key, a.window_start, a.window_end, rec, a))
+        rows.append(_row(key, a.window_start, a.window_end, rec, a, a.sku, a.source_type))
     for key, rs in by_key.items():
         left = [r for r in rs if r.id not in covered.get(key, set())]
         if not left:
@@ -153,7 +165,9 @@ def usage(
         obs = [_to_obs(r) for r in left]
         for cat in CATEGORIES:
             if any(getattr(r, _COLUMN[cat]) is not None for r in left):
-                rows.append(_row(key, start, end, reconcile(cat, obs, None), None))
+                skus = {r.sku for r in left}
+                one = skus.pop() if len(skus) == 1 else "unknown"
+                rows.append(_row(key, start, end, reconcile(cat, obs, None), None, one))
 
     checkpoints = db.scalars(select(CollectionCheckpoint)).all()
     fresh = [

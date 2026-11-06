@@ -33,6 +33,8 @@ def record_request(db: Session, obs: RequestObservation) -> bool:
             quality=obs.quality.value,
             normalization_version=obs.normalization_version,
             usage_metadata=obs.metadata,
+            sku=obs.sku,
+            source_type=obs.source_type,
         )
         .on_conflict_do_nothing(index_elements=["source_key"])
         .returning(RequestObservationRow.id)
@@ -49,6 +51,8 @@ def upsert_aggregate(db: Session, obs: AggregateObservation) -> str:
             AggregateObservationRow.provider == obs.provider,
             AggregateObservationRow.account == obs.account,
             AggregateObservationRow.model_id == obs.model_id,
+            AggregateObservationRow.sku == obs.sku,
+            AggregateObservationRow.source_type == obs.source_type,
             AggregateObservationRow.category == obs.category,
             AggregateObservationRow.window_start == obs.window_start,
             AggregateObservationRow.window_end == obs.window_end,
@@ -61,6 +65,8 @@ def upsert_aggregate(db: Session, obs: AggregateObservation) -> str:
                 provider=obs.provider,
                 account=obs.account,
                 model_id=obs.model_id,
+                sku=obs.sku,
+                source_type=obs.source_type,
                 category=obs.category,
                 window_start=obs.window_start,
                 window_end=obs.window_end,
