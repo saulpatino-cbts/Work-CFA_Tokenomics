@@ -39,6 +39,18 @@ class RoleAssignment(Base):
     created_by: Mapped[str] = mapped_column(String(1100), nullable=False)
 
 
+class AccountGrant(Base):
+    """Lets a non-admin identity read usage for one provider account. Deny by default."""
+
+    __tablename__ = "account_grants"
+    issuer: Mapped[str] = mapped_column(String(512), primary_key=True)
+    subject: Mapped[str] = mapped_column(String(512), primary_key=True)
+    provider: Mapped[str] = mapped_column(String(32), primary_key=True)
+    account: Mapped[str] = mapped_column(String(256), primary_key=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
+    created_by: Mapped[str] = mapped_column(String(1100), nullable=False)
+
+
 class AuditEvent(Base):
     """Append-only record of security-relevant actions. Never stores secrets or bearer values."""
 

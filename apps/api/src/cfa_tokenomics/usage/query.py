@@ -8,7 +8,7 @@ Nothing is added across sources.
 from dataclasses import asdict, dataclass
 from datetime import datetime, timedelta
 
-from sqlalchemy import select
+from sqlalchemy import and_, or_, select
 from sqlalchemy.orm import Session
 
 from ..db import AggregateObservationRow, CollectionCheckpoint, RequestObservationRow
@@ -83,7 +83,12 @@ def usage(
     provider: str | None = None,
     account: str | None = None,
     model_id: str | None = None,
+    allowed: list[tuple[str, str]] | None = None,
 ) -> dict:
+    """``allowed`` is the caller's (provider, account) scope; None means unrestricted (admin).
+
+    An empty list returns nothing: access is denied by default.
+    """
     if start.tzinfo is None or end.tzinfo is None:
         raise QueryError("start and end must include a timezone")
     if end <= start:
@@ -95,6 +100,17 @@ def usage(
         for col, val in (("provider", provider), ("account", account), ("model_id", model_id)):
             if val is not None:
                 stmt = stmt.where(getattr(model, col) == val)
+        if allowed is not None:
+            stmt = stmt.where(
+                or_(
+                    *[
+                        and_(model.provider == p, model.account == a)  # type: ignore[attr-defined]
+                        for p, a in allowed
+                    ]
+                )
+                if allowed
+                else False
+            )
         return stmt
 
     aggs = db.scalars(
@@ -145,6 +161,7 @@ def usage(
         for c in checkpoints
         if (provider is None or c.provider == provider)
         and (account is None or c.account == account)
+        and (allowed is None or (c.provider, c.account) in allowed)
     ]
     return {
         "range": {"start": start, "end": end},

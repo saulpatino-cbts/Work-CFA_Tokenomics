@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from . import __version__, roles
+from . import __version__, roles, scope
 from .authz import Permission, Principal, Role, require
 from .config import Settings, get_settings
 from .db import get_engine, get_session
@@ -13,6 +13,13 @@ from .usage import query as usage_query
 
 _READ_USAGE = Depends(require(Permission.READ_USAGE))
 _MANAGE_IDENTITY = Depends(require(Permission.MANAGE_IDENTITY))
+
+
+class GrantBody(BaseModel):
+    issuer: str = Field(min_length=1, max_length=512)
+    subject: str = Field(min_length=1, max_length=512)
+    provider: str = Field(min_length=1, max_length=32)
+    account: str = Field(min_length=1, max_length=256)
 
 
 class RoleBody(BaseModel):
@@ -57,12 +64,13 @@ def create_app() -> FastAPI:
         provider: str | None = None,
         account: str | None = None,
         model_id: str | None = None,
-        _: Principal = _READ_USAGE,
+        principal: Principal = _READ_USAGE,
         db: Session = Depends(get_session),
     ) -> dict:
-        """Reconciled usage for a bounded range (see docs/token-accounting.md)."""
+        """Reconciled usage for a bounded range, limited to the caller's account scope."""
         try:
-            return usage_query.usage(db, start, end, provider, account, model_id)
+            allowed = scope.allowed_accounts(db, principal)
+            return usage_query.usage(db, start, end, provider, account, model_id, allowed)
         except usage_query.QueryError as exc:
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
 
@@ -91,6 +99,26 @@ def create_app() -> FastAPI:
         except roles.RoleError as exc:
             code = 404 if "no such" in str(exc) else status.HTTP_409_CONFLICT
             raise HTTPException(code, str(exc)) from None
+
+    @app.put("/v1/admin/grants", status_code=status.HTTP_204_NO_CONTENT)
+    def put_grant(
+        body: GrantBody,
+        actor: Principal = _MANAGE_IDENTITY,
+        db: Session = Depends(get_session),
+    ) -> None:
+        scope.grant(db, actor, **body.model_dump())
+
+    @app.delete("/v1/admin/grants", status_code=status.HTTP_204_NO_CONTENT)
+    def delete_grant(
+        issuer: str,
+        subject: str,
+        provider: str,
+        account: str,
+        actor: Principal = _MANAGE_IDENTITY,
+        db: Session = Depends(get_session),
+    ) -> None:
+        if not scope.revoke(db, actor, issuer, subject, provider, account):
+            raise HTTPException(status.HTTP_404_NOT_FOUND, "no such grant")
 
     return app
 

@@ -44,7 +44,8 @@ def db(monkeypatch):
     with engine.begin() as c:
         c.execute(
             text(
-                "drop table if exists collection_checkpoints, usage_aggregate_observations, "
+                "drop table if exists account_grants, collection_checkpoints, "
+                "usage_aggregate_observations, "
                 "usage_request_observations, audit_events, role_assignments, alembic_version"
             )
         )

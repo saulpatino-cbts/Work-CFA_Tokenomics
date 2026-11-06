@@ -33,7 +33,8 @@ def env(monkeypatch):
     with engine.begin() as c:
         c.execute(
             text(
-                "drop table if exists collection_checkpoints, usage_aggregate_observations, "
+                "drop table if exists account_grants, collection_checkpoints, "
+                "usage_aggregate_observations, "
                 "usage_request_observations, audit_events, role_assignments, alembic_version"
             )
         )
@@ -54,8 +55,9 @@ def env(monkeypatch):
         yield TestClient(app), db
 
 
-def hdr(groups=("readers",)):
-    claims = {"iss": ISS, "aud": AUD, "sub": "u", "exp": time.time() + 300, "groups": list(groups)}
+def hdr(sub="root", groups=()):
+    """Defaults to the bootstrap admin (unrestricted scope); scoping is tested separately."""
+    claims = {"iss": ISS, "aud": AUD, "sub": sub, "exp": time.time() + 300, "groups": list(groups)}
     return {"Authorization": "Bearer " + jwt.encode(claims, KEY, algorithm="RS256")}
 
 
@@ -77,7 +79,7 @@ def get(c, params=None, headers=None):
 def test_requires_authentication_and_role(env):
     c, _ = env
     assert c.get("/v1/usage", params=RANGE).status_code == 401
-    assert get(c, headers=hdr(groups=())).status_code == 403
+    assert get(c, headers=hdr(sub="nobody")).status_code == 403
 
 
 def test_provider_only_window(env):

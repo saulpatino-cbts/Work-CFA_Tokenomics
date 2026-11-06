@@ -12,7 +12,7 @@ The repository began as a governance/security template. This documentation found
 | API skeleton | Started (`apps/api`) | Real-IdP test, usage ledger, first CI run on GitHub. |
 | Marketplace distribution | Gap analysis only | See [marketplace](marketplace.md). |
 | Provider adapters | Bedrock metric normalizer only (no live calls, no credentials, no scheduler); Foundry and Vertex not started | Live collection with customer-granted access; adapters for the other two. |
-| Usage ledger/reconciliation | Started: tables, migration, reconciliation rules, tests (synthetic data) | Live-provider verification; UI. A read API exists (`GET /v1/usage`). |
+| Usage ledger/reconciliation | Started: tables, migration, reconciliation rules, tests (synthetic data) | Live-provider verification; UI. A read API exists (`GET /v1/usage`) with per-identity account scoping (ADR 0008, proposed). |
 | Guided setup | Proposed | Interactive flow and real verification tests. |
 | Full portability | Proposed | Archive decision and validated fresh restore. |
 | Operations and recovery | Proposed | Executable runbooks and tested recovery targets. |
