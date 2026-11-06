@@ -47,7 +47,7 @@ h1, h2, h3, p { margin: 0; }
 .eyebrow { font-size: 13px; font-weight: 700; letter-spacing: 0; }
 .muted { color: var(--dark-gray); }
 .note { font-size: 12px; color: var(--dark-gray); }
-.chip { display: inline-flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 700;
+.chip { white-space: nowrap; display: inline-flex; gap: 6px; align-items: center; font-size: 12px; font-weight: 700;
   padding: 4px 10px; border-radius: 999px; border: 2px solid var(--dark-blue); background: var(--white); }
 .concept-flag { font-size: 12px; font-weight: 700; background: var(--dark-blue); color: var(--white);
   padding: 6px 12px; border-radius: 999px; justify-self: start; }
