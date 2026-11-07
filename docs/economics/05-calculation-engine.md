@@ -2,6 +2,8 @@
 
 **Status:** proposed methodology. Part of the [AI economics redesign](README.md). Worked-example figures are **illustrative, not provider prices or marketplace fees**.
 
+> **Implementation.** Sections 1 to 10 are implemented as a pure library in `apps/api/src/cfa_tokenomics/econ` (`formulas.py`, `commercial.py`, `scenario.py`, `node.py`), tested in `apps/api/tests/test_econ.py`, including the worked example below reproduced exactly. Overlap resolution (section 10) and allocation (section 2) need the database layer and are not yet implemented.
+
 ## Rules that apply everywhere
 
 - Exact decimal arithmetic; currency carried on every amount; no summing across currencies (convert first with a stored, dated `FxRate`).
