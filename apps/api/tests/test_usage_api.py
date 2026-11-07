@@ -6,10 +6,11 @@ from datetime import UTC, datetime, timedelta
 
 import jwt
 import pytest
+from conftest import reset_database
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
-from sqlalchemy import create_engine, text
+from sqlalchemy import create_engine
 from sqlalchemy.orm import Session
 
 from cfa_tokenomics import migrate
@@ -30,14 +31,7 @@ RANGE = {"start": T.isoformat(), "end": (T + timedelta(hours=1)).isoformat()}
 def env(monkeypatch):
     monkeypatch.setenv("CFA_DATABASE_URL", URL)
     engine = create_engine(URL)
-    with engine.begin() as c:
-        c.execute(
-            text(
-                "drop table if exists account_grants, collection_checkpoints, "
-                "usage_aggregate_observations, "
-                "usage_request_observations, audit_events, role_assignments, alembic_version"
-            )
-        )
+    reset_database(engine)
     migrate.main(["upgrade"])
     settings = Settings(
         environment="production",

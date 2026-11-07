@@ -4,6 +4,7 @@ import os
 from datetime import UTC, datetime, timedelta
 
 import pytest
+from conftest import reset_database
 from sqlalchemy import create_engine, func, select, text
 from sqlalchemy.orm import Session
 
@@ -21,14 +22,7 @@ T = datetime(2026, 1, 1, tzinfo=UTC)
 def db(monkeypatch):
     monkeypatch.setenv("CFA_DATABASE_URL", URL)
     engine = create_engine(URL)
-    with engine.begin() as c:
-        c.execute(
-            text(
-                "drop table if exists account_grants, collection_checkpoints, "
-                "usage_aggregate_observations, "
-                "usage_request_observations, audit_events, role_assignments, alembic_version"
-            )
-        )
+    reset_database(engine)
     migrate.main(["upgrade"])
     with Session(engine) as s:
         yield s

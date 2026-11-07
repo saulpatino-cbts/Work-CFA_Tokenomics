@@ -4,6 +4,7 @@ Secrets are never configuration values: only *references* (names/ARNs/URIs of a
 customer-controlled secret store) may be set here (REQ-002).
 """
 
+import uuid
 from functools import lru_cache
 from typing import Literal
 
@@ -23,6 +24,12 @@ class Settings(BaseSettings):
     oidc_audience: str | None = None
     # Public client id of the browser app (authorization code + PKCE; no client secret).
     oidc_client_id: str | None = None
+    # Single-tenant installs: the tenant every authenticated user acts in
+    # (ADR 0011 working assumption 1).
+    default_tenant_id: uuid.UUID | None = None
+    # Dev and test only. Readiness fails when the database role can bypass row-level security
+    # (superuser or BYPASSRLS), because tenant isolation would then be silently off.
+    allow_rls_bypass: bool = False
     # Directory of the built web app, served same-origin. Unset means API only.
     web_dir: str | None = None
     oidc_jwks_uri: str | None = Field(default=None, description="Override; else OIDC discovery")

@@ -43,6 +43,9 @@ select = ["E", "F", "I", "B", "UP"]
 # Formula lines mirror the equations in docs/economics/05-calculation-engine.md.
 "src/cfa_tokenomics/econ/*" = ["E501"]
 "tests/test_econ.py" = ["E501"]
+"tests/test_tenancy.py" = ["E501"]
+# Declarative table definitions read best one constraint per line.
+"src/cfa_tokenomics/migrations/versions/0005_*" = ["E501"]
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends"]

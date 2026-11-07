@@ -446,3 +446,43 @@ def test_error_and_revenue_value_components():
     assert rv.value == 3500
     with pytest.raises(ValueError):
         f.revenue_value(money("up", 1, A), leaf("cm", "1.5", "ratio", A))
+
+
+def test_canon_is_exact_and_independent_of_scale():
+    from decimal import localcontext
+
+    from cfa_tokenomics.econ.types import canon
+
+    assert canon(Decimal("315.0")) == canon(Decimal("315")) == "315"
+    assert canon(Decimal("1E+3")) == "1000" and canon(Decimal("0E-69")) == "0"
+    assert canon(Decimal("-0.50")) == "-0.5"
+    long = Decimal("0.1147776183644189383070301291248206")
+    with localcontext() as ctx:
+        ctx.prec = 5  # a low-precision ambient context must not change the text
+        assert canon(long) == "0.1147776183644189383070301291248206"
+    with pytest.raises(ValueError):
+        canon(Decimal("NaN"))
+
+
+def test_node_id_does_not_depend_on_the_ambient_decimal_context():
+    from decimal import localcontext
+
+    from cfa_tokenomics.econ.types import BasisMix
+
+    mix = BasisMix(
+        Decimal("0.1147776183644189383070301291248206"),
+        Decimal(0),
+        Decimal("0.8852223816355810616929698708751794"),
+    )
+    from cfa_tokenomics.econ.node import Node
+
+    def make():
+        return Node("k", "f", 1, Decimal("6970"), "money", "USD", mix)
+
+    with localcontext() as ctx:
+        ctx.prec = 5
+        low = make().id
+    with localcontext() as ctx:
+        ctx.prec = 60
+        high = make().id
+    assert low == high == make().id

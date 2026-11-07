@@ -2,6 +2,8 @@
 
 **Status:** proposed. Part of the [AI economics redesign](README.md). Column names for the FOCUS entity come from the FOCUS specification and are listed in [FOCUS alignment](#focus-alignment); everything else is this product's own model.
 
+> **Implementation (slice 2).** The organization, application, price book, assumption, scenario and calculation-node entities below are implemented in migration `0005` with row-level security, composite tenant foreign keys, append-only history and exact numerics. `UsageRecord`, `FOCUSCostRecord`, `AllocatedCost`, `CloudResource`, connectors, ingestion, business metrics, price models and marketplace entities are **not built yet**.
+
 ## Conventions
 
 - Every table carries `tenant_id`; row-level security enforces it.
