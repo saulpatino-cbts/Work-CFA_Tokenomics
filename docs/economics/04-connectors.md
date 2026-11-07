@@ -42,8 +42,10 @@ Rules: `pull` is idempotent for a window; the cursor advances only after the raw
 - **Revisions replace, never add.** A revised export supersedes earlier records only for the (billing account, sub account) pairs it contains and only inside the charge-period window it covers; replaced rows stay as history. Different connectors are different sources and never supersede each other. This rule is a working design and **needs checking against real Azure and AWS exports** (partial or filtered exports could behave differently).
 - **Finality.** A run is `provisional` until its last charge period ended more than 7 days ago, then `final` (Azure documents changes until the fifth day after period end; Anthropic reports about a week). `--final` overrides.
 - **Lineage.** Every record points to its raw file (kept gzip, byte for byte) and its row number. Cost records, raw files, rejects and supersessions are append-only.
-- **Version.** The declared FOCUS version is recorded but processing is by column name. The only legacy mapping is `ProviderName` to `ServiceProviderName`, recorded in the row when used, and **unconfirmed**.
-- **Not built:** Parquet (Azure and AWS can export it), automatic version detection, and per-version rules.
+- **Version.** The declared FOCUS version (1.0 to 1.5) is recorded but processing is by column name. `ServiceProviderName` is required for declared 1.4 and 1.5 (Mandatory in 1.4). The only legacy mapping is `ProviderName` to `ServiceProviderName` (confirmed from the specification history), recorded in the row when used; `PublisherName` is kept as an extension. See [FOCUS 1.5 readiness](08-focus-1-5-readiness.md).
+- **Privacy.** The 1.5 identity columns are not stored in normalized records unless explicitly requested. The raw file is kept as received.
+- **Currency.** `BillingCurrency` must be a three-letter code; `PricingCurrency` may be a provider unit (FOCUS 1.5 draft).
+- **Not built:** Parquet (Azure and AWS can export it) and automatic version detection.
 
 ## Capability matrix
 

@@ -147,7 +147,7 @@ erDiagram
 | SKU and location | `SkuId`, `SkuMeter`, `SkuPriceDetails`, `SkuPriceId`, `RegionId`, `RegionName`, `AvailabilityZone`, capacity reservation columns |
 | Invoice | `InvoiceId`, `InvoiceDetailId` |
 
-Only `BilledCost`, `EffectiveCost`, `ListCost`, `ContractedCost` and `ChargeCategory` were confirmed **mandatory**; requirement levels for the rest are **[VERIFY]**. `ChargeCategory` allows `Usage`, `Purchase`, `Tax`, `Credit`, `Adjustment`.
+`BilledCost`, `EffectiveCost`, `ListCost`, `ContractedCost`, `ChargeCategory` and (from 1.4) `ServiceProviderName` are confirmed **Mandatory**; `Tags` and `AllocatedMethodId` are Conditional; `AllocatedMethodDetails` is Recommended. Other requirement levels are **[VERIFY]**. `ChargeCategory` allows `Usage`, `Purchase`, `Tax`, `Credit`, `Adjustment`.
 
 ### Cost definitions the engine relies on
 
@@ -171,10 +171,14 @@ Only `BilledCost`, `EffectiveCost`, `ListCost`, `ContractedCost` and `ChargeCate
 | `cached_input_tokens` | Token | Input | Read |
 | `cache_write_tokens` | Token | Input | Write |
 | `output_tokens` | Token | Output | n/a |
-| `reasoning_tokens` | Token | provider-defined **[VERIFY]** | n/a |
+| `reasoning_tokens` (separately metered) | Token | Output (FOCUS 1.5 draft) | n/a |
 | `requests` | Request | n/a | n/a |
 | `sessions` | Session | n/a | n/a |
 | `seats_assigned`, `seats_active` | Seat (product-defined) | n/a | n/a |
+
+### Provider split allocation and identity columns
+
+FOCUS 1.3 added provider-calculated split allocation (`AllocatedMethodId`, `AllocatedMethodDetails`, `AllocatedResourceId`, `AllocatedResourceName`, `AllocatedTags`). The specification says allocated ratios for one origin charge must total 1, but **does not clearly say whether split rows and the origin charge both appear in an export**, so they must not be summed blindly. These columns are stored typed, `provider_split_lines` is reported in the allocation summary, and rules can match them. Do not assume totals are safe until a real provider export is checked (risk R-24). The 1.5 identity columns (`PrincipalId`, `CredentialId`, `RequesterDetails`) are dropped by default; see [FOCUS 1.5 readiness](08-focus-1-5-readiness.md).
 
 ### Extension columns
 

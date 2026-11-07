@@ -33,6 +33,14 @@ LicenceCost(a,t) = sum over licence lines  AllocatedAmount(l,a,t)           [sea
 - The default measure is **effective cost** (after discounts, with commitments amortized). Billed and list cost are shown alongside so commitment benefit is visible. Names and definitions follow FOCUS ([data model](03-data-model.md#focus-alignment)).
 - **Allocation** assigns each cost line `c` with amount `X_c` to applications by the first matching rule in priority order: tag, direct mapping, proportional by a usage driver (`share_a = driver_a / sum driver`), fixed percentage, or even split. Invariant, enforced and tested: `sum over a AllocatedCost + Unallocated = X_c`. Unmatched cost goes to a visible *unallocated* bucket. Allocation quality (the share allocated, and how) is reported next to every application total.
 
+**Implemented (Phase 1 slice 4)** in `alloc/` (`engine.py`, `runner.py`):
+
+- **Rules** are versioned and append-only, ordered by priority; the first rule whose conditions match **and that can be applied** wins. Methods: `direct`, `tag` (tag value names an application, or an explicit map; case-sensitive; a value-less tag cannot name one), `fixed_percent` (a remainder goes to *unallocated* with reason `percent_remainder`), `even`, and `proportional` (explicit, versioned driver values per application and period; every listed application must have a driver, otherwise `driver_missing`). A matching rule that cannot be applied falls through; the first such reason is kept as the unallocated reason (`tag_missing`, `tag_unmapped`, `tag_without_value`, `driver_missing`, `driver_zero`, `no_rule`).
+- **Exact splitting.** Amounts are split in integer units of 10^-18 by the largest-remainder method, ties by position, so the slices add up to the original in all four measures (billed, effective, list, contracted) with no rounding drift. This does not depend on the process's decimal precision (a hidden-rounding bug of that kind was found and fixed during development).
+- **Runs.** A run covers current cost lines whose charge period starts in a half-open window, in one transaction, and is skipped when an identical run (rules, drivers, cost lines) already succeeded. "Current allocation" of a line is the slices of the latest successful run (by sequence number, never by clock).
+- **Reports** keep three buckets apart per currency: allocated, explicitly unallocated (with reasons), and **not yet allocated** (for example after a revised import). Coverage is allocated effective cost over total effective cost. `verify_allocation` lists any line whose slices do not add up; it must be empty. `python -m cfa_tokenomics.admin allocate TENANT START END` runs and summarizes.
+- **Not built:** deriving proportional drivers from usage records (drivers are entered or imported), workload-level and customer-level rules beyond a fixed workload on a direct rule, shared-cost pools, and an API or screen.
+
 ## 3. Operations and development
 
 ```text
