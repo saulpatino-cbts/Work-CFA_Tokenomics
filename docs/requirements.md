@@ -21,6 +21,25 @@ These requirements capture the product owner's clarified scope. They supersede e
 | REQ-011 | Customer-owned data lifecycle | Customer controls retention, deletion, exports, backups, and recovery policy. |
 | REQ-012 | No commercial operations | Payment processing, subscriptions, refunds, and vendor billing workflows are outside scope. |
 
+## Owner-stated scope, 2026-11-07 (pending ADR 0011)
+
+The owner's brief reframes the product as an application-centric AI economics platform. These are **proposed requirements** until [ADR 0011](adr/0011-ai-economics-platform.md) is accepted. Design: [economics set](economics/README.md).
+
+| ID | Requirement | Acceptance intent |
+| --- | --- | --- |
+| REQ-013 | Application-centric economics | Cost, value, unit economics, price and margin are computed per application and filterable by customer, environment, provider, model, team, workload, scenario and period. |
+| REQ-014 | FOCUS-aligned cost model | Cloud, AI, SaaS and internal costs share a FOCUS-compatible normalized model; FinOps Foundation concepts are used rather than a proprietary method. |
+| REQ-015 | Observed, estimated and assumed | Every figure carries its basis; an estimate is never presented as telemetry. |
+| REQ-016 | Business value model | Editable, visible assumptions produce hours saved, labour value, net value, ROI and payback. |
+| REQ-017 | Scenarios and sensitivity | Baseline, Current, Forecast, Optimized and Customer Proposal scenarios recalculate cost, value, ROI, price and margin; sensitivity on key drivers. |
+| REQ-018 | Commercial and marketplace modelling | Price models, required price for a target margin, and configurable marketplace fees and commitment effects. **Modelling only** (see REQ-012 note). |
+| REQ-019 | Provenance | Any important number traces to calculation, input, source and timestamp. |
+| REQ-020 | Connector framework | New sources are added without redesign; no source is assumed to expose tokens; manual import is supported. |
+| REQ-021 | Enterprise security | Tenant isolation, RBAC, SSO, secret management, audit, connector health, retention, ingestion traceability; no credential in client code. |
+| REQ-022 | Executive experience | Economics-first dashboards answering the ten executive questions; tokens are drill-down. |
+
+**Proposed clarification of REQ-012:** modelling prices, margins and marketplace economics is in scope; payment processing, invoicing customers, subscription billing operations and marketplace metering remain out of scope.
+
 ## Intended outcomes
 
 Customer administrators can deploy and configure the platform without sharing credentials with the vendor. Authorized users can inspect permitted usage, understand data freshness and coverage, and request an Assessment without opening permanent support access. Administrators can export and restore customer-owned state and apply their own data policies.

@@ -14,6 +14,8 @@
 
 A connection needs separate health results for identity, network, model access, telemetry, and optional billing. Customers may configure any subset of providers. Do not require all three to finish setup.
 
+> **Redesign proposal.** The [connector framework](economics/04-connectors.md) and sourced capability matrix supersede this page's provider-by-provider framing if [ADR 0011](adr/0011-ai-economics-platform.md) is accepted.
+
 ## Vendor scope extension
 
 The owner extended scope to Claude Code, OpenAI Codex, Perplexity, Google Gemini and GitHub Copilot via their own APIs, and Microsoft Copilot via Microsoft Graph and Viva. See [ADR 0010](adr/0010-vendor-and-genai-scope.md). **None of these is implemented or verified**; each needs its documentation read and its fields confirmed first.
