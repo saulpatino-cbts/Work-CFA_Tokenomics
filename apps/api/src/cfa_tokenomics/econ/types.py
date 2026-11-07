@@ -33,6 +33,23 @@ def D(x: int | str | Decimal) -> Decimal:
     return Decimal(x)
 
 
+def canon(d: Decimal) -> str:
+    """Canonical text of a Decimal for hashing: no trailing zeros, no exponent, and no rounding.
+
+    ``Decimal.normalize`` is avoided because it rounds to the ambient context precision, which would make
+    an id depend on process settings."""
+    sign, digits, exp = d.as_tuple()
+    if not isinstance(exp, int):  # NaN or infinity are never valid figures
+        raise ValueError("non-finite number")
+    digits = list(digits)
+    while len(digits) > 1 and digits[-1] == 0:
+        digits.pop()
+        exp += 1
+    if digits == [0]:
+        return "0"
+    return format(Decimal((sign, tuple(digits), exp)), "f")
+
+
 class Basis(StrEnum):
     """Where a figure comes from. Never inferred silently."""
 

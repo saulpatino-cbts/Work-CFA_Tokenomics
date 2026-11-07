@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from decimal import Decimal
 from enum import StrEnum
 
-from .types import ZERO, Basis, BasisMix, D, exact, weakest
+from .types import ZERO, Basis, BasisMix, D, canon, exact, weakest
 
 
 class Status(StrEnum):
@@ -45,9 +45,13 @@ class Node:
         payload = "|".join(
             [
                 self.key, self.formula_id, str(self.formula_version),
-                "None" if self.value is None else format(self.value, "f"),
+                "None" if self.value is None else canon(self.value),
                 self.unit, self.currency or "", self.status.value, self.source_ref or "",
                 ",".join(i.id for i in self.inputs),
+                # basis and wording are part of the identity: changing "assumed" to "observed" must be
+                # detectable, not just a change of number.
+                *(canon(m) for m in (self.mix.observed, self.mix.estimated, self.mix.assumed)),
+                self.label, self.note,
             ]
         )  # fmt: skip
         object.__setattr__(self, "id", hashlib.sha256(payload.encode()).hexdigest()[:16])

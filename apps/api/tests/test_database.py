@@ -5,6 +5,7 @@ import time
 
 import jwt
 import pytest
+from conftest import reset_database
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
@@ -41,14 +42,7 @@ def settings(**over) -> Settings:
 def db(monkeypatch):
     monkeypatch.setenv("CFA_DATABASE_URL", URL)
     engine = create_engine(URL)
-    with engine.begin() as c:
-        c.execute(
-            text(
-                "drop table if exists account_grants, collection_checkpoints, "
-                "usage_aggregate_observations, "
-                "usage_request_observations, audit_events, role_assignments, alembic_version"
-            )
-        )
+    reset_database(engine)
     migrate.main(["upgrade"])
     with Session(engine) as s:
         yield s
@@ -140,10 +134,19 @@ def test_remove_missing_is_404(db):
 
 
 def test_readyz_reflects_database(db):
-    assert api(settings()).get("/readyz").json() == {"status": "ready", "database": "ok"}
+    # The test database role is a superuser, so opt in to the dev-only bypass explicitly.
+    ok = api(settings(allow_rls_bypass=True)).get("/readyz").json()
+    assert ok == {"status": "ready", "database": "ok"}
     bad = settings(database_url=SecretStr("postgresql+psycopg://x:y@127.0.0.1:1/none"))
     r = api(bad).get("/readyz")
     assert r.status_code == 503 and r.json()["database"] == "unreachable"
+
+
+def test_readyz_refuses_a_role_that_bypasses_row_level_security(db):
+    """A superuser or BYPASSRLS role silently turns tenant isolation off, so it is not ready."""
+    r = api(settings()).get("/readyz")
+    assert r.status_code == 503
+    assert r.json() == {"status": "not_ready", "database": "role_bypasses_rls"}
 
 
 def test_readyz_production_without_database_is_503():

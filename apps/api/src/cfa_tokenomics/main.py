@@ -13,6 +13,7 @@ from . import __version__, roles, scope
 from .authz import Permission, Principal, Role, require
 from .config import Settings, get_settings
 from .db import get_engine, get_session
+from .tenancy import role_can_bypass_rls
 from .usage import query as usage_query
 from .usage import series as usage_series
 
@@ -90,9 +91,13 @@ def create_app() -> FastAPI:
         try:
             with engine.connect() as conn:
                 conn.execute(text("select 1"))
+                bypass = role_can_bypass_rls(conn)
         except Exception:
             response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
             return {"status": "not_ready", "database": "unreachable"}
+        if bypass and not settings.allow_rls_bypass:
+            response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+            return {"status": "not_ready", "database": "role_bypasses_rls"}
         return {"status": "ready", "database": "ok"}
 
     @app.get("/v1/whoami")
