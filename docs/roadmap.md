@@ -19,6 +19,10 @@ The repository began as a governance/security template. This documentation found
 | Full portability | Proposed | Archive decision and validated fresh restore. |
 | Operations and recovery | Proposed | Executable runbooks and tested recovery targets. |
 
+## Redesign proposal (2026-11-07)
+
+The owner's brief reframes the product as an application-centric AI economics platform. The assessment, target architecture and four-phase roadmap are in [docs/economics](economics/README.md), with [ADR 0011](adr/0011-ai-economics-platform.md) proposed. Until it is decided, the milestones below describe the token application only.
+
 ## Milestone 0: resolve prerequisites
 
 Choose initial hosting/runtime, persistence, observation mode, Assessment transport, credential migration policy, licensing, and customer scope model. Convert open decisions into reviewed ADRs. Confirm whether initial cost scope includes billing ingestion, estimates, or tokens only.

@@ -4,6 +4,7 @@ This is the source-controlled documentation for Work-CFA_Tokenomics. It describe
 
 ## Reading order
 
+0. [AI economics redesign](economics/README.md): the proposed product direction (assessment, architecture, data model, connectors, calculation engine, UX, roadmap).
 1. [Requirements](requirements.md): confirmed scope, non-goals, and traceable requirement IDs.
 2. [Architecture](architecture.md): logical components, data flows, and unresolved hosting choices.
 3. [Roles and identity](access-control.md): customer roles, credentials, and authorization.
