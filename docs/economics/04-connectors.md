@@ -32,6 +32,19 @@ Rules: `pull` is idempotent for a window; the cursor advances only after the raw
 
 **Manual import is a first-class connector.** It accepts FOCUS files (CSV or Parquet, any version from 1.0), a generic CSV with a saved column mapping, and a usage template. It is the fastest route to real data, the fallback for sources with no API, and the way customers supply price sheets and invoices.
 
+## Manual FOCUS import (implemented)
+
+`python -m cfa_tokenomics.admin import-focus TENANT_ID FILE [--version 1.2] [--final] [--allow-partial]` imports a FOCUS CSV (plain or gzip) through a connector named `manual-focus-import`. It is the first connector and the way to put real cost data into the model before any API connector exists. **Tested on synthetic files only; no real export has been imported.**
+
+- **Parse, don't coerce.** Required columns are the five FOCUS-mandatory ones (`BilledCost`, `EffectiveCost`, `ListCost`, `ContractedCost`, `ChargeCategory`) plus `ChargePeriodStart`, `ChargePeriodEnd` and `BillingCurrency`. A row is rejected, with a reason code, for an unknown `ChargeCategory`, a non-finite or non-numeric amount, an amount with more than 18 decimal places (never rounded), a timestamp without a time zone, a bad currency code, an empty period, or invalid tags. Unrecognized columns (for example Azure's `x_` columns) are kept as extensions.
+- **Strict by default.** If any row is rejected the whole file is refused and nothing is imported (the rejects are recorded). A partial import silently drops money, and a later revised export would then replace good earlier rows. `--allow-partial` is explicit consent.
+- **Once per file.** The same file content is imported once per connector.
+- **Revisions replace, never add.** A revised export supersedes earlier records only for the (billing account, sub account) pairs it contains and only inside the charge-period window it covers; replaced rows stay as history. Different connectors are different sources and never supersede each other. This rule is a working design and **needs checking against real Azure and AWS exports** (partial or filtered exports could behave differently).
+- **Finality.** A run is `provisional` until its last charge period ended more than 7 days ago, then `final` (Azure documents changes until the fifth day after period end; Anthropic reports about a week). `--final` overrides.
+- **Lineage.** Every record points to its raw file (kept gzip, byte for byte) and its row number. Cost records, raw files, rejects and supersessions are append-only.
+- **Version.** The declared FOCUS version is recorded but processing is by column name. The only legacy mapping is `ProviderName` to `ServiceProviderName`, recorded in the row when used, and **unconfirmed**.
+- **Not built:** Parquet (Azure and AWS can export it), automatic version detection, and per-version rules.
+
 ## Capability matrix
 
 `Tokens` means token counts by category. `Cost` means a dollar amount from the source. `Seats` means seat or licence data.

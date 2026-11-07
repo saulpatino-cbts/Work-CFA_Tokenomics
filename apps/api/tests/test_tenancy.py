@@ -9,8 +9,8 @@ from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
 import pytest
-from conftest import reset_database
-from sqlalchemy import create_engine, text
+from conftest import ROLE, WIDE, _as, app, two_tenants
+from sqlalchemy import text
 from sqlalchemy.exc import DBAPIError, IntegrityError
 from sqlalchemy.orm import Session
 from test_econ import example
@@ -27,55 +27,11 @@ from cfa_tokenomics.models_econ import (
     Scenario,
     ValueAssumption,
 )
-from cfa_tokenomics.tenancy import app_role_grants_sql, role_can_bypass_rls, tenant_session
+from cfa_tokenomics.tenancy import app_role_grants_sql, role_can_bypass_rls
 
 URL = os.environ.get("CFA_TEST_DATABASE_URL")
 pytestmark = pytest.mark.skipif(not URL, reason="CFA_TEST_DATABASE_URL not set")
-ROLE = "cfa_app_test"
-WIDE = "cfa_app_test_wide"
 NOW = datetime(2026, 1, 1, tzinfo=UTC)
-
-
-def _as(role):
-    return lambda conn: conn.execute(text(f"set local role {role}"))
-
-
-@pytest.fixture
-def env(monkeypatch):
-    monkeypatch.setenv("CFA_DATABASE_URL", URL)
-    engine = create_engine(URL)
-    reset_database(engine)
-    migrate.main(["upgrade"])
-    with engine.begin() as c:
-        for role in (ROLE, WIDE):
-            c.execute(
-                text(
-                    f"do $$ begin if not exists (select from pg_roles where rolname='{role}') "
-                    f"then create role {role} nologin nosuperuser nobypassrls; end if; end $$"
-                )
-            )
-        for stmt in app_role_grants_sql(ROLE).split(";"):
-            if stmt.strip():
-                c.execute(text(stmt))
-        # A role with broader grants, to prove row-level security stands on its own.
-        for stmt in app_role_grants_sql(WIDE).split(";"):
-            if stmt.strip():
-                c.execute(text(stmt))
-        c.execute(text(f"grant update, delete on value_assumptions, calculation_nodes to {WIDE}"))
-    yield engine
-    engine.dispose()
-
-
-def app(engine, tid, role=ROLE):
-    return tenant_session(engine, tid, _as(role))
-
-
-def two_tenants(engine):
-    a = store.create_tenant(engine, "A", "usd", _as(ROLE))
-    b = store.create_tenant(engine, "B", "usd", _as(ROLE))
-    return a, b
-
-
 # ---- the guard -------------------------------------------------------------------------------------
 
 
@@ -89,10 +45,13 @@ def test_superuser_bypasses_rls_but_the_app_role_does_not(env):
 def test_grants_sql_is_least_privilege_and_validates_the_role_name():
     sql = app_role_grants_sql("cfa_runtime")
     assert "ALL PRIVILEGES" not in sql and "SUPERUSER" not in sql and "BYPASSRLS" not in sql
+    from cfa_tokenomics.tenancy import APPEND_ONLY_TABLES
+
     append_only = [ln for ln in sql.splitlines() if "value_assumptions" in ln]
     assert append_only == [
-        "GRANT SELECT, INSERT ON value_assumptions, calculation_nodes, calculation_edges TO cfa_runtime;"
+        f"GRANT SELECT, INSERT ON {', '.join(APPEND_ONLY_TABLES)} TO cfa_runtime;"
     ]
+    assert "UPDATE" not in append_only[0] and "DELETE" not in append_only[0]
     for bad in ("Robert'; drop table x;--", "UPPER", "", "a" * 64):
         with pytest.raises(ValueError):
             app_role_grants_sql(bad)
