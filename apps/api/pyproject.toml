@@ -39,5 +39,10 @@ target-version = "py312"
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP"]
 
+[tool.ruff.lint.per-file-ignores]
+# Formula lines mirror the equations in docs/economics/05-calculation-engine.md.
+"src/cfa_tokenomics/econ/*" = ["E501"]
+"tests/test_econ.py" = ["E501"]
+
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends"]

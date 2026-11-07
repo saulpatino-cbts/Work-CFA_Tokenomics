@@ -1,6 +1,6 @@
 # 0011. AI economics platform
 
-- **Status:** Proposed
+- **Status:** Accepted (owner approved merging the design and starting Phase 1, 2026-11-07); working assumptions below are unconfirmed
 - **Date:** 2026-11-07
 - **Decision authority:** Product owner
 - **Owners:** Architecture, FinOps, Product
@@ -36,6 +36,22 @@ Reposition the product as an **application-centric AI economics platform** and d
 | [0010](0010-vendor-and-genai-scope.md) vendor scope | **Stays** and is extended by the connector matrix. |
 
 REQ-012 ("no commercial operations") needs a clarification the owner must approve: **modelling** prices, margins and marketplace economics is in scope; payment processing, invoicing, subscription billing operations and marketplace metering are not.
+
+## Working assumptions for Phase 1
+
+The owner approved the design and Phase 1 without answering the nine open decisions. Phase 1 proceeds on these **working assumptions**, each stated so it can be corrected. They are not confirmed decisions.
+
+| # | Working assumption |
+| --- | --- |
+| 1 | Customer-hosted stays; `tenant_id` and row-level security are enforced from the first new table; whether CBTS operates it for several clients is undecided. |
+| 2 | REQ-012 is read as allowing price, margin and marketplace **modelling** only; payment processing, invoicing, subscription billing operations and marketplace metering stay out. |
+| 3 | "Customer" means a buyer of an application the tenant sells. |
+| 4 | **No real data has been supplied.** Phase 1 builds against synthetic, clearly labelled fixtures. Acceptance criterion 1 (import a real FOCUS export) stays **unmet** until a real export is provided. |
+| 5 | Target FOCUS 1.4; adopt the 1.5 token conventions after ratification. |
+| 6 | No default realization or cashability factors; they must be entered with a rationale. |
+| 7 | One base currency per tenant; dated FX rates; no summing across currencies. |
+| 8 | Aggregate per-user data by default; privacy review before any per-user source. |
+| 9 | `AGENTS.md` is updated in the Phase 1 documentation slice. |
 
 ## Alternatives considered
 

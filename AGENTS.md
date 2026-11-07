@@ -4,7 +4,7 @@ Applies to all repository content unless a more specific file intentionally narr
 
 ## Required context
 
-Read `README.md`, `CONTRIBUTING.md`, `docs/requirements.md`, and accepted ADRs before implementation. Consult `docs/roadmap.md` and `docs/risk-register.md` for unresolved choices. This repository is at documentation/architecture foundation stage; do not claim a running product.
+Read `README.md`, `CONTRIBUTING.md`, `docs/requirements.md`, `docs/economics/README.md`, and accepted ADRs before implementation. Consult `docs/roadmap.md` and `docs/risk-register.md` for unresolved choices. This repository is at documentation/architecture foundation stage; do not claim a running product.
 
 ## Hard boundaries
 
@@ -12,7 +12,9 @@ Read `README.md`, `CONTRIBUTING.md`, `docs/requirements.md`, and accepted ADRs b
 - Customer controls credentials, data, retention, deletion, backups, and upgrades.
 - Customer admin/user/reader roles; vendor admin/support has no default customer-data access.
 - Assessment requires customer approval, narrow scope, named identity, expiry/revocation, and local audit.
-- Required integrations: Foundry, Bedrock, Vertex AI. Do not assume supporting their APIs means hosting on all three clouds.
+- Source scope is set by ADR 0010 and ADR 0011 and the connector matrix in `docs/economics/04-connectors.md`: cloud AI platforms, AI vendor APIs, cloud cost exports, Microsoft Copilot via Graph, and manual import. Supporting a provider's API does not mean hosting on that cloud. Do not assume a source exposes tokens.
+- Product direction is application-centric AI economics (ADR 0011): cost, value, unit economics, price and margin per application. Price, margin and marketplace work is **modelling only**; never add payment processing, invoicing, subscription billing operations or marketplace metering.
+- Money and quantities are exact decimals with a currency; never floating point. Every figure carries a basis (observed, estimated, assumed); an estimate is never presented as telemetry. Never add overlapping sources; never turn unknown into zero.
 - Preserve usage provenance and provider-specific semantics; unknown is not zero and overlap is not additive.
 - Full export/import must validate data and authority; do not restore active sessions or support grants.
 - No commercial operations, vendor-owned retention timer, iOS form processing, or appointment service.

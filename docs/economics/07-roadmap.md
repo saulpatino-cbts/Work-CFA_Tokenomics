@@ -10,6 +10,20 @@
 - No new token-only features. Existing telemetry stays working while the new model is built beside it.
 - Each phase has a demonstration on non-synthetic data supplied by a customer or the owner.
 
+## Phase 1 progress
+
+| Slice | State |
+| --- | --- |
+| 1. Calculation library (`apps/api/src/cfa_tokenomics/econ`): exact decimals, basis and provenance nodes, cost, value, ROI, payback, unit economics, scenarios, sensitivity, pricing and margin | **Done** (tests, synthetic inputs) |
+| 2. Data model with `tenant_id` and row-level security; application, workload, price book, assumptions, scenarios, calculation nodes | Not started |
+| 3. FOCUS 1.4 cost schema, version upgrade and manual import connector | Not started |
+| 4. Allocation engine and allocation coverage | Not started |
+| 5. API for applications, assumptions, scenarios and the explain view | Not started |
+| 6. Application economics screens | Not started |
+| 7. Migration of the existing ledger into normalized usage facts | Not started |
+
+Acceptance criteria status (see below): criterion 4 (worked example reproduces exactly) and the engine half of criterion 5 (scenario recalculation, tornado) are met by tests on synthetic inputs; criterion 7 (no floating-point money) holds for the new library only. Criteria 1, 2, 3 and 6 are **unmet**. Criterion 1 additionally needs a real FOCUS export, which has not been supplied.
+
 ## Phase 1: Economics foundation
 
 ### Scope
