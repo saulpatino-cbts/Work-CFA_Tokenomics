@@ -2,7 +2,7 @@
 # Base images are tag-pinned, not digest-pinned: pin by digest before any marketplace submission
 # (docs/marketplace.md).
 
-FROM node:25-slim AS web
+FROM node:26-slim AS web
 WORKDIR /web
 COPY apps/web/package.json apps/web/package-lock.json ./
 RUN npm ci
