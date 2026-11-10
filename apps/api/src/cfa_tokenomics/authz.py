@@ -68,14 +68,15 @@ def _highest(*roles: Role | None) -> Role | None:
 
 
 def _stored_role(settings: Settings, claims: dict) -> Role | None:
-    from sqlalchemy.orm import Session
-
     from .db import RoleAssignment, get_engine
+    from .tenancy import tenant_session
 
     engine = get_engine(settings)
-    if engine is None:
-        return None
-    with Session(engine) as db:
+    if engine is None or settings.default_tenant_id is None:
+        return (
+            None  # no tenant, no stored roles: only the IdP mapping and the bootstrap admin apply
+        )
+    with tenant_session(engine, settings.default_tenant_id) as db:
         row = db.get(RoleAssignment, (claims["iss"], claims["sub"]))
         return Role(row.role) if row else None
 

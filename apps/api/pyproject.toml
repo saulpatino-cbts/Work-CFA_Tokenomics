@@ -49,7 +49,11 @@ select = ["E", "F", "I", "B", "UP"]
 "tests/test_focus_*.py" = ["E501"]
 "tests/test_alloc_*.py" = ["E501"]
 # Declarative table definitions read best one constraint per line.
-"src/cfa_tokenomics/migrations/versions/000[567]_*" = ["E501"]
+"src/cfa_tokenomics/migrations/versions/000[5-9]_*" = ["E501"]
+"src/cfa_tokenomics/legacy_tenancy.py" = ["E501"]
+"src/cfa_tokenomics/usage/facts.py" = ["E501"]
+"tests/test_legacy_*.py" = ["E501"]
+"tests/test_usage_facts.py" = ["E501"]
 
 [tool.ruff.lint.flake8-bugbear]
 extend-immutable-calls = ["fastapi.Depends"]

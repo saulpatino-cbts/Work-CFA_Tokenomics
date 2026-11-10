@@ -6,17 +6,17 @@ from datetime import UTC, datetime, timedelta
 
 import jwt
 import pytest
-from conftest import reset_database
+from conftest import TENANT, make_tenant, reset_database
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 from sqlalchemy import create_engine, text
-from sqlalchemy.orm import Session
 
 from cfa_tokenomics import migrate
 from cfa_tokenomics.config import Settings, get_settings
 from cfa_tokenomics.db import AuditEvent
 from cfa_tokenomics.main import create_app
+from cfa_tokenomics.tenancy import tenant_session
 from cfa_tokenomics.usage import ledger
 from cfa_tokenomics.usage.models import AggregateObservation
 
@@ -34,6 +34,7 @@ def env(monkeypatch):
     engine = create_engine(URL)
     reset_database(engine)
     migrate.main(["upgrade"])
+    make_tenant(engine)
     settings = Settings(
         environment="production",
         oidc_issuer=ISS,
@@ -42,11 +43,12 @@ def env(monkeypatch):
         database_url=SecretStr(URL),
         oidc_reader_group="readers",
         bootstrap_admin=f"{ISS}|root",
+        default_tenant_id=TENANT,
     )
     app = create_app()
     app.dependency_overrides[get_settings] = lambda: settings
     app.state.key_provider = lambda _t: KEY.public_key()
-    with Session(engine) as db:
+    with tenant_session(engine, TENANT) as db:
         for acct, val in (("a", 10.0), ("b", 20.0)):
             ledger.upsert_aggregate(
                 db,

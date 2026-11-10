@@ -14,6 +14,7 @@ from .authz import Permission, Principal, Role, require
 from .config import Settings, get_settings
 from .db import get_engine, get_session
 from .economics_api import router as economics_router
+from .legacy_tenancy import unassigned_tables
 from .tenancy import role_can_bypass_rls
 from .usage import query as usage_query
 from .usage import series as usage_series
@@ -93,12 +94,21 @@ def create_app() -> FastAPI:
             with engine.connect() as conn:
                 conn.execute(text("select 1"))
                 bypass = role_can_bypass_rls(conn)
+                waiting = unassigned_tables(conn)
         except Exception:
             response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
             return {"status": "not_ready", "database": "unreachable"}
         if bypass and not settings.allow_rls_bypass:
             response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
             return {"status": "not_ready", "database": "role_bypasses_rls"}
+        if settings.default_tenant_id is None:
+            # Every data route runs inside a tenant; without one they all refuse.
+            response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+            return {"status": "not_ready", "database": "tenant_not_configured"}
+        if waiting:
+            # Old rows have no tenant and are invisible until an operator assigns one.
+            response.status_code = status.HTTP_503_SERVICE_UNAVAILABLE
+            return {"status": "not_ready", "database": "legacy_tenant_unassigned"}
         return {"status": "ready", "database": "ok"}
 
     @app.get("/v1/whoami")

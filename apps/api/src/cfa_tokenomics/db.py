@@ -1,9 +1,10 @@
 """Database schema and engine (ADR 0006). Schema changes go through Alembic migrations."""
 
+import uuid
 from collections.abc import Iterator
 from datetime import UTC, datetime
 
-from fastapi import Depends
+from fastapi import Depends, HTTPException, status
 from sqlalchemy import (
     JSON,
     BigInteger,
@@ -12,12 +13,15 @@ from sqlalchemy import (
     Integer,
     String,
     UniqueConstraint,
+    Uuid,
     create_engine,
+    text,
 )
 from sqlalchemy.engine import Engine
-from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, sessionmaker
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column
 
 from .config import Settings, get_settings
+from .tenancy import tenant_session
 
 
 def _now() -> datetime:
@@ -28,7 +32,18 @@ class Base(DeclarativeBase):
     pass
 
 
-class RoleAssignment(Base):
+class _Tenant:
+    """The owning tenant. Filled by the database from the session's tenant (a column default), so a
+    write outside a tenant session is refused rather than stored without an owner."""
+
+    tenant_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid,
+        server_default=text("nullif(current_setting('app.tenant_id', true), '')::uuid"),
+        nullable=True,
+    )
+
+
+class RoleAssignment(_Tenant, Base):
     """A role granted to an identity. Identity is issuer + subject, never email."""
 
     __tablename__ = "role_assignments"
@@ -39,7 +54,7 @@ class RoleAssignment(Base):
     created_by: Mapped[str] = mapped_column(String(1100), nullable=False)
 
 
-class AccountGrant(Base):
+class AccountGrant(_Tenant, Base):
     """Lets a non-admin identity read usage for one provider account. Deny by default."""
 
     __tablename__ = "account_grants"
@@ -51,7 +66,7 @@ class AccountGrant(Base):
     created_by: Mapped[str] = mapped_column(String(1100), nullable=False)
 
 
-class AuditEvent(Base):
+class AuditEvent(_Tenant, Base):
     """Append-only record of security-relevant actions. Never stores secrets or bearer values."""
 
     __tablename__ = "audit_events"
@@ -63,7 +78,7 @@ class AuditEvent(Base):
     detail: Mapped[dict] = mapped_column(JSON, default=dict, nullable=False)
 
 
-class RequestObservationRow(Base):
+class RequestObservationRow(_Tenant, Base):
     """One model-call attempt routed through the app. Replays are idempotent via source_key."""
 
     __tablename__ = "usage_request_observations"
@@ -87,7 +102,7 @@ class RequestObservationRow(Base):
     ingested_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
-class AggregateObservationRow(Base):
+class AggregateObservationRow(_Tenant, Base):
     """A provider metric window. A revised value replaces the old one and bumps revision."""
 
     __tablename__ = "usage_aggregate_observations"
@@ -121,7 +136,7 @@ class AggregateObservationRow(Base):
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
-class CollectionCheckpoint(Base):
+class CollectionCheckpoint(_Tenant, Base):
     """Cursor per (provider, account). Advanced only after observations are durably written."""
 
     __tablename__ = "collection_checkpoints"
@@ -144,8 +159,12 @@ def get_engine(settings: Settings) -> Engine | None:
 
 
 def get_session(settings: Settings = Depends(get_settings)) -> Iterator[Session]:
+    """A session scoped to the installation's tenant, so row-level security applies to every query.
+    With no tenant configured the request is refused: nothing is read or written unscoped."""
     engine = get_engine(settings)
     if engine is None:
         raise RuntimeError("database not configured")
-    with sessionmaker(engine, expire_on_commit=False)() as session:
+    if settings.default_tenant_id is None:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "tenant not configured")
+    with tenant_session(engine, settings.default_tenant_id) as session:
         yield session

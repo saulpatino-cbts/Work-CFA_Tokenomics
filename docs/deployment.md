@@ -43,7 +43,15 @@ Tenant isolation is enforced by PostgreSQL row-level security (migration `0005`)
 3. Point `CFA_DATABASE_URL` at the runtime role. Create a tenant as the owner with `python -m cfa_tokenomics.admin create-tenant NAME CURRENCY` and set `CFA_DEFAULT_TENANT_ID` to the id it prints (single-tenant installs).
 4. `CFA_ALLOW_RLS_BYPASS=true` exists for development and test databases only. Never set it in production.
 
-**Current coverage.** The new economics tables are isolated by tenant. The earlier usage ledger, role, grant and audit tables have no `tenant_id` yet and are shared by everything connecting to the database (they are migrated in Phase 1 slice 7).
+**Coverage.** Every tenant table is isolated, including the earlier usage ledger, role, grant, audit and checkpoint tables (migration `0008`). The audit log is append-only for the runtime role. Every data route runs in the installation's tenant, so `CFA_DEFAULT_TENANT_ID` is required: without it `/readyz` returns 503 (`tenant_not_configured`) and data routes refuse.
+
+**Upgrading an install that already holds data.** Rows written before `0008` have no tenant, and nothing guesses one. They stay invisible, and `/readyz` returns 503 (`legacy_tenant_unassigned`), until the database owner names the tenant:
+
+1. Take a recovery checkpoint, then run the migration: `python -m cfa_tokenomics.migrate upgrade`.
+2. Create the tenant if needed (`create-tenant`), then run `python -m cfa_tokenomics.admin assign-legacy-tenant TENANT_ID` as the owner. It assigns every unassigned row in one transaction, makes `tenant_id` mandatory, and swaps the old global keys for tenant-scoped ones. It is safe to run again. An install with no rows needs no step: the migration finalizes it.
+3. Optionally build the normalized usage facts: `python -m cfa_tokenomics.admin project-usage TENANT_ID`. It is idempotent and is not run automatically.
+
+Downgrading `0008` fails, rather than merging data, if two tenants hold rows that share a key.
 
 ## Upgrades and removal
 

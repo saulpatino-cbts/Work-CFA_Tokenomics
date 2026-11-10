@@ -1,15 +1,28 @@
 """Shared test helpers."""
 
 import os
+import uuid
 
 import pytest
 from sqlalchemy import create_engine, text
 from sqlalchemy.engine import Engine
 
 from cfa_tokenomics import migrate, store
+from cfa_tokenomics.models_econ import Tenant
 from cfa_tokenomics.tenancy import app_role_grants_sql, tenant_session
 
 URL = os.environ.get("CFA_TEST_DATABASE_URL")
+
+
+TENANT = uuid.UUID("00000000-0000-4000-8000-000000000001")
+
+
+def make_tenant(engine: Engine, tid: uuid.UUID = TENANT) -> uuid.UUID:
+    """A fixed, known tenant for tests that exercise the API as a single-tenant install."""
+    with tenant_session(engine, tid) as db:
+        db.add(Tenant(id=tid, name="Test", base_currency="USD"))
+        db.commit()
+    return tid
 
 
 def reset_database(engine: Engine) -> None:

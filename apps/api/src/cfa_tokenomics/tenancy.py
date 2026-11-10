@@ -15,19 +15,16 @@ from sqlalchemy import event, text
 from sqlalchemy.engine import Connection, Engine
 from sqlalchemy.orm import Session
 
-LEGACY_TABLES = (
-    "account_grants", "audit_events", "collection_checkpoints", "role_assignments",
-    "usage_aggregate_observations", "usage_request_observations",
-)  # fmt: skip
 MUTABLE_TABLES = (
     "tenants", "business_units", "customers", "environments", "applications", "workloads",
     "application_customers", "price_books", "price_entries", "scenarios", "scenario_drivers",
-    "connectors", "ingestion_runs", "allocation_runs",
+    "connectors", "ingestion_runs", "allocation_runs", "account_grants", "collection_checkpoints",
+    "role_assignments", "usage_aggregate_observations", "usage_facts",
 )  # fmt: skip
 APPEND_ONLY_TABLES = (
     "value_assumptions", "calculation_nodes", "calculation_edges", "raw_files", "ingestion_rejects",
     "focus_cost_records", "focus_supersessions", "allocation_rules", "allocation_drivers",
-    "allocated_costs",
+    "allocated_costs", "audit_events", "usage_request_observations",
 )  # fmt: skip
 _ROLE = re.compile(r"^[a-z_][a-z0-9_]{0,62}$")
 
@@ -66,10 +63,10 @@ def app_role_grants_sql(role: str) -> str:
     """SQL granting a restricted runtime role what it needs. Run it as the database owner.
 
     The role must be created without SUPERUSER and without BYPASSRLS. Append-only tables get
-    SELECT and INSERT only. The legacy usage tables are not yet tenant-isolated (no tenant_id)."""
+    SELECT and INSERT only, which includes the audit log and the request ledger."""
     if not _ROLE.match(role):
         raise ValueError("role must be lowercase letters, digits and underscores")
-    dml = ", ".join((*LEGACY_TABLES, *MUTABLE_TABLES))
+    dml = ", ".join(MUTABLE_TABLES)
     return "\n".join(
         [
             f"GRANT USAGE ON SCHEMA public TO {role};",

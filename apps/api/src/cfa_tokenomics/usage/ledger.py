@@ -1,4 +1,7 @@
-"""Durable, replay-safe writes for usage observations (ADR 0007)."""
+"""Durable, replay-safe writes for usage observations (ADR 0007).
+
+Every function expects a session from ``tenancy.tenant_session``: the row's tenant comes from the
+session, and a session with no tenant cannot write."""
 
 from datetime import UTC, datetime
 
@@ -36,7 +39,7 @@ def record_request(db: Session, obs: RequestObservation) -> bool:
             sku=obs.sku,
             source_type=obs.source_type,
         )
-        .on_conflict_do_nothing(index_elements=["source_key"])
+        .on_conflict_do_nothing(index_elements=["tenant_id", "source_key"])
         .returning(RequestObservationRow.id)
     )
     inserted = db.execute(stmt).scalar() is not None
@@ -94,7 +97,7 @@ def save_checkpoint(db: Session, provider: str, account: str, cursor: str | None
     stmt = insert(CollectionCheckpoint).values(provider=provider, account=account, cursor=cursor)
     db.execute(
         stmt.on_conflict_do_update(
-            index_elements=["provider", "account"],
+            index_elements=["tenant_id", "provider", "account"],
             set_={"cursor": cursor, "updated_at": datetime.now(UTC)},
         )
     )
