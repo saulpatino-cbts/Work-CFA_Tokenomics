@@ -71,3 +71,79 @@ export interface PublicConfig {
   oidc_client_id: string | null;
   oidc_audience: string | null;
 }
+
+// ---- economics API (apps/api economics_api.py). Decimals travel as strings: never as floats. ----
+
+export type Basis = "observed" | "estimated" | "assumed";
+export type NodeStatus = "ok" | "unknown" | "not_reached" | "infeasible";
+
+export interface Application {
+  id: string;
+  name: string;
+  currency: string;
+  owner: string | null;
+  lifecycle: "build" | "run" | "retire";
+  initial_investment: string | null;
+  investment_basis: Basis | null;
+  amortization_months: number | null;
+}
+
+export interface Assumption {
+  key: string;
+  version: number;
+  value: string | null; // null is "unknown", which is not zero
+  unit: string;
+  basis: Basis;
+  rationale: string;
+  author: string;
+}
+
+export interface BasisMix {
+  observed: string | null;
+  estimated: string | null;
+  assumed: string | null;
+}
+
+export interface FigureNode {
+  id: string;
+  key: string;
+  value: string | null;
+  unit: string;
+  currency: string | null;
+  status: NodeStatus;
+  note: string;
+  basis: Basis;
+  mix: BasisMix;
+}
+
+export interface ExplainNode extends FigureNode {
+  formula: string;
+  formula_version: number;
+  label: string;
+  source_ref: string | null;
+  inputs: ExplainNode[];
+}
+
+export interface EvaluateResponse {
+  scenario_id: string | null;
+  results: Record<string, FigureNode>;
+}
+
+export interface CoverageSummary {
+  currency: string;
+  total_effective: string;
+  allocated_effective: string;
+  unallocated_effective: string;
+  not_yet_allocated_effective: string;
+  coverage: string | null;
+  by_method: Record<string, string>;
+  unallocated_by_reason: Record<string, string>;
+  provider_split_lines: number;
+}
+
+/** One driver as the scenario endpoint takes it. */
+export interface DriverBody {
+  value: string | null;
+  basis: Basis;
+  source?: string;
+}
