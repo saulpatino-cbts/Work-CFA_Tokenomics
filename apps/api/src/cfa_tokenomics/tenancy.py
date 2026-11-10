@@ -22,11 +22,12 @@ LEGACY_TABLES = (
 MUTABLE_TABLES = (
     "tenants", "business_units", "customers", "environments", "applications", "workloads",
     "application_customers", "price_books", "price_entries", "scenarios", "scenario_drivers",
-    "connectors", "ingestion_runs",
+    "connectors", "ingestion_runs", "allocation_runs",
 )  # fmt: skip
 APPEND_ONLY_TABLES = (
     "value_assumptions", "calculation_nodes", "calculation_edges", "raw_files", "ingestion_rejects",
-    "focus_cost_records", "focus_supersessions",
+    "focus_cost_records", "focus_supersessions", "allocation_rules", "allocation_drivers",
+    "allocated_costs",
 )  # fmt: skip
 _ROLE = re.compile(r"^[a-z_][a-z0-9_]{0,62}$")
 

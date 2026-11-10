@@ -23,10 +23,11 @@
 | R-17 | P0 | Microsoft Copilot data via Graph and Viva can identify individuals; license data is sensitive | Security/privacy | Privacy review, data-minimizing design, customer consent model. |
 | R-18 | P1 | The same traffic appears in a cloud source and a vendor source | FinOps | Sources never added (done in UI and API); overlap guidance in the product. |
 | R-19 | P0 | The economics scope conflicts with REQ-012 and ADR 0003 until ADR 0011 is decided | Product | Owner decision on ADR 0011 and the REQ-012 clarification. |
-| R-20 | P1 | FOCUS 1.5 token conventions are a working draft; sources emit different FOCUS versions | Connectors/FinOps | Confirm at ratification (scheduled December 2026); upgrade layer tested. |
+| R-20 | P1 | FOCUS 1.5 is a working draft (ratification scheduled 3 December 2026 and may slip); sources emit different FOCUS versions | Connectors/FinOps | Work through the [December checklist](economics/08-focus-1-5-readiness.md#december-checklist) at ratification. |
 | R-21 | P1 | Several source APIs are in beta or have undocumented limits, delay or revision rules | Connectors | Per-source verification of items marked *not found*; defensive rate-limit handling. |
 | R-22 | P0 | Business value figures can be over-claimed and used for commercial decisions | Product/FinOps | Basis labelling, capacity versus cashable value, required rationale for assumptions, explain view. |
 | R-23 | P1 | Tenancy model undecided (customer-hosted versus operated for several clients) | Architecture | Owner decision; row-level security tests either way. |
+| R-24 | P1 | Provider-calculated split allocation rows (FOCUS 1.3) may coexist with their origin charges; the specification does not clearly say, so totals could double count | FinOps/connectors | Check a real provider export; confirm whether origin charges are present; rule or filter if so. Rows are flagged now. |
 
 ## Change discipline
 

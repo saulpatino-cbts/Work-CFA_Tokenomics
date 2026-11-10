@@ -70,8 +70,9 @@ TEXT_COLUMNS = (
     "resource_type", "region_id", "region_name", "availability_zone", "sku_id", "sku_price_id",
     "sku_meter", "commitment_discount_id", "commitment_discount_name", "commitment_discount_category",
     "commitment_discount_type", "commitment_discount_status", "commitment_discount_unit",
+    "allocated_method_id", "allocated_resource_id", "allocated_resource_name",
 )  # fmt: skip
-JSON_COLUMNS = ("tags", "sku_price_details")
+JSON_COLUMNS = ("tags", "sku_price_details", "allocated_method_details", "allocated_tags")
 SHORT_COLUMNS = ("charge_category", "billing_currency", "pricing_currency")
 
 focus_cost_records = Table(

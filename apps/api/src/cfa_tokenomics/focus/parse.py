@@ -49,6 +49,7 @@ class ParseResult:
     unknown_columns: list[str]
     aliases_used: dict[str, str]
     declared_version: str
+    dropped_identity_columns: list[str] = field(default_factory=list)
 
 
 def decompress(raw: bytes, max_bytes: int) -> bytes:
@@ -103,7 +104,10 @@ def _json_object(text: str) -> dict[str, Any]:
 
 
 def parse_focus_csv(
-    raw: bytes, declared_version: str = "unknown", max_bytes: int = 100_000_000
+    raw: bytes,
+    declared_version: str = "unknown",
+    max_bytes: int = 100_000_000,
+    keep_identity_columns: bool = False,
 ) -> ParseResult:
     if declared_version not in C.DECLARED_VERSIONS:
         raise FileError(f"declared FOCUS version must be one of {', '.join(C.DECLARED_VERSIONS)}")
@@ -126,10 +130,14 @@ def parse_focus_csv(
         if legacy in present and current not in present:
             aliases[legacy] = current
     effective = {aliases.get(h, h) for h in header}
-    missing = [c for c in C.REQUIRED if c not in effective]
+    required = C.REQUIRED + C.VERSION_MANDATORY.get(declared_version, ())
+    missing = [c for c in required if c not in effective]
     if missing:
         raise FileError(f"missing required columns: {', '.join(missing)}")
-    unknown = [h for h in header if h not in C.KNOWN]
+    identity = [h for h in header if h in C.IDENTITY_COLUMNS]
+    unknown = [
+        h for h in header if h not in C.KNOWN and (keep_identity_columns or h not in identity)
+    ]
 
     rows: list[ParsedRow] = []
     rejects: list[Reject] = []
@@ -188,7 +196,13 @@ def parse_focus_csv(
                     reject = fail("missing_required_value", col)
                     break
                 if v:
-                    if not _CURRENCY.match(v):
+                    if col == "PricingCurrency":
+                        ok = len(v) <= C.PRICING_CURRENCY_MAX_LENGTH and not any(
+                            ch.isspace() for ch in v
+                        )
+                    else:
+                        ok = bool(_CURRENCY.match(v))
+                    if not ok:
                         reject = fail("bad_currency", col)
                         break
                     values[attr] = v
@@ -219,4 +233,12 @@ def parse_focus_csv(
         for legacy in aliases:
             ext[f"_alias:{legacy}"] = aliases[legacy]
         rows.append(ParsedRow(n, values, ext))
-    return ParseResult(rows, rejects, header, unknown, aliases, declared_version)
+    return ParseResult(
+        rows,
+        rejects,
+        header,
+        unknown,
+        aliases,
+        declared_version,
+        [] if keep_identity_columns else identity,
+    )

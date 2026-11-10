@@ -39,6 +39,7 @@ class ImportResult:
     superseded: int = 0
     reject_reasons: dict[str, int] = field(default_factory=dict)
     unknown_columns: list[str] = field(default_factory=list)
+    dropped_identity_columns: list[str] = field(default_factory=list)
     error: str | None = None
     duplicate_of: uuid.UUID | None = None
 
@@ -99,6 +100,7 @@ def import_focus_file(
     finality: str | None = None,
     final_after_days: int = 7,
     allow_partial: bool = False,
+    keep_identity_columns: bool = False,
     now: datetime | None = None,
     max_bytes: int = 100_000_000,
 ) -> ImportResult:
@@ -154,7 +156,9 @@ def import_focus_file(
         db.commit()
 
     try:
-        parsed: ParseResult = parse_focus_csv(content, declared_version, max_bytes)
+        parsed: ParseResult = parse_focus_csv(
+            content, declared_version, max_bytes, keep_identity_columns=keep_identity_columns
+        )
     except FileError as exc:
         finish("failed", str(exc))
         return ImportResult("failed", run_id, error=str(exc))
@@ -231,6 +235,7 @@ def import_focus_file(
         superseded,
         reasons,
         parsed.unknown_columns,
+        parsed.dropped_identity_columns,
     )
 
 

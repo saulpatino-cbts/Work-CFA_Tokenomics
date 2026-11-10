@@ -213,3 +213,86 @@ def test_purchase_and_usage_lines_keep_billed_and_effective_cost_separate():
     p, u = (x.values for x in r.rows)
     assert (p["billed_cost"], p["effective_cost"]) == (1000, 0)
     assert (u["billed_cost"], u["effective_cost"]) == (0, 100)
+
+
+# ---- FOCUS 1.5 readiness (working draft, ratification scheduled 3 December 2026) ----------------------
+
+
+def test_version_1_5_can_be_declared_ahead_of_ratification():
+    r = parse_focus_csv(
+        csv(OK + ",Acme", head=HEAD + ",ServiceProviderName"), declared_version="1.5"
+    )
+    assert r.declared_version == "1.5"
+
+
+def test_pricing_currency_may_hold_a_provider_unit_but_billing_currency_stays_a_currency_code():
+    head = HEAD + ",PricingCurrency,ServiceProviderName"
+    credits = parse_focus_csv(csv(OK + ",PLATFORM-CREDITS,Acme", head=head), declared_version="1.5")
+    assert (
+        credits.rejects == [] and credits.rows[0].values["pricing_currency"] == "PLATFORM-CREDITS"
+    )
+    assert reasons(parse_focus_csv(csv(OK + ",has space,Acme", head=head))) == [
+        (2, "bad_currency", "PricingCurrency")
+    ]
+    assert reasons(parse_focus_csv(csv(OK + "," + "X" * 17 + ",Acme", head=head))) == [
+        (2, "bad_currency", "PricingCurrency")
+    ]
+    bad_billing = "1,1,1,1,Usage,2026-01-01T00:00:00Z,2026-01-02T00:00:00Z,CREDITS"
+    assert reasons(parse_focus_csv(csv(bad_billing))) == [(2, "bad_currency", "BillingCurrency")]
+
+
+def test_identity_columns_are_not_stored_by_default_but_are_reported_as_dropped():
+    head = HEAD + ",ServiceProviderName,PrincipalId,CredentialId,RequesterDetails,x_Other"
+    row = OK + ',Acme,user-123,key-9,"[{""name"": ""Ann""}]",kept'
+    r = parse_focus_csv(csv(row, head=head), declared_version="1.5")
+    assert r.rows[0].extensions == {"x_Other": "kept"}  # nothing identifying survives normalization
+    assert r.dropped_identity_columns == ["PrincipalId", "CredentialId", "RequesterDetails"]
+    assert "PrincipalId" not in r.unknown_columns
+
+
+def test_identity_columns_can_be_kept_only_by_explicit_choice():
+    head = HEAD + ",PrincipalId"
+    r = parse_focus_csv(csv(OK + ",user-123", head=head), keep_identity_columns=True)
+    assert r.rows[0].extensions == {"PrincipalId": "user-123"} and r.dropped_identity_columns == []
+
+
+def test_provider_name_alias_is_confirmed_and_publisher_name_is_not_mapped():
+    head = HEAD + ",ProviderName,PublisherName"
+    r = parse_focus_csv(csv(OK + ",Acme,Publisher Inc", head=head), declared_version="1.2")
+    assert r.rows[0].values["service_provider_name"] == "Acme"
+    assert (
+        r.rows[0].extensions["PublisherName"] == "Publisher Inc"
+    )  # preserved, never guessed into another column
+
+
+def test_service_provider_name_is_mandatory_for_declared_1_4_and_1_5_only():
+    with pytest.raises(FileError, match="ServiceProviderName"):
+        parse_focus_csv(csv(OK), declared_version="1.4")
+    with pytest.raises(FileError, match="ServiceProviderName"):
+        parse_focus_csv(csv(OK), declared_version="1.5")
+    assert parse_focus_csv(csv(OK), declared_version="1.2").rows  # older exports do not have it
+    assert parse_focus_csv(csv(OK), declared_version="unknown").rows
+    ok = parse_focus_csv(
+        csv(OK + ",Acme", head=HEAD + ",ServiceProviderName"), declared_version="1.4"
+    )
+    assert ok.rows[0].values["service_provider_name"] == "Acme"
+    legacy = parse_focus_csv(csv(OK + ",Acme", head=HEAD + ",ProviderName"), declared_version="1.4")
+    assert (
+        legacy.rows
+    )  # a ProviderName column is mapped, so the file still satisfies the requirement
+
+
+def test_provider_split_allocation_columns_are_typed_and_json_columns_parse():
+    head = (
+        HEAD
+        + ",AllocatedMethodId,AllocatedResourceId,AllocatedResourceName,AllocatedMethodDetails,AllocatedTags"
+    )
+    row = (
+        OK
+        + ',split-v1,pod-7,checkout,"{""Elements"": [{""AllocatedRatio"": 0.25}]}","{""team"": ""pay""}"'
+    )
+    r = parse_focus_csv(csv(row, head=head), declared_version="1.3")
+    v = r.rows[0].values
+    assert v["allocated_method_id"] == "split-v1" and v["allocated_resource_id"] == "pod-7"
+    assert v["allocated_method_details"] == {"Elements": [{"AllocatedRatio": 0.25}]}
+    assert v["allocated_tags"] == {"team": "pay"} and r.rows[0].extensions == {}

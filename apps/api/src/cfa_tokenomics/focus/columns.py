@@ -1,12 +1,13 @@
 """FOCUS column handling: names, kinds and the few facts this product depends on.
 
-Only facts confirmed from the FOCUS specification are treated as rules. The legacy alias below
-is NOT confirmed (VERIFY against the FOCUS 1.0 to 1.2 specifications before relying on it).
+Only facts confirmed from the FOCUS specification are treated as rules (sources and dates in
+docs/economics/08-focus-1-5-readiness.md).
 """
 
 MAPPER_VERSION = "focus-csv-1"
 FOCUS_TARGET_VERSION = "1.4"
-DECLARED_VERSIONS = ("1.0", "1.1", "1.2", "1.3", "1.4", "unknown")
+# "1.5" is accepted so exports can be labelled ahead of ratification (scheduled 3 December 2026).
+DECLARED_VERSIONS = ("1.0", "1.1", "1.2", "1.3", "1.4", "1.5", "unknown")
 
 # Confirmed MANDATORY in FOCUS 1.4: BilledCost, EffectiveCost, ListCost, ContractedCost,
 # ChargeCategory.
@@ -43,7 +44,19 @@ TIMESTAMP_OPTIONAL = {
     "BillingPeriodEnd": "billing_period_end",
 }
 CURRENCY = {"BillingCurrency": "billing_currency", "PricingCurrency": "pricing_currency"}
-JSON_OBJECT = {"Tags": "tags", "SkuPriceDetails": "sku_price_details"}
+# FOCUS 1.5 working draft: PricingCurrency may hold a provider-issued unit (for example platform credits),
+# so it is not forced to look like an ISO 4217 code. BillingCurrency stays a three-letter code.
+PRICING_CURRENCY_MAX_LENGTH = 16
+
+# FOCUS 1.5 working draft identity columns. They can identify people or credentials, so by default they
+# are NOT stored in normalized records (docs/economics risk R-17). The raw file keeps what it was given.
+IDENTITY_COLUMNS = ("PrincipalId", "CredentialId", "RequesterDetails")
+JSON_OBJECT = {
+    "Tags": "tags",
+    "SkuPriceDetails": "sku_price_details",
+    "AllocatedMethodDetails": "allocated_method_details",
+    "AllocatedTags": "allocated_tags",
+}
 STRING = {
     "BillingAccountId": "billing_account_id", "BillingAccountName": "billing_account_name",
     "SubAccountId": "sub_account_id", "SubAccountName": "sub_account_name",
@@ -54,7 +67,8 @@ STRING = {
     "ServiceName": "service_name", "ServiceCategory": "service_category",
     "ServiceSubcategory": "service_subcategory", "ServiceProviderName": "service_provider_name",
     "HostProviderName": "host_provider_name", "InvoiceIssuerName": "invoice_issuer_name",
-    "InvoiceId": "invoice_id", "ResourceId": "resource_id", "ResourceName": "resource_name",
+    "InvoiceId": "invoice_id", "ResourceId": "resource_id", "AllocatedMethodId": "allocated_method_id",
+    "AllocatedResourceId": "allocated_resource_id", "AllocatedResourceName": "allocated_resource_name", "ResourceName": "resource_name",
     "ResourceType": "resource_type", "RegionId": "region_id", "RegionName": "region_name",
     "AvailabilityZone": "availability_zone", "SkuId": "sku_id", "SkuPriceId": "sku_price_id",
     "SkuMeter": "sku_meter", "CommitmentDiscountId": "commitment_discount_id",
@@ -65,9 +79,13 @@ STRING = {
     "CommitmentDiscountUnit": "commitment_discount_unit",
 }  # fmt: skip
 
-# FOCUS 1.0 named the provider column ProviderName. Mapping it to ServiceProviderName is a working
-# assumption (VERIFY). The original name is recorded in the row's extensions when it is used.
+# Confirmed: ServiceProviderName "replaces the removed ProviderName" (FOCUS 1.3; ProviderName was removed in
+# 1.4). PublisherName has no one-to-one successor (HostProviderName is only one of several), so it is NOT
+# mapped and is kept as an extension. The original name is recorded in the row when the alias is used.
 LEGACY_ALIASES = {"ProviderName": "ServiceProviderName"}
+
+# ServiceProviderName is Mandatory in FOCUS 1.4 (confirmed). Declared 1.4 and 1.5 files must have it.
+VERSION_MANDATORY = {"1.4": ("ServiceProviderName",), "1.5": ("ServiceProviderName",)}
 
 KNOWN = (
     set(DECIMAL_REQUIRED) | set(DECIMAL_OPTIONAL) | set(TIMESTAMP_REQUIRED)
