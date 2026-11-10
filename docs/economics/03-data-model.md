@@ -199,3 +199,11 @@ Sources revise data after first publishing it: Azure charges can change until th
 | `Float value` | `NUMERIC` quantity and cost columns. |
 
 Migration is additive first: new tables and a backfill that writes normalized facts from the existing ledger, with the old tables retained until the new read paths are proven.
+
+### Implemented: tenant isolation and usage facts (Phase 1 slice 7)
+
+- **Legacy tables are tenant-isolated** (migration `0008`): `tenant_id`, forced row-level security, tenant-scoped keys, and an append-only audit log. `tenant_id` defaults to the session's tenant, so a write outside a tenant session is refused. Rows that predate the migration are invisible until `assign-legacy-tenant` names a tenant ([deployment](../deployment.md#database-role-and-tenant-isolation)).
+- **`usage_facts`** (migration `0009`) is the normalized layer, built from the ledger by `project-usage`: one exact-decimal quantity per measure, with `unit`, `basis`, `quality`, `grain` (request or window), `statistic`, the source row (`source_table`, `source_id`) and a `revision`. Rebuildable, idempotent, tenant-isolated.
+- **Rules:** a category the source did not report produces no fact (unknown is not zero); quality maps to basis conservatively (reported and partial are observed, estimated and unknown are estimated, never observed); sources stay apart in `source_type` and are never added; non-finite provider values are skipped and counted.
+- **Floats:** the ledger's aggregate `value` stays a float column. Facts convert it through its shortest round-trip text, so a count is exact and a fraction is the decimal the provider's number printed as. The ledger column itself is not changed.
+- **Not done:** only token categories are projected (no seats, sessions or compute measures yet, because no source supplies them); facts are not refreshed automatically and no read route or allocation driver uses them yet; `application_id` is not set on facts; grants are not yet scoped to application or business unit (R-25).

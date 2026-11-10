@@ -4,12 +4,12 @@ import os
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from conftest import reset_database
+from conftest import TENANT, make_tenant, reset_database
 from sqlalchemy import create_engine, func, select, text
-from sqlalchemy.orm import Session
 
 from cfa_tokenomics import migrate
 from cfa_tokenomics.db import AggregateObservationRow, RequestObservationRow
+from cfa_tokenomics.tenancy import tenant_session
 from cfa_tokenomics.usage import ledger
 from cfa_tokenomics.usage.models import AggregateObservation, Quality, RequestObservation
 
@@ -24,7 +24,8 @@ def db(monkeypatch):
     engine = create_engine(URL)
     reset_database(engine)
     migrate.main(["upgrade"])
-    with Session(engine) as s:
+    make_tenant(engine)
+    with tenant_session(engine, TENANT) as s:
         yield s
 
 

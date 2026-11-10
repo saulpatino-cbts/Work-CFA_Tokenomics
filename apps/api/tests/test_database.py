@@ -5,18 +5,18 @@ import time
 
 import jwt
 import pytest
-from conftest import reset_database
+from conftest import TENANT, make_tenant, reset_database
 from cryptography.hazmat.primitives.asymmetric import rsa
 from fastapi.testclient import TestClient
 from pydantic import SecretStr
 from sqlalchemy import create_engine, text
 from sqlalchemy.exc import IntegrityError
-from sqlalchemy.orm import Session
 
 from cfa_tokenomics import migrate
 from cfa_tokenomics.config import Settings, get_settings
 from cfa_tokenomics.db import AuditEvent, RoleAssignment
 from cfa_tokenomics.main import create_app
+from cfa_tokenomics.tenancy import tenant_session
 
 URL = os.environ.get("CFA_TEST_DATABASE_URL")
 pytestmark = pytest.mark.skipif(not URL, reason="CFA_TEST_DATABASE_URL not set")
@@ -33,6 +33,7 @@ def settings(**over) -> Settings:
         database_secret_ref="ref",
         database_url=SecretStr(URL or ""),
         bootstrap_admin=f"{ISS}|root",
+        default_tenant_id=TENANT,
     )
     base.update(over)
     return Settings(**base)
@@ -44,7 +45,8 @@ def db(monkeypatch):
     engine = create_engine(URL)
     reset_database(engine)
     migrate.main(["upgrade"])
-    with Session(engine) as s:
+    make_tenant(engine)
+    with tenant_session(engine, TENANT) as s:
         yield s
 
 
