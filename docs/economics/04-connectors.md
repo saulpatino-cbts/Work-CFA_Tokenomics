@@ -62,17 +62,19 @@ Rules: `pull` is idempotent for a window; the cursor advances only after the raw
 | **Anthropic Usage and Cost Analytics API** | **yes** | requests | **yes** (`amount`, `list_amount`) | no | Vendor cost, when billed by Anthropic |
 | **Anthropic Claude Code Analytics API** | **yes** | sessions, accepts, commits, PRs | `estimated_cost` | no | none (estimate) |
 | **GitHub Copilot usage metrics** | partial (CLI, app, BYOK fields) (summary) | interactions, active users, acceptances | no | no | none |
-| **GitHub Copilot seats and billing** | no | premium requests, AI credits | **yes** (`netAmount` etc.) | **yes** (seats, plan, last activity) | **Billed cost** from GitHub |
+| **GitHub Copilot seats and billing** | no | AI credits (premium requests were replaced on 2026-06-01) | **yes** (`netAmount` etc.) | **yes** (seats, plan, last activity) | **Billed cost** from GitHub |
 | **Microsoft 365 Copilot (Graph reports)** | **no** | active users, prompt counts, per-app last activity | **no** | licensed users only; licensing via Graph | none |
 | **Microsoft Graph licensing** | no | no | no | **yes** (`consumedUnits`, per-user license details) | none (needs a licence price) |
 | **OpenAI Usage and Costs API** | **yes** | requests | **yes** (daily only) | no | Vendor cost |
-| **OpenAI Codex (workspace analytics)** | not found | daily usage | not found | not found | not established |
-| **Google Gemini** | per response only; no org API found | n/a | via Cloud Billing | no | Cloud Billing export (not read) |
+| **OpenAI Codex (workspace analytics)** | **not found** (a Daily Usage Analytics API exists; its fields were not readable) | daily usage | not found | not found | not established |
+| **Google Gemini and Vertex AI** | Vertex: token metrics in Cloud Monitoring (beta). Gemini Developer API: per response only, no org API found | n/a | via Cloud Billing | no | Cloud Billing BigQuery export (a FOCUS export is in preview) |
 | **Perplexity** | per response only; no org API found | console only | console only | no | not established |
 | **Application and gateway telemetry** | **yes, per request** (if instrumented) | requests, sessions, users | no | no | none |
 | **Manual import** | as supplied | as supplied | as supplied | as supplied | as supplied |
 
 ### Source notes
+
+The notes below were the first reading. The later, fuller research (nine vendors, with sources, permissions, limits, privacy flags and the items still not found) is in [vendor API research](09-vendor-api-research.md); where the two differ, **that document is current**. Its main corrections: Claude in Azure Foundry is billed through one Marketplace consumption-unit meter; third-party Bedrock models are billed under the model provider, not under Bedrock; GitHub replaced premium requests with AI credits and retired its legacy metrics APIs; OpenAI cost amounts are JSON numbers, not strings; and Microsoft Copilot reports now exist under `/copilot/reports` in v1.0.
 
 **Anthropic.** Current API is in beta: `GET /v1/organizations/analytics/usage` and `.../analytics/cost` with the header `anthropic-beta: analytics-usage-cost-2026-08-24`; a legacy `usage_report/messages` endpoint is still documented. Auth is an Admin API key or an OAuth token with the `org:admin` scope (Console organizations), or a key with the `read:analytics` scope (Claude Enterprise); unavailable to individual accounts. Token categories: uncached input, cache creation (5-minute and 1-hour), cache read, output, total, plus requests and web-search requests. Dimensions: model, workspace, API key, actor (user, service account or key), service tier, context window, inference geography, speed, product; up to five `group_by` values. Buckets `1m`, `1h`, `1d`; at most 31 days per request. Cost amounts are **decimal strings in cents with six decimals** (parse as decimal, never float), always USD. Data typically refreshes within 4 hours and can take up to 24; values can be revised until about 7 days after month end; responses carry `data_refreshed_at`. Claude Code Analytics (`/v1/organizations/usage_report/claude_code`) is one UTC day per request, includes user email, and **does not return subscription-plan usage** (Pro, Max, Team, Enterprise); only usage authenticated against the Console organization. (<https://platform.claude.com/docs/en/manage-claude/usage-cost-analytics-api>, <.../claude-code-analytics-api>)
 

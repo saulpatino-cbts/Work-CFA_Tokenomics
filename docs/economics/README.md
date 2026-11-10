@@ -22,6 +22,7 @@ AI usage -> tokens -> infrastructure -> cloud cost -> application cost -> busine
 | G | [UX and dashboard redesign](06-ux.md) | 11, 13G |
 | H | [Delivery roadmap](07-roadmap.md) (four phases with acceptance criteria) | 13H |
 | - | [FOCUS 1.5 readiness](08-focus-1-5-readiness.md) (December 2026 release preparation) | 4 |
+| - | [Vendor API research](09-vendor-api-research.md) (Phase 2 preparation, documentation-sourced, nothing run) | 4 |
 
 Decision record: [ADR 0011](../adr/0011-ai-economics-platform.md). New requirements: [REQ-013 to REQ-022](../requirements.md#owner-stated-scope-2026-11-07-pending-adr-0011).
 
