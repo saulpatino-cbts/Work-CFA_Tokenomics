@@ -31,6 +31,7 @@ Record notable changes under Unreleased in the same PR. No product release or ru
 - FOCUS 1.5 readiness (docs/economics/08): declared version `1.5` accepted; `ServiceProviderName` required for declared 1.4 and 1.5; `ProviderName` alias confirmed and `PublisherName` kept as an extension; `PricingCurrency` may hold a provider unit; the 1.5 identity columns are dropped by default. FOCUS 1.5 is not ratified.
 - `api-ci.yml` workflow (lint, tests, image build; Actions pinned by SHA).
 - Accepted ADRs 0004 (stack), 0005 (container packaging and marketplace), 0006 (persistence) and a [marketplace gap analysis](docs/marketplace.md).
+- Phase 1 slice 5: economics HTTP API (`economics_api.py`). Applications, versioned assumptions with history, allocation rules, drivers, runs and the coverage summary, scenario evaluation with optional tornado and saving, and `GET /v1/explain/{node_id}` returning the verified calculation tree down to its inputs. New permissions `economics:read` (reader, user, admin) and `economics:write` (user, admin). Every route runs in a tenant-scoped session (`CFA_DEFAULT_TENANT_ID`), so row-level security decides visibility; authentication runs before the tenant session opens; writes leave audit events. Decimals must be strings or integers (floats are refused). A tampered stored node returns 500, never a silently wrong figure. Not done: per-application access scoping (R-25), a Parquet or file-upload route, and any screens. Tested on synthetic data against a restricted database role.
 
 ### Changed
 

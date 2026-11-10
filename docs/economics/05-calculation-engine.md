@@ -180,3 +180,19 @@ The same application looks excellent or marginal depending on whether hours save
 Pricing: with RunCost $1,970 as COGS, a 3% proportional fee (illustrative) and a 40% target margin, `Price = 1,970 / (1 - 0.03 - 0.40) = $3,456` per month. Check: net revenue is 3,456 × 0.97 = 3,352; less the 1,970 COGS that is 1,382; and 1,382 / 3,456 = 40%.
 
 Scaling: 10× users and 10× tokens at the same prices makes AI cost $2,700 (linear in tokens); infrastructure follows its step function; a cheaper model or caching changes `Price(m,k)` and `ModelMix`; a commitment trades a lower rate for waste risk when usage falls short. All of it recalculates through the same formulas.
+
+## HTTP API (implemented, Phase 1 slice 5)
+
+All routes are under `/v1`, run in a tenant-scoped session and need `economics:read` (reader, user, admin) or `economics:write` (user, admin). Decimals are sent as strings or integers; a float is refused with 422. Writes are audited.
+
+| Route | Purpose |
+| --- | --- |
+| `POST /applications`, `GET /applications`, `GET /applications/{id}` | Application records (currency, lifecycle, investment with its basis). |
+| `PUT /applications/{id}/assumptions/{key}` | Appends a version. A rationale is required; `value: null` means unknown, never zero. |
+| `GET /applications/{id}/assumptions`, `.../{key}/history` | Current values and the full history with authors. |
+| `PUT /allocation/rules/{key}`, `POST /allocation/rules/{key}/drivers` | Versioned rules and driver values ([allocation](03-data-model.md#pricing-and-allocation)). |
+| `POST /allocation/runs`, `GET /allocation/summary` | Run a window (idempotent) and read coverage per currency. |
+| `POST /applications/{id}/scenarios/evaluate` | Runs the scenario engine on drivers that each carry a value, a basis and an optional source. Optional `sensitivity` (a tornado over named drivers) and `save_as`. Returns every figure with its node id and basis mix. |
+| `GET /explain/{node_id}` | The calculation tree down to its inputs, re-verified against its content hash. A stored node that no longer matches returns 500. Another tenant's node and an absent one both return 404. |
+
+Limits worth knowing: the scenario currency must equal the application's; model shares must sum to 1; a model with no price for a token category is an error, not a zero; the tornado accepts at most 25 drivers per request. Not implemented: per-application scoping ([R-25](../risk-register.md)), listing or loading saved scenarios, and comparing an estimate with an observed bill.
