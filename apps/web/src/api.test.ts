@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { ApiError, fetchSeries, fetchUsage } from "./api";
+import { ApiError, evaluateScenario, fetchSeries, fetchUsage, putAssumption } from "./api";
 
 const range = { start: new Date("2026-01-01T00:00:00Z"), end: new Date("2026-01-02T00:00:00Z") };
 
@@ -28,5 +28,18 @@ describe("api client", () => {
     await expect(fetchUsage("tok", range)).rejects.toMatchObject({ status: 403 });
     stub(new Response("no", { status: 401 }));
     await expect(fetchUsage("tok", range)).rejects.toBeInstanceOf(ApiError);
+  });
+  it("sends writes as JSON with the bearer token, and the id is URL-encoded", async () => {
+    const f = stub(new Response(JSON.stringify({ key: "k", version: 1 })));
+    await putAssumption("tok", "id/1", "model.m.share", { value: "0.5", unit: "ratio", basis: "assumed", rationale: "why" });
+    const [url, init] = f.mock.calls[0] as [URL, RequestInit];
+    expect(init.method).toBe("PUT");
+    expect(url.pathname).toBe("/v1/applications/id%2F1/assumptions/model.m.share");
+    expect(init.headers).toEqual({ Authorization: "Bearer tok", "Content-Type": "application/json" });
+    expect(JSON.parse(init.body as string)).toEqual({ value: "0.5", unit: "ratio", basis: "assumed", rationale: "why" }); // a string, never a float
+  });
+  it("a refused write is an ApiError with the status", async () => {
+    stub(new Response("{}", { status: 403 }));
+    await expect(evaluateScenario("tok", "x", {})).rejects.toMatchObject({ status: 403 });
   });
 });
