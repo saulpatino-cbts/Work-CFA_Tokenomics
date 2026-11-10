@@ -28,6 +28,7 @@
 | R-22 | P0 | Business value figures can be over-claimed and used for commercial decisions | Product/FinOps | Basis labelling, capacity versus cashable value, required rationale for assumptions, explain view. |
 | R-23 | P1 | Tenancy model undecided (customer-hosted versus operated for several clients) | Architecture | Owner decision; row-level security tests either way. |
 | R-24 | P1 | Provider-calculated split allocation rows (FOCUS 1.3) may coexist with their origin charges; the specification does not clearly say, so totals could double count | FinOps/connectors | Check a real provider export; confirm whether origin charges are present; rule or filter if so. Rows are flagged now. |
+| R-25 | P1 | Economics API has no per-application access scoping: any identity with a role sees every application, cost line and assumption in its tenant. The tenant comes from one configured id, so serving several tenants is not possible yet | Security | ADR 0008 re-scoped to application, business unit and environment, with denial tests; a tenant claim mapping if CBTS ever operates it for several clients (R-23). |
 
 ## Change discipline
 

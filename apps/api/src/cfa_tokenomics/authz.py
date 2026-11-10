@@ -27,14 +27,24 @@ class Permission(StrEnum):
     READ_USAGE = "usage:read"
     EXPORT_IMPORT = "data:export_import"
     MANAGE_ASSESSMENT = "assessment:manage"
+    ECONOMICS_READ = "economics:read"
+    ECONOMICS_WRITE = "economics:write"
 
 
 _MATRIX: dict[Role, frozenset[Permission]] = {
     Role.ADMIN: frozenset(Permission),
     Role.USER: frozenset(
-        {Permission.VIEW_PROVIDERS, Permission.WRITE_RECORDS, Permission.READ_USAGE}
+        {
+            Permission.VIEW_PROVIDERS,
+            Permission.WRITE_RECORDS,
+            Permission.READ_USAGE,
+            Permission.ECONOMICS_READ,
+            Permission.ECONOMICS_WRITE,
+        }
     ),
-    Role.READER: frozenset({Permission.VIEW_PROVIDERS, Permission.READ_USAGE}),
+    Role.READER: frozenset(
+        {Permission.VIEW_PROVIDERS, Permission.READ_USAGE, Permission.ECONOMICS_READ}
+    ),
 }
 
 

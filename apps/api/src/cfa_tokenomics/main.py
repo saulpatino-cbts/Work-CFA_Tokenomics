@@ -13,6 +13,7 @@ from . import __version__, roles, scope
 from .authz import Permission, Principal, Role, require
 from .config import Settings, get_settings
 from .db import get_engine, get_session
+from .economics_api import router as economics_router
 from .tenancy import role_can_bypass_rls
 from .usage import query as usage_query
 from .usage import series as usage_series
@@ -196,6 +197,8 @@ def create_app() -> FastAPI:
     ) -> None:
         if not scope.revoke(db, actor, issuer, subject, provider, account):
             raise HTTPException(status.HTTP_404_NOT_FOUND, "no such grant")
+
+    app.include_router(economics_router)
 
     web_dir = get_settings().web_dir if _web_enabled() else None
     if web_dir and Path(web_dir).is_dir():
