@@ -24,7 +24,7 @@ const STATUS: Record<string, string> = {
   app_exceeds_provider: "! App exceeds provider", unknown: "? Unknown",
 };
 
-export function Telemetry({ auth }: { auth: AuthClient }) {
+export function Telemetry({ auth, embedded = false }: { auth: AuthClient; embedded?: boolean }) {
   const [state, setState] = useState<State>({ kind: "loading" });
   const [category, setCategory] = useState<Category>("input");
   const [range, setRange] = useState<24 | 168>(24);
@@ -96,10 +96,14 @@ export function Telemetry({ auth }: { auth: AuthClient }) {
   return (
     <>
       <header className="top">
-        <div className="brand">
-          <div className="logo-ph">logo placeholder</div>
-          <div><div className="eyebrow">CFA Tokenomics <span className="note">(working name)</span></div><h1>Token telemetry</h1></div>
-        </div>
+        {embedded ? (
+          <h2>Token telemetry</h2>
+        ) : (
+          <div className="brand">
+            <div className="logo-ph">logo placeholder</div>
+            <div><div className="eyebrow">CFA Tokenomics <span className="note">(working name)</span></div><h1>Token telemetry</h1></div>
+          </div>
+        )}
         <div className="group" role="group" aria-label="Filters">
           {([24, 168] as const).map((r) => (
             <button key={r} className="sel" aria-pressed={range === r} onClick={() => setRange(r)}>{r === 24 ? "Last 24 h" : "7 d"}</button>
@@ -107,7 +111,7 @@ export function Telemetry({ auth }: { auth: AuthClient }) {
           {sources.map((s) => (
             <button key={s} className="sel" aria-pressed={source === s} onClick={() => setSourcePick(s)}>{SOURCE_LABEL[s]}</button>
           ))}
-          <button className="sel" aria-pressed={false} onClick={() => void auth.signOut()}>Sign out</button>
+          {!embedded && <button className="sel" aria-pressed={false} onClick={() => void auth.signOut()}>Sign out</button>}
         </div>
       </header>
 
