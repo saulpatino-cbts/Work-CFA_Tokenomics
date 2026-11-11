@@ -193,6 +193,7 @@ All routes are under `/v1`, run in a tenant-scoped session and need `economics:r
 | `PUT /allocation/rules/{key}`, `POST /allocation/rules/{key}/drivers` | Versioned rules and driver values ([allocation](03-data-model.md#pricing-and-allocation)). |
 | `POST /allocation/runs`, `GET /allocation/summary` | Run a window (idempotent) and read coverage per currency. |
 | `POST /applications/{id}/scenarios/evaluate` | Runs the scenario engine on drivers that each carry a value, a basis and an optional source. Optional `sensitivity` (a tornado over named drivers) and `save_as`. Returns every figure with its node id and basis mix. |
+| `GET /cost/ai-tokens?start=&end=` | AI tokens, cost, model, direction, cache action, input-to-output ratio and cache hit rate read from imported FOCUS rows ([FOCUS 1.5 AI Model Billing](08-focus-1-5-readiness.md)). Needs only `economics:read`. Rows missing a model or direction are counted, not guessed. |
 | `GET /explain/{node_id}` | The calculation tree down to its inputs, re-verified against its content hash. A stored node that no longer matches returns 500. Another tenant's node and an absent one both return 404. |
 
 Limits worth knowing: the scenario currency must equal the application's; model shares must sum to 1; a model with no price for a token category is an error, not a zero; the tornado accepts at most 25 drivers per request. Not implemented: per-application scoping ([R-25](../risk-register.md)), listing or loading saved scenarios, and comparing an estimate with an observed bill.

@@ -207,3 +207,7 @@ Migration is additive first: new tables and a backfill that writes normalized fa
 - **Rules:** a category the source did not report produces no fact (unknown is not zero); quality maps to basis conservatively (reported and partial are observed, estimated and unknown are estimated, never observed); sources stay apart in `source_type` and are never added; non-finite provider values are skipped and counted.
 - **Floats:** the ledger's aggregate `value` stays a float column. Facts convert it through its shortest round-trip text, so a count is exact and a fraction is the decimal the provider's number printed as. The ledger column itself is not changed.
 - **Not done:** only token categories are projected (no seats, sessions or compute measures yet, because no source supplies them); facts are not refreshed automatically and no read route or allocation driver uses them yet; `application_id` is not set on facts; grants are not yet scoped to application or business unit (R-25).
+
+### Implemented: AI token view over FOCUS rows (Phase 1)
+
+`focus/ai.py` and `GET /v1/cost/ai-tokens` read tokens, cost and model identity straight from imported `FOCUSCostRecord` rows, using the FOCUS 1.5 draft's `SkuPriceDetails` properties (`ModelId`, `TokenDirection`, `TokenCacheAction`) and the draft's own query rules ([readiness note](08-focus-1-5-readiness.md#checked-against-the-unpublished-working-draft-supplied-2026-11-11)). This is billing-derived token visibility: it complements, and never adds to, the telemetry-derived usage in `usage_facts`.

@@ -12,6 +12,27 @@ Read from the FOCUS site and the FinOps Foundation on 2026-11-07, by documentati
 
 Re-verify everything marked *(draft)* or *(summary)* before relying on it.
 
+## Checked against the unpublished working draft (supplied 2026-11-11)
+
+**[REVIEW REQUIRED]** The owner supplied the FOCUS working-draft specification (a Markdown file whose header reads "Branch: working_draft (Unversioned)" and "This version not for publication") and its machine-readable model (a JSON file marked model version 1.5). The draft's own licence section states CC BY 4.0, so facts below are recorded with attribution and in our own words, and **neither file is stored in this repository**. The owner should confirm that recording details of an unpublished draft here is acceptable before this note is shared outside the team. It is still a working draft: nothing below is ratified.
+
+**What it confirms** (matches the notes above):
+
+- Only **four new columns**, all Conditional: `AllocatedServiceName`, `PrincipalId`, `CredentialId`, `RequesterDetails` (JSON). `AllocatedServiceName` must be null exactly when `AllocatedMethodId` is null, and should match the generator's own `ServiceName`. The draft carries a privacy note that Cost and Usage data can hold personal data, including pseudonymized identity values.
+- **AI Model Billing** is a supported feature introduced in 1.5. Tokens ride on `ConsumedQuantity`, `ConsumedUnit`, `PricingQuantity`, `PricingUnit`, `SkuId`, `SkuMeter` and `SkuPriceDetails`; no new columns.
+- **`SkuPriceDetails` properties** (recommended, defined with fixed spelling and casing): `ModelDeveloper`, `ModelFamily`, `ModelId`, `ModelVersion`, `TokenDirection` (`Input`, `Output`) and `TokenCacheAction` (`Uncached`, `Read`, `Write`, `Other`). Custom properties must start with `x_`. **No allowed values are defined for the four model properties**, so they are free text and `ModelId` "is not guaranteed to match across service providers". A property is omitted, not guessed, when a price bills several token kinds on one meter.
+- **`ConsumedQuantity` must not count a cached token twice**: a cached token counted on a Read or Write row must not also be counted inside another row's quantity. Under that rule, token rows can be summed. That is the draft's rule; this product cannot verify it of a given provider.
+
+**What it corrects or adds:**
+
+- **The SKU Price dataset is a preview in this draft**, "not evaluated for conformance", and may change in the next version, although the release-scope page described it as in final review. The machine-readable model contains only four datasets (Billing Period, Cost and Usage, Contract Commitment, Invoice Detail). Importing SKU Price into the price book stays planned but is not urgent.
+- **The draft's AI queries use exact units and filters.** They match `ConsumedUnit = 'Tokens'` (plural: the Unit Format rule gives simple units in the plural, and a unit with a quantity reads "1000 Tokens"), `ServiceCategory = 'AI and Machine Learning'`, `ChargeCategory = 'Usage'`, and, for token quantities, `ChargeClass IS NULL` (corrections excluded). The cache hit rate is cache-read tokens over **all** input token rows; the draft warns it is overstated when a provider emits cache-read rows but none for its other input tokens, and that rows from a single request-and-response meter carry no `TokenDirection` and drop out.
+- **The mandatory column list is longer than this importer requires.** The draft makes these Mandatory: `BilledCost`, `BillingAccountId`, `BillingAccountName` (nullable), `BillingCurrency`, `BillingPeriodStart`, `BillingPeriodEnd`, `ChargeCategory`, `ChargeClass` (nullable), `ChargeDescription` (nullable), `ChargePeriodStart`, `ChargePeriodEnd`, `ContractedCost`, `EffectiveCost`, `HostProviderName`, `InvoiceIssuerName`, `ListCost`, `PricingQuantity` (nullable), `PricingUnit` (nullable), `ServiceCategory`, `ServiceName` and `ServiceProviderName`. The importer deliberately requires only the columns it uses plus `ServiceProviderName` for declared 1.4 and 1.5, so it is more lenient than the draft. Reporting a missing mandatory column as a warning (not a rejection) is a sensible follow-up and is **not built**.
+- **The machine-readable model is a conformance rule set**: 1,728 rules (1,489 active, 239 removed), 24 operating-model conditions and 42 check functions (regular-expression, decimal, JSON-schema and duplicate checks among them). It could drive a conformance report for imported files. **Not built**; the file's licence and stability as a draft need checking first.
+- **Not in 1.5** (from the release-scope page, consistent with the draft): price region scope, reasoning tokens as their own dimension, cache-storage charges, input modality, context-window pricing, priority, standard and batch tiers, provisioned throughput as a commitment, deeper AI subcategories (including agentic AI), a Consumer ID column and scoped requester configuration.
+
+**What this product now does with it.** `GET /v1/cost/ai-tokens` (implemented in `focus/ai.py`) reads imported FOCUS rows and reports tokens, effective cost, effective cost per million tokens, input-to-output ratio and cache hit rate by provider, model, direction and cache action, following the draft's queries and caveats. Rows without a model or direction are counted, a value outside the allowed set is treated as absent and counted, token-like units other than exactly `Tokens` are counted and not summed, corrections are excluded from tokens and shown as their own cost, and an unknown rate is null, never zero. It needs no vendor call and works on any FOCUS export that carries the properties. **Tested on synthetic rows only**: no real provider export that carries these properties has been seen, and none is known to emit them yet.
+
 ## Status and schedule
 
 | Item | State |
@@ -38,10 +59,10 @@ Re-verify everything marked *(draft)* or *(summary)* before relying on it.
 | 1.5 item | Effect on this repository | Done now | When 1.5 is ratified |
 | --- | --- | --- | --- |
 | Identity columns (`PrincipalId`, `CredentialId`, `RequesterDetails`) | They can identify people. Risk R-17. | The importer **drops them by default** and reports which it dropped; `keep_identity_columns` is an explicit choice. The raw file still holds whatever the file contained, so raw retention and redaction need a policy. | Add typed columns only if a privacy review approves. |
-| AI token properties | Our `UsageRecord` to FOCUS mapping can follow them. | Mapping table updated: separately metered reasoning tokens carry `Output`. | Confirm names and values at ratification. |
+| AI token properties | Our `UsageRecord` to FOCUS mapping can follow them. | Mapping table updated: separately metered reasoning tokens carry `Output`. **Names and allowed values confirmed against the supplied draft**, and read by `GET /v1/cost/ai-tokens`. | Re-confirm against the ratified text. |
 | Provisioned, batch and priority tiers are not FOCUS concepts | Our `sku` dimension (`api_on_demand`, `api_provisioned`, `subscription`) is product-defined, not a FOCUS field. | Documented as an `x_` extension; not presented as FOCUS. | Revisit if FOCUS adds them. |
 | Consumption currency | `PricingCurrency` may not look like an ISO code. | `PricingCurrency` now accepts any non-space token up to 16 characters; `BillingCurrency` stays a three-letter code. | Confirm. **Conflict to resolve:** the 1.4 changelog says 1.4 removed the virtual-currency allowance, while the 1.5 text says the prior text allowed it. |
-| SKU Price dataset | A natural source for the price book. | Not built. No provider emitting it was found. | Plan an importer into `price_entries`. |
+| SKU Price dataset | A natural source for the price book. The supplied draft marks it **preview**, not evaluated for conformance. | Not built. No provider emitting it was found. | Re-check its status, then plan an importer into `price_entries`. |
 | `AllocatedServiceName` | Sits next to provider split allocation. | Preserved as an extension. | Add a typed column. |
 | Declared version | Exports may be labelled 1.5 early. | `1.5` is accepted as a declared version; `ServiceProviderName` is required for declared 1.4 and 1.5 (Mandatory in 1.4). | Re-check mandatory columns for 1.5. |
 | Validator | Hosted tool lacks 1.4 and 1.5. | Our own importer tests stand in. | Run the validator on sample exports when it supports them. |
@@ -53,7 +74,7 @@ When 1.5 is announced, re-verify and update:
 
 1. Ratification and final date; any change to the items marked *(draft)* above.
 2. The final column list, requirement levels and **operating model conditions** that now govern Conditional columns.
-3. Exact `SkuPriceDetails` property names and values, and any allowed values for `ModelDeveloper`, `ModelFamily`, `ModelId` and `ModelVersion` (*not found* in the draft).
+3. `SkuPriceDetails` property names and values (found in the supplied draft; the four model properties have **no allowed values**), and whether that changed.
 4. Whether `PricingCurrency` and consumption currency changed, and the 1.4 versus 1.5 currency conflict.
 5. The 1.4 to 1.5 migration guide and Validator support for 1.4 and 1.5.
 6. Whether Azure and AWS exports move to 1.4 or 1.5 (Azure's FOCUS export was documented as 1.2-preview, AWS as 1.0 and 1.2 when last read).

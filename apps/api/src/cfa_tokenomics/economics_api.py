@@ -11,7 +11,7 @@ from __future__ import annotations
 
 import uuid
 from collections.abc import Iterator
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Annotated, Any, Literal
 
@@ -29,6 +29,7 @@ from .db import AuditEvent, get_engine
 from .econ import scenario as sc
 from .econ.node import Node, leaf
 from .econ.types import Basis
+from .focus.ai import ai_token_report
 from .models_econ import Application
 from .tenancy import tenant_session
 
@@ -278,6 +279,67 @@ def get_summary(t: TenantDb, _: Principal = _READ) -> dict[str, Any]:
             }  # fmt: skip
         )
     return {"summaries": out}
+
+
+MAX_AI_WINDOW = timedelta(days=366)
+
+
+@router.get("/cost/ai-tokens")
+def get_ai_tokens(
+    start: datetime, end: datetime, t: TenantDb, _: Principal = _READ
+) -> dict[str, Any]:
+    """Tokens, cost and model identity for AI services, read from imported FOCUS rows (FOCUS 1.5
+    "AI Model Billing"). Model, direction and cache action are only as complete as the provider's
+    SkuPriceDetails: rows without them are counted, never guessed. Each currency stands alone."""
+    if start.tzinfo is None or end.tzinfo is None:
+        raise HTTPException(422, "start and end must include a timezone")
+    if end <= start:
+        raise HTTPException(422, "end must be after start")
+    if end - start > MAX_AI_WINDOW:
+        raise HTTPException(422, f"range exceeds {MAX_AI_WINDOW.days} days")
+    rep = ai_token_report(t[0], start, end)
+    return {
+        "models": [
+            {
+                "provider": m.provider, "model_id": m.model_id, "currency": m.currency,
+                "input_tokens": _str(m.input_tokens), "output_tokens": _str(m.output_tokens),
+                "cache_read_tokens": _str(m.cache_read_tokens),
+                "cache_write_tokens": _str(m.cache_write_tokens),
+                "unclassified_tokens": _str(m.unclassified_tokens),
+                "effective_cost": _str(m.effective_cost),
+                "correction_effective_cost": _str(m.correction_effective_cost),
+                "input_to_output_ratio": _str(m.input_to_output_ratio),
+                "cache_hit_rate": _str(m.cache_hit_rate), "warnings": m.warnings,
+            }
+            for m in rep.models
+        ],
+        "rows": [
+            {
+                "provider": r.provider, "developer": r.developer, "family": r.family,
+                "model_id": r.model_id, "model_version": r.model_version,
+                "direction": r.direction, "cache_action": r.cache_action, "sku_id": r.sku_id,
+                "sku_meter": r.sku_meter, "pricing_unit": r.pricing_unit, "currency": r.currency,
+                "is_correction": r.is_correction, "tokens": _str(r.tokens),
+                "pricing_quantity": _str(r.pricing_quantity),
+                "effective_cost": _str(r.effective_cost), "billed_cost": _str(r.billed_cost),
+                "effective_cost_per_million_tokens": _str(r.effective_cost_per_million_tokens),
+                "lines": r.lines,
+            }
+            for r in rep.rows
+        ],
+        "truncated": rep.truncated,
+        "coverage": {
+            "rows_without_model": rep.rows_without_model,
+            "rows_without_direction": rep.rows_without_direction,
+            "rows_with_invalid_values": rep.rows_with_invalid_values,
+            "rows_with_other_token_units": rep.rows_with_other_token_units,
+        },
+        "notes": [
+            "Read from imported FOCUS cost rows; no vendor is called.",
+            "Token quantities exclude correction rows; corrections are shown as a separate cost.",
+            "Unknown is null, never zero. Currencies are never added together.",
+        ],
+    }  # fmt: skip
 
 
 # ---- scenarios and explain --------------------------------------------------------------------
