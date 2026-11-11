@@ -65,6 +65,8 @@ Connectors, in order of value and ease, each behind the framework in [connectors
 6. OpenAI usage and costs; Gemini and Perplexity as their documentation allows.
 7. Application and gateway telemetry.
 
+Research status: the [vendor API research](09-vendor-api-research.md) (2026-11-10) fills in permissions, limits, revision windows and privacy flags for every source below, and lists what is still not found. Perplexity and the Gemini Developer API have no organization usage API in the pages read, so they stay manual import or gateway telemetry. Codex is blocked until its Admin API reference is obtained. Microsoft 365 Copilot has no dollar cost API.
+
 Also: overlap resolution across sources, connector health and drift monitoring, `finality` handling, privacy defaults (aggregate, pseudonymize, no bodies), tag-coverage guidance, retention controls.
 
 ### Dependencies
