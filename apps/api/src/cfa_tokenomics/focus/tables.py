@@ -34,7 +34,7 @@ ingestion_runs = Table(
     Column("id", Uuid, primary_key=True), Column("tenant_id", Uuid, nullable=False),
     Column("connector_id", Uuid, nullable=False), Column("source_name", Text, nullable=False),
     Column("declared_version", String(16), nullable=False), Column("status", String(16), nullable=False),
-    Column("finished_at", _TS), Column("row_count", Integer, nullable=False),
+    Column("started_at", _TS), Column("finished_at", _TS), Column("row_count", Integer, nullable=False),
     Column("rejected_count", Integer, nullable=False), Column("mapper_version", String(32), nullable=False),
     Column("content_hash", String(64), nullable=False), Column("finality", String(12), nullable=False),
     Column("error", Text),
