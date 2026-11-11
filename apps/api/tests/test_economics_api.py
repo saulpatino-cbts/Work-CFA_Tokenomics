@@ -344,3 +344,55 @@ def test_allocation_input_errors_and_cross_tenant_rules(api):
         json={"window_start": FEB1.isoformat(), "window_end": JAN1.isoformat()}, headers=ADMIN,
     )  # fmt: skip
     assert run.status_code == 422
+
+
+# ---- AI tokens from FOCUS rows -----------------------------------------------------------------
+
+
+def test_ai_tokens_route_returns_exact_figures_with_coverage_and_respects_access(api):
+    from test_focus_ai import END, I_U, NOW, OUT, START, csv_bytes, line
+
+    from cfa_tokenomics.focus import importer as imp
+
+    with api.session() as db:
+        cid = imp.get_or_create_manual_connector(db, api.a)
+        res = imp.import_focus_file(
+            db, api.a, cid, "f.csv",
+            csv_bytes(line("3.00", "1000000", props=I_U), line("6.00", "400000", props=OUT), line("1.00", "10", props={})),
+            declared_version="1.5", now=NOW,
+        )  # fmt: skip
+        assert res.status == "succeeded"
+    q = {"start": START.isoformat(), "end": END.isoformat()}
+    assert api.c.get("/v1/cost/ai-tokens", params=q).status_code == 401
+    r = api.c.get("/v1/cost/ai-tokens", params=q, headers=READER)  # a reader may read
+    assert r.status_code == 200, r.text
+    body = r.json()
+    (m,) = body["models"]
+    assert Decimal(m["input_tokens"]) == 1_000_000 and Decimal(m["output_tokens"]) == 400_000
+    assert (
+        Decimal(m["input_to_output_ratio"]) == Decimal("2.5") and Decimal(m["cache_hit_rate"]) == 0
+    )  # labelled Uncached: a real zero
+    assert Decimal(m["unclassified_tokens"]) == 10 and m["currency"] == "USD"
+    out = next(x for x in body["rows"] if x["direction"] == "Output")
+    assert Decimal(out["effective_cost_per_million_tokens"]) == 15 and out["model_id"] == "model-a"
+    assert body["coverage"] == {
+        "rows_without_model": 0,
+        "rows_without_direction": 1,
+        "rows_with_invalid_values": 0,
+        "rows_with_other_token_units": 0,
+    }
+    api.tid = api.b  # another tenant sees nothing
+    assert api.c.get("/v1/cost/ai-tokens", params=q, headers=ADMIN).json()["models"] == []
+
+
+@pytest.mark.parametrize(
+    "params",
+    [
+        {"start": "2026-01-01T00:00:00", "end": "2026-02-01T00:00:00Z"},  # no timezone
+        {"start": "2026-02-01T00:00:00Z", "end": "2026-01-01T00:00:00Z"},  # backwards
+        {"start": "2024-01-01T00:00:00Z", "end": "2026-01-01T00:00:00Z"},  # over 366 days
+        {"start": "2026-01-01T00:00:00Z"},  # missing end
+    ],
+)
+def test_ai_tokens_route_validates_the_window(api, params):
+    assert api.c.get("/v1/cost/ai-tokens", params=params, headers=ADMIN).status_code == 422

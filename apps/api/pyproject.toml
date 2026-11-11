@@ -52,6 +52,7 @@ select = ["E", "F", "I", "B", "UP"]
 "tests/test_econ.py" = ["E501"]
 "tests/test_tenancy.py" = ["E501"]
 "tests/test_focus_*.py" = ["E501"]
+"tests/test_economics_api.py" = ["E501"]
 "tests/test_alloc_*.py" = ["E501"]
 # Declarative table definitions read best one constraint per line.
 "src/cfa_tokenomics/migrations/versions/000[5-9]_*" = ["E501"]
