@@ -14,7 +14,9 @@ Re-verify everything marked *(draft)* or *(summary)* before relying on it.
 
 ## Checked against the unpublished working draft (supplied 2026-11-11)
 
-**[REVIEW REQUIRED]** The owner supplied the FOCUS working-draft specification (a Markdown file whose header reads "Branch: working_draft (Unversioned)" and "This version not for publication") and its machine-readable model (a JSON file marked model version 1.5). The draft's own licence section states CC BY 4.0, so facts below are recorded with attribution and in our own words, and **neither file is stored in this repository**. The owner should confirm that recording details of an unpublished draft here is acceptable before this note is shared outside the team. It is still a working draft: nothing below is ratified.
+**Owner approval recorded:** the owner confirmed that recording details of this unpublished draft in this repository is acceptable. The licence and "not for publication" points below still apply when sharing outside the team.
+
+The owner supplied the FOCUS working-draft specification (a Markdown file whose header reads "Branch: working_draft (Unversioned)" and "This version not for publication") and its machine-readable model (a JSON file marked model version 1.5). The draft's own licence section states CC BY 4.0, so facts below are recorded with attribution and in our own words, and **neither file is stored in this repository**. It is still a working draft: nothing below is ratified.
 
 **What it confirms** (matches the notes above):
 

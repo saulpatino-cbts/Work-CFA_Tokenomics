@@ -4,6 +4,9 @@ version = "0.0.0"
 description = "Work-CFA_Tokenomics API skeleton (proposed ADR 0004; not a product release)."
 requires-python = ">=3.12"
 dependencies = [
+  "azure-identity==1.27.0",
+  "azure-storage-blob==12.31.1",
+  "boto3==1.44.0",
   "cryptography==50.0.2",
   "fastapi==0.162.0",
   "httpx==0.28.1",
@@ -44,6 +47,8 @@ select = ["E", "F", "I", "B", "UP"]
 "src/cfa_tokenomics/econ/*" = ["E501"]
 "src/cfa_tokenomics/focus/*" = ["E501"]
 "src/cfa_tokenomics/alloc/*" = ["E501"]
+"src/cfa_tokenomics/connectors/*" = ["E501"]
+"tests/test_connectors_*.py" = ["E501"]
 "tests/test_econ.py" = ["E501"]
 "tests/test_tenancy.py" = ["E501"]
 "tests/test_focus_*.py" = ["E501"]
