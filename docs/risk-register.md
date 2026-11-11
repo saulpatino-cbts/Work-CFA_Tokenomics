@@ -30,6 +30,7 @@
 | R-24 | P1 | Provider-calculated split allocation rows (FOCUS 1.3) may coexist with their origin charges; the specification does not clearly say, so totals could double count | FinOps/connectors | Check a real provider export; confirm whether origin charges are present; rule or filter if so. Rows are flagged now. |
 | R-25 | P1 | Economics API has no per-application access scoping: any identity with a role sees every application, cost line and assumption in its tenant. The tenant comes from one configured id, so serving several tenants is not possible yet | Security | ADR 0008 re-scoped to application, business unit and environment, with denial tests; a tenant claim mapping if CBTS ever operates it for several clients (R-23). |
 | R-26 | P1 | Migration `0008` and `assign-legacy-tenant` have not been run against a real install with data; the facts projection is not refreshed automatically | Data/operations | A rehearsal on a copy of a real install, with row counts before and after, and a scheduled `project-usage` once collection exists. |
+| R-27 | P1 | The AWS and Azure cost-export connectors are tested only on synthetic exports with stubbed storage: real export layouts, completeness signals (manifest timing), file sizes and column sets are unverified, and a run larger than the in-memory cap (default 200 MB) is refused | Connectors | A real export from each cloud read by a connector in an authorized test account, streaming import, and Parquet support; `connector-check` output attached. |
 
 ## Change discipline
 

@@ -45,7 +45,58 @@ Rules: `pull` is idempotent for a window; the cursor advances only after the raw
 - **Version.** The declared FOCUS version (1.0 to 1.5) is recorded but processing is by column name. `ServiceProviderName` is required for declared 1.4 and 1.5 (Mandatory in 1.4). The only legacy mapping is `ProviderName` to `ServiceProviderName` (confirmed from the specification history), recorded in the row when used; `PublisherName` is kept as an extension. See [FOCUS 1.5 readiness](08-focus-1-5-readiness.md).
 - **Privacy.** The 1.5 identity columns are not stored in normalized records unless explicitly requested. The raw file is kept as received.
 - **Currency.** `BillingCurrency` must be a three-letter code; `PricingCurrency` may be a provider unit (FOCUS 1.5 draft).
-- **Not built:** Parquet (Azure and AWS can export it) and automatic version detection.
+- **Not built:** Parquet (Azure and AWS can export it; the cloud connectors below ask for CSV) and automatic version detection.
+
+## AWS and Azure cost-export connectors (implemented)
+
+Two pull connectors read a FOCUS cost export from storage the customer already owns and hand each billing period to the importer above. **Tested on synthetic exports with in-memory stores and stubbed clients; nothing has been run against a real S3 bucket, a real storage account or a real export** (R-27).
+
+```text
+python -m cfa_tokenomics.admin connector-add aws|azure TENANT_ID NAME SCOPE.json
+python -m cfa_tokenomics.admin connector-check  TENANT_ID NAME      identity, access and data, reported separately
+python -m cfa_tokenomics.admin connector-run    TENANT_ID NAME [--dry-run]
+python -m cfa_tokenomics.admin connector-status TENANT_ID NAME
+```
+
+There is no scheduler yet: `connector-run` is idempotent and safe to run from cron or a job runner.
+
+**Settings** (`SCOPE.json`; any other key is refused):
+
+| Setting | Meaning |
+| --- | --- |
+| `bucket`, `region` (AWS) | The S3 bucket holding the export, and optionally its region. |
+| `account_url`, `container` (Azure) | The bare storage account address and the blob container. A URL with a query string (a SAS token), credentials or a path is refused. |
+| `prefix` | Path to the export, above the date folders. AWS: `<prefix>/<export name>`; Azure: `<directory>/<export name>`. |
+| `focus_version` | Declared FOCUS version recorded on the run (default `1.2`). Processing is by column name. |
+| `lookback_periods` | How many months back to read (1 to 24, default 3). |
+| `settle_minutes` | A run whose files changed more recently than this is deferred (default 30), so a half-written export is never read. |
+| `max_run_mb` | Uncompressed size cap per run (default 200). |
+| `allow_partial` | Import good rows when some are rejected (default false: the whole run is refused). |
+
+**Credentials are never settings.** The connector uses the platform's own identity: an AWS instance, task or SSO role through the default credential chain; an Azure managed identity through the default Azure credential chain. Nothing is stored in the database (`credential_ref` stays empty), logged or passed on a command line. Storage errors are reduced to a class and a fixed message, so a failure cannot echo a role ARN or a signed URL.
+
+### Onboarding checklist
+
+- *AWS.* Create a Data Export in Billing and Cost Management: "FOCUS 1.2 with AWS columns" (or 1.0), format **Text or CSV with GZIP** (not Parquet or zip), to a bucket in the customer's account. Give the runtime role `s3:ListBucket` on the bucket (scoped to the prefix) and `s3:GetObject` on the prefix, and nothing else: the connector reads S3 only and calls no Data Exports or Cost Explorer API. (Standard S3 action names; confirm against the customer's policy tooling.)
+- *Azure.* Create a Cost Management export "Cost and usage details (FOCUS)", daily, month to date, format **CSV (none or gzip)** (not Parquet), to a storage account, for an EA or MCA scope (management-group and pay-as-you-go scopes are not supported by Azure's FOCUS export). Give the runtime's managed identity the built-in **Storage Blob Data Reader** role on the container. (Role name not confirmed on the pages read; confirm in the customer's tenant.)
+- Run `connector-check`. It reports configuration, access (can the location be listed) and data (is there a run in a supported format) as separate steps, so a failure names the layer to fix.
+
+### How a run is chosen and imported
+
+- A run is the set of files that make up one billing period's export. Both clouds split large exports into several files, and the importer treats each file as a revision that supersedes earlier rows for the same account and window, so **a run's parts are joined into one logical file** (same columns required; different columns refuse the run). Importing parts one by one would have kept only the last.
+- Exports are cumulative, so **only the newest run of each period is read**. Older runs of the same period are passed over.
+- A run already imported is skipped **without downloading it**. The identity of a run includes each file's etag and size, so an export overwritten in place is seen as new, and the importer's supersession replaces the earlier rows while keeping them as history.
+- A run that failed deterministically (a rejected row, mismatched columns) is **not retried until its files change**, and is reported as `failed_before` so it is not silent.
+- **Finality** follows each cloud's documented revision window, not one global rule: Azure 7 days after the period ends, AWS 14 days.
+- Unreadable formats are reported, not skipped: a Parquet or zip export says to change the export format to CSV.
+
+### Limits, stated plainly
+
+- **Whole runs are held in memory** (default cap 200 MB uncompressed, raised with `max_run_mb`). A larger run is refused as `too_large`, never truncated. Large enterprise exports will exceed this: **streaming import is the next piece of work**, and Parquet support after it.
+- **The layouts are from documentation, not a real export.** Matching is tolerant of depth, and nothing depends on a manifest's internal fields (not verified), so completeness is judged by `settle_minutes`, not by a manifest. Whether Azure writes `manifest.json` before or after the data files is unknown.
+- **No Cost Explorer or Cost Management API.** These connectors read exports only. Cost Explorer's new Bedrock attributes and Azure's Query API are separate sources ([vendor research](09-vendor-api-research.md)).
+- **No scheduler, no health screen, no UI** to add a connector. Status is a command.
+- **Do not point two connectors at one export:** supersession is per connector.
 
 ## Capability matrix
 

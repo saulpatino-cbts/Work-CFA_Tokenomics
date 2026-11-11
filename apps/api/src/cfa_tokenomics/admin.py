@@ -4,8 +4,11 @@ python -m cfa_tokenomics.admin create-tenant NAME CURRENCY
 python -m cfa_tokenomics.admin app-role-sql ROLE     prints the grants for the runtime role
 python -m cfa_tokenomics.admin assign-legacy-tenant TENANT_ID   rows that predate tenancy
 python -m cfa_tokenomics.admin project-usage TENANT_ID   build usage facts from the ledger
+python -m cfa_tokenomics.admin connector-add aws|azure TENANT_ID NAME SCOPE_JSON_FILE
+python -m cfa_tokenomics.admin connector-check|connector-run|connector-status TENANT_ID NAME
 """
 
+import json
 import os
 import sys
 import uuid
@@ -14,6 +17,16 @@ from datetime import UTC, datetime
 from sqlalchemy import create_engine
 
 from .alloc.runner import allocation_summary, run_allocation
+from .connectors.costexport import (
+    build_store,
+    check,
+    connector_status,
+    create_connector,
+    discover,
+    load_connector,
+    pull,
+)
+from .connectors.store import StoreError
 from .focus.importer import get_or_create_manual_connector, import_focus_file
 from .legacy_tenancy import assign_legacy_tenant
 from .store import create_tenant
@@ -33,6 +46,14 @@ def main(argv: list[str]) -> int:
         return _assign_legacy(argv[1])
     if len(argv) == 2 and argv[0] == "project-usage":
         return _project_usage(argv[1])
+    if argv and argv[0] == "connector-add" and len(argv) == 5:
+        return _connector_add(argv[1:])
+    if (
+        argv
+        and argv[0] in ("connector-check", "connector-run", "connector-status")
+        and len(argv) >= 3
+    ):
+        return _connector_cmd(argv[0], argv[1:])
     if len(argv) == 4 and argv[0] == "allocate":
         return _allocate(argv[1:])
     if len(argv) >= 3 and argv[0] == "import-focus":
@@ -75,6 +96,64 @@ def _project_usage(tenant: str) -> int:
         f"{res.aggregate_unchanged} unchanged"
     )
     return 0
+
+
+def _connector_add(args: list[str]) -> int:
+    url = os.environ.get("CFA_DATABASE_URL")
+    if not url:
+        print("CFA_DATABASE_URL is required", file=sys.stderr)
+        return 2
+    provider, tenant, name, path = args
+    try:
+        with open(path) as fh:
+            scope = json.load(fh)
+        tenant_id = uuid.UUID(tenant)
+        with tenant_session(create_engine(url), tenant_id) as db:
+            cid = create_connector(db, tenant_id, provider, name, scope)
+    except (OSError, ValueError) as exc:  # includes bad JSON and ConfigError
+        print(f"refused: {exc}", file=sys.stderr)
+        return 1
+    print(cid)
+    return 0
+
+
+def _connector_cmd(command: str, args: list[str]) -> int:
+    url = os.environ.get("CFA_DATABASE_URL")
+    if not url:
+        print("CFA_DATABASE_URL is required", file=sys.stderr)
+        return 2
+    tenant_id, name = uuid.UUID(args[0]), args[1]
+    try:
+        with tenant_session(create_engine(url), tenant_id) as db:
+            cid, cfg, enabled = load_connector(db, name)
+            if command == "connector-status":
+                print(json.dumps(connector_status(db, cid), default=str, indent=2))
+                return 0
+            if not enabled:
+                print("refused: the connector is disabled", file=sys.stderr)
+                return 1
+            store = build_store(cfg)
+            if command == "connector-check":
+                steps = check(cfg, store)
+                for s in steps:
+                    print(f"{'ok  ' if s.ok else 'FAIL'} {s.name}: {s.message}")
+                return 0 if all(s.ok for s in steps) else 1
+            if "--dry-run" in args:
+                d = discover(cfg, store)
+                for r in d.selected:
+                    where, n = r.run_id or "(in place)", len(r.parts)
+                    print(f"would read {r.period} run {where}: {n} file(s)")
+                return 0
+            outcomes = pull(db, tenant_id, cid, cfg, store)
+    except (ValueError, StoreError) as exc:  # ConfigError is a ValueError
+        print(f"refused: {exc}", file=sys.stderr)
+        return 1
+    for o in outcomes:
+        extra = f" rows={o.rows} superseded={o.superseded}" if o.rows else ""
+        where = o.run_id or "(in place)"
+        print(f"{o.period} {where}: {o.status}{extra} {o.detail}".strip())
+    bad = {"failed", "too_large", "unsupported", "failed_before"}
+    return 1 if any(o.status in bad for o in outcomes) else 0
 
 
 def _allocate(args: list[str]) -> int:
