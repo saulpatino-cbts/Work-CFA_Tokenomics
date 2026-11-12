@@ -6,7 +6,7 @@
 - **Owners:** Security and privacy; connectors
 - **Requirements:** REQ-013 to REQ-022 (proposed), customer data custody ([ADR 0001](0001-customer-hosted-boundary.md))
 - **Issue:** None exists
-- **Implementation evidence:** `apps/api/src/cfa_tokenomics/privacy.py` and `apps/api/tests/test_privacy.py` (the pseudonymizer and the mode type only). No connector uses it yet.
+- **Implementation evidence:** `apps/api/src/cfa_tokenomics/privacy.py` and `apps/api/tests/test_privacy.py` (the pseudonymizer and the mode type only). The Anthropic connector (`connectors/anthropic.py`) runs in aggregate mode, never groups by person and refuses person-level rows; it **refuses `per_user` mode because the pseudonymized storage for it does not exist yet**. No connector stores a pseudonym yet.
 
 ## Context
 
