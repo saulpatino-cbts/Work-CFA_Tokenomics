@@ -286,6 +286,10 @@ def _openai(month: str, seed: int) -> tuple[dict, dict]:
                         "speed": "standard",
                         "credits": None,
                         "cost_usd": usd,
+                        "uncached_text_input_tokens": tin,
+                        "cached_text_input_tokens": tin // 2,
+                        "text_output_tokens": tin // 5,
+                        "text_total_tokens": tin + tin // 2 + tin // 5,
                     }
                 ]
                 for c in clients:
@@ -296,25 +300,62 @@ def _openai(month: str, seed: int) -> tuple[dict, dict]:
                                            "commits": {"with_codex_contribution": rng.randrange(1, 9),
                                                        "with_codex_contribution_percentage": 40.0, "total_commits": 12}}  # fmt: skip
             per_user.append(row)
+    token_fields = (
+        "uncached_text_input_tokens",
+        "cached_text_input_tokens",
+        "text_output_tokens",
+        "text_total_tokens",
+    )
     ws: dict[int, dict] = {}
     for r in per_user:
-        w = ws.setdefault(r["start_time"], {"object": "workspace.usage.result", "start_time": r["start_time"], "end_time": r["end_time"],
-                                            "user_id": None, "actor": None, "chats": 0, "messages": 0, "credits": Decimal(0), "usd": Decimal(0)})  # fmt: skip
-        w["chats"] += r["totals"]["chats"]
-        w["messages"] += r["totals"]["messages"]
-        w["credits"] += Decimal(str(r["totals"]["credits"] or 0))
-        w["usd"] += Decimal(str(r["totals"].get("cost_usd") or 0))
+        w = ws.setdefault(r["start_time"], {"end_time": r["end_time"], "chats": 0, "messages": 0, "credits": Decimal(0),
+                                            "usd": Decimal(0), "tokens": {}, "clients": {}, "models": {}})  # fmt: skip
+        t = r["totals"]
+        w["chats"] += t["chats"]
+        w["messages"] += t["messages"]
+        w["credits"] += Decimal(str(t["credits"] or 0))
+        w["usd"] += Decimal(str(t.get("cost_usd") or 0))
+        for f in token_fields:
+            if f in t:
+                w["tokens"][f] = w["tokens"].get(f, 0) + t[f]
+        for c in r["clients"]:
+            k = w["clients"].setdefault(
+                c["client_id"], {"chats": 0, "messages": 0, "credits": Decimal(0)}
+            )
+            k["chats"] += c["chats"]
+            k["messages"] += c["messages"]
+            k["credits"] += Decimal(str(c.get("credits") or 0))
+        for m in r["models"]:
+            k = w["models"].setdefault(
+                (m["model"], m.get("speed")),
+                {"credits": Decimal(0), "usd": Decimal(0), "tokens": {}},
+            )
+            k["credits"] += Decimal(str(m.get("credits") or 0))
+            k["usd"] += Decimal(str(m.get("cost_usd") or 0))
+            for f in token_fields:
+                if f in m:
+                    k["tokens"][f] = k["tokens"].get(f, 0) + m[f]
+
+    def est(credits: Decimal) -> float:
+        return float((credits * credit_usd).quantize(Decimal("0.01")))
+
     workspace = []
     for start in sorted(ws):
         w = ws[start]
         totals = {"chats": w["chats"], "messages": w["messages"], "credits": float(w["credits"]) if w["credits"] else None,
-                  "cost_usd": float(w["usd"]) if w["usd"] else None}  # fmt: skip
+                  "cost_usd": float(w["usd"]) if w["usd"] else None, **w["tokens"]}  # fmt: skip
         if w["credits"]:
-            totals["estimated_cost_usd"] = float(
-                (w["credits"] * credit_usd).quantize(Decimal("0.01"))
-            )
-        workspace.append({"object": w["object"], "start_time": start, "end_time": w["end_time"], "user_id": None, "actor": None,
-                          "totals": totals, "clients": []})  # fmt: skip
+            totals["estimated_cost_usd"] = est(w["credits"])
+        clients = [{"client_id": cid, "chats": k["chats"], "messages": k["messages"],
+                    "credits": float(k["credits"]) if k["credits"] else None,
+                    **({"estimated_cost_usd": est(k["credits"])} if k["credits"] else {})}
+                   for cid, k in sorted(w["clients"].items())]  # fmt: skip
+        models = [{"model": m, **({"speed": sp} if sp else {}), "credits": float(k["credits"]) if k["credits"] else None,
+                   **({"cost_usd": float(k["usd"])} if k["usd"] else {}),
+                   **({"estimated_cost_usd": est(k["credits"])} if k["credits"] else {}), **k["tokens"]}
+                  for (m, sp), k in sorted(w["models"].items())]  # fmt: skip
+        workspace.append({"object": "workspace.usage.result", "start_time": start, "end_time": w["end_time"], "user_id": None,
+                          "actor": None, "totals": totals, "clients": clients, "models": models})  # fmt: skip
 
     def page(rows: list[dict]) -> dict:
         return {"object": "page", "data": rows, "has_more": False, "next_page": None}

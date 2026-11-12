@@ -45,6 +45,7 @@ from ..usage import ledger
 from ..usage.models import AggregateObservation, Quality
 from . import credentials
 from .costexport import ConfigError, Outcome, Step
+from .paged import PagedClient, SourceError, day_windows
 
 BASE_URL = "https://api.anthropic.com"  # fixed: the credential can only go here
 API_VERSION = "2026-10-21"
@@ -52,9 +53,6 @@ BETA = "analytics-usage-cost-2026-08-24"
 MIN_START = datetime(2026, 1, 1, tzinfo=UTC)  # the API refuses earlier dates
 MAX_SPAN = timedelta(days=31)
 PAGE_LIMIT = 1000
-MAX_PAGES = 200
-MAX_ATTEMPTS = 5
-MAX_RESTARTS = 2
 FINAL_AFTER_MONTH_END = timedelta(days=7)  # values can change until about 7 days after month end
 # The five dimensions that aggregate mode may group by. Never ``actor``.
 USAGE_GROUPS = ("model", "workspace_id", "service_tier", "speed", "context_window")
@@ -76,14 +74,6 @@ MANIFEST = {
     "limits": "60 requests per minute per organization; at most 31 days per request; 1,000 rows per page",
     "privacy": "aggregate mode never groups by person; per-user mode is not built",
 }
-
-
-class SourceError(Exception):
-    """A failure talking to the source. The message never contains the credential or a response body."""
-
-
-class _CursorExpired(Exception):
-    pass
 
 
 @dataclass(frozen=True)
@@ -149,9 +139,15 @@ def create_connector(db: Session, tenant_id: uuid.UUID, name: str, scope: dict) 
 # ---- the HTTP client ------------------------------------------------------------------------------------
 
 
-class Client:
-    """Read-only access to the analytics endpoints. Paced under the documented rate limit, with bounded
-    retries. The key is resolved on first use and held only in memory."""
+def _headers(key: str) -> dict[str, str]:
+    return {
+        "x-api-key": key, "anthropic-version": API_VERSION, "anthropic-beta": BETA,
+        "user-agent": "cfa-tokenomics/0 (read-only cost connector)",
+    }  # fmt: skip
+
+
+class Client(PagedClient):
+    """Read-only access to the analytics endpoints, paced under the documented 60 requests per minute."""
 
     def __init__(
         self,
@@ -160,101 +156,7 @@ class Client:
         sleep=time.sleep,
         min_interval: float = 1.1,
     ):
-        self._ref = credential_ref
-        self._http = http or httpx.Client(base_url=BASE_URL, timeout=30.0)
-        self._sleep = sleep
-        self._min_interval = min_interval
-        self._last = 0.0
-
-    def __repr__(self) -> str:
-        return "Client(<credential withheld>)"
-
-    def _headers(self) -> dict[str, str]:
-        return {
-            "x-api-key": credentials.resolve(self._ref), "anthropic-version": API_VERSION, "anthropic-beta": BETA,
-            "user-agent": "cfa-tokenomics/0 (read-only cost connector)",
-        }  # fmt: skip
-
-    def _get(self, path: str, params: list[tuple[str, str]]) -> dict:
-        headers = self._headers()
-        for attempt in range(MAX_ATTEMPTS):
-            wait = self._min_interval - (time.monotonic() - self._last)
-            if wait > 0:
-                self._sleep(wait)
-            self._last = time.monotonic()
-            try:
-                res = self._http.get(path, params=params, headers=headers)
-            except httpx.TransportError as exc:
-                if attempt == MAX_ATTEMPTS - 1:
-                    raise SourceError(
-                        f"the Anthropic API could not be reached ({type(exc).__name__})"
-                    ) from None
-                self._sleep(min(2**attempt, 30))
-                continue
-            if res.status_code == 200:
-                try:
-                    body = res.json()
-                except ValueError:
-                    raise SourceError(
-                        "the Anthropic API returned something that is not JSON"
-                    ) from None
-                if not isinstance(body, dict):
-                    raise SourceError("the Anthropic API returned an unexpected response shape")
-                return body
-            if res.status_code == 410:
-                raise _CursorExpired
-            if res.status_code in (429, 500, 502, 503, 504):
-                if attempt == MAX_ATTEMPTS - 1:
-                    raise SourceError(
-                        f"the Anthropic API kept refusing the request (HTTP {res.status_code})"
-                    )
-                retry = res.headers.get("retry-after", "")
-                self._sleep(
-                    min(float(retry), 60)
-                    if retry.replace(".", "", 1).isdigit()
-                    else min(2**attempt, 30)
-                )
-                continue
-            if res.status_code in (401, 403):
-                raise SourceError(
-                    f"the Anthropic API rejected the credential or it lacks Admin API access (HTTP {res.status_code})"
-                )
-            if res.status_code == 400:
-                raise SourceError("the Anthropic API rejected the request parameters (HTTP 400)")
-            raise SourceError(f"the Anthropic API returned HTTP {res.status_code}")
-        raise SourceError("the Anthropic API request did not complete")  # pragma: no cover
-
-    def get_all(self, path: str, params: list[tuple[str, str]]) -> tuple[list[dict], str | None]:
-        """Every page of one query. A cursor that expires mid-way (the data was refreshed) restarts the query."""
-        for _ in range(MAX_RESTARTS + 1):
-            try:
-                return self._pages(path, params)
-            except _CursorExpired:
-                continue
-        raise SourceError(
-            "the Anthropic data kept being refreshed while it was read; try again later"
-        )
-
-    def _pages(self, path: str, params: list[tuple[str, str]]) -> tuple[list[dict], str | None]:
-        rows: list[dict] = []
-        refreshed: str | None = None
-        page: str | None = None
-        for n in range(MAX_PAGES):
-            body = self._get(path, params + ([("page", page)] if page else []))
-            data = body.get("data")
-            if not isinstance(data, list) or not isinstance(body.get("has_more"), bool):
-                raise SourceError("the Anthropic API returned an unexpected response shape")
-            rows += data
-            if n == 0:
-                refreshed = body.get("data_refreshed_at")
-                if refreshed is not None and not isinstance(refreshed, str):
-                    raise SourceError("the Anthropic API returned an unexpected data_refreshed_at")
-            if not body["has_more"]:
-                return rows, refreshed
-            page = body.get("next_page")
-            if not isinstance(page, str) or not page:
-                raise SourceError("the Anthropic API said there was more data but gave no cursor")
-        raise SourceError("the Anthropic data spans more pages than this connector will read")
+        super().__init__("Anthropic", BASE_URL, credential_ref, _headers, http, sleep, min_interval)
 
 
 def build_client(cfg: AnthropicConfig) -> Client:
@@ -266,15 +168,7 @@ def build_client(cfg: AnthropicConfig) -> Client:
 
 def windows(cfg: AnthropicConfig, now: datetime | None = None) -> list[tuple[datetime, datetime]]:
     """Day-aligned windows of at most 31 days, up to the start of today (UTC): today is still being filled."""
-    now = now or datetime.now(UTC)
-    end = datetime(now.year, now.month, now.day, tzinfo=UTC)
-    start = max(MIN_START, end - timedelta(days=cfg.lookback_days))
-    out = []
-    while start < end:
-        stop = min(start + MAX_SPAN, end)
-        out.append((start, stop))
-        start = stop
-    return out
+    return day_windows(cfg.lookback_days, now, MIN_START, MAX_SPAN)
 
 
 def _ts(value: Any, what: str) -> datetime:

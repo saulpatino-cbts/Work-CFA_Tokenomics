@@ -4,7 +4,8 @@ python -m cfa_tokenomics.admin create-tenant NAME CURRENCY
 python -m cfa_tokenomics.admin app-role-sql ROLE     prints the grants for the runtime role
 python -m cfa_tokenomics.admin assign-legacy-tenant TENANT_ID   rows that predate tenancy
 python -m cfa_tokenomics.admin project-usage TENANT_ID   build usage facts from the ledger
-python -m cfa_tokenomics.admin connector-add aws|azure|anthropic TENANT_ID NAME SCOPE_JSON_FILE
+python -m cfa_tokenomics.admin connector-add PROVIDER TENANT_ID NAME SCOPE.json
+    (PROVIDER is aws, azure, anthropic or openai_codex)
 python -m cfa_tokenomics.admin connector-check|connector-run|connector-status TENANT_ID NAME
 """
 
