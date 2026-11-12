@@ -269,7 +269,7 @@ def test_the_cli_adds_checks_and_runs_a_connector(env, tmp_path, capsys, monkeyp
     )  # the CLI uses the clock; pin it inside the lookback
     store = Store()
     store.put(f"{AWS_RUN}/p.csv.gz", gz(row("100.00", 1)))
-    monkeypatch.setattr(admin, "build_store", lambda cfg: store)
+    monkeypatch.setattr(cx, "build_store", lambda cfg: store)
     assert admin.main(["connector-check", str(t), "cli-aws"]) == 0
     assert "ok   data" in capsys.readouterr().out
     assert admin.main(["connector-run", str(t), "cli-aws", "--dry-run"]) == 0

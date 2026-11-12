@@ -104,6 +104,35 @@ There is no scheduler yet: `connector-run` is idempotent and safe to run from cr
 - **No scheduler, no health screen, no UI** to add a connector. Status is a command.
 - **Do not point two connectors at one export:** supersession is per connector.
 
+## Anthropic connector (implemented, aggregate mode)
+
+Reads the Admin API's usage and cost analytics endpoints (beta) with a read-only credential. **Tested against a fake server built from the documented response shapes and the synthetic sample set; nothing has been run against the real API, so bracket encoding of `group_by[]`, paging and the exact error behaviour are unverified** (R-29).
+
+```text
+python -m cfa_tokenomics.admin connector-add anthropic TENANT_ID NAME SCOPE.json
+python -m cfa_tokenomics.admin connector-check|connector-run [--dry-run]|connector-status TENANT_ID NAME
+```
+
+**Settings** (any other key is refused, so a key has nowhere to go): `credential_ref` (required), `mode` (`aggregate`, the default; `per_user` is **refused: its pseudonymized storage is not built**, [ADR 0012](../adr/0012-privacy-modes-for-vendor-sources.md)), `lookback_days` (1 to 365, default 35), `billing_account_id` (a label for the FOCUS billing account, default `anthropic`).
+
+**The credential is a reference, never a value.** `credential_ref` is `env:NAME` (an environment variable the deployment fills from the customer's secret store) or `file:/absolute/path` (a mounted secret file). It is stored in the connector's `credential_ref` column, resolved only when a request is made, and never logged, echoed in an error or placed in settings. The API host is fixed in code (`https://api.anthropic.com`), so a key can only be sent there. Use an Admin API key (Console), or an Analytics key with `read:analytics` (Claude Enterprise); workspace-scoped keys do not work.
+
+### What a run does
+
+- Reads whole UTC days up to the start of today, in windows of at most 31 days, grouping only by `model`, `workspace_id`, `service_tier`, `speed` and `context_window`. It **never groups by `actor`**, and refuses (storing nothing) any row that carries person-level fields anyway.
+- Requests are paced under the documented 60 per minute, retried a bounded number of times (honoring `Retry-After`), and a cursor that expires because the data was refreshed restarts the query. An unexpected response shape is an error, not a guess.
+- **Usage** goes to the usage ledger as `anthropic` observations from the `vendor_admin_api` source: `input` is Anthropic's *uncached* input, cache reads and writes keep their own categories (writes are the 5-minute plus 1-hour counts), `total` is the source's total. They are summed over tier, speed and context window because the ledger has no such dimensions.
+- **Cost** goes in as FOCUS-shaped rows through the FOCUS importer, so it has lineage, revision handling and finality. `amount` (after discounts, before credits) fills BilledCost, EffectiveCost and ContractedCost; `list_amount` fills ListCost; cents are converted to dollars exactly. Token counts are joined from the usage rows of the same group, so cost per million tokens works in the [AI token view](08-focus-1-5-readiness.md); `SkuPriceDetails` carries `ModelDeveloper`, `ModelId`, `TokenDirection` and `TokenCacheAction` (uncached, read, write).
+- **Days newer than the response's `data_refreshed_at` are left for a later run**, because they are partial or missing. Finality is `provisional` until about 7 days after month end, then `final`.
+- An unchanged window is not imported again; a revised one supersedes the earlier rows and keeps them as history.
+
+### Anthropic connector limits
+
+- **`BilledCost` is not the invoiced amount.** Credits are not visible in this API, so it is the pre-credit amount; each row says so (`x_BilledCostIsPreCredit`), and the invoice stays authoritative. Priority Tier commitment fees are not in this data, and neither is usage through Bedrock, Vertex or Foundry (that is in the cloud bill).
+- Aggregate mode only: no per-person usage, no Claude Code per-user analytics, no spend-limit or member endpoints.
+- No scheduler, no health screen, no UI to add a connector. `connector-run` is idempotent and safe to run from cron.
+- Cost types other than tokens (web search, code execution, session usage) are stored as cost with no token quantity.
+
 ## Capability matrix
 
 `Tokens` means token counts by category. `Cost` means a dollar amount from the source. `Seats` means seat or licence data.
