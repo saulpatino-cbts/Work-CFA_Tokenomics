@@ -21,7 +21,7 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column
 
-from .db import Base
+from .db import Base, _now
 
 _MONEY = Numeric(28, 10)
 _QTY = Numeric(38, 12)
@@ -33,6 +33,18 @@ class Tenant(Base):
     name: Mapped[str] = mapped_column(String(256))
     base_currency: Mapped[str] = mapped_column(String(3))
     fiscal_year_start_month: Mapped[int] = mapped_column(SmallInteger, default=1)
+    person_display: Mapped[str] = mapped_column(String(12), default="pseudonym")
+
+
+class Person(Base):
+    """A pseudonym's display name (ADR 0013). A name and nothing else; see migration 0011."""
+
+    __tablename__ = "people"
+    tenant_id: Mapped[uuid.UUID] = mapped_column(Uuid, primary_key=True)
+    pseudonym: Mapped[str] = mapped_column(String(34), primary_key=True)
+    display_name: Mapped[str] = mapped_column(String(256))
+    source: Mapped[str] = mapped_column(String(16))
+    updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_now)
 
 
 class _Owned:

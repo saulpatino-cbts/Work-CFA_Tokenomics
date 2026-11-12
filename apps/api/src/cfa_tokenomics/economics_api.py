@@ -15,12 +15,12 @@ from datetime import datetime, timedelta
 from decimal import Decimal
 from typing import Annotated, Any, Literal
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from pydantic import BaseModel, BeforeValidator, ConfigDict, Field
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from . import store
+from . import people, store
 from .alloc import runner
 from .alloc.runner import AllocationError
 from .authz import Permission, Principal, get_principal, require
@@ -36,6 +36,7 @@ from .tenancy import tenant_session
 router = APIRouter(prefix="/v1")
 _READ = Depends(require(Permission.ECONOMICS_READ))
 _WRITE = Depends(require(Permission.ECONOMICS_WRITE))
+_IDENTITY = Depends(require(Permission.MANAGE_IDENTITY))
 BasisName = Literal["observed", "estimated", "assumed"]
 MAX_SWEEP = 25  # drivers in one tornado request; each costs a full evaluation per bound
 
@@ -516,3 +517,36 @@ def explain(node_id: str, t: TenantDb, _: Principal = _READ) -> dict[str, Any]:
         }  # fmt: skip
 
     return tree(root)
+
+
+class DisplayBody(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    display: Literal["pseudonym", "name"]
+
+
+@router.get("/people/resolve")
+def resolve_people(
+    ctx: TenantDb,
+    ids: Annotated[list[str] | None, Query()] = None,
+    principal: Principal = _READ,
+) -> dict:
+    """What to show for each pseudonym: the pseudonym, or the name if an administrator has chosen
+    to show names. Looking names up is audited."""
+    db, tid = ctx
+    try:
+        return {
+            "display": people.get_display(db, tid),
+            "shown": people.resolve(db, principal, tid, list(ids or [])),
+        }
+    except people.PeopleError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None
+
+
+@router.put("/admin/people/display", status_code=status.HTTP_204_NO_CONTENT)
+def put_people_display(body: DisplayBody, ctx: TenantDb, principal: Principal = _IDENTITY) -> None:
+    """Administrators choose whether the product shows pseudonyms (default) or names."""
+    db, tid = ctx
+    try:
+        people.set_display(db, principal, tid, body.display)
+    except people.PeopleError as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, str(exc)) from None

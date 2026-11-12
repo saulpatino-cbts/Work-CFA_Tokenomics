@@ -331,8 +331,8 @@ def test_downgrade_refuses_to_merge_tenants_that_share_a_key(env):
             ledger.save_checkpoint(db, "bedrock", "a", "c")
     with pytest.raises(Exception):  # noqa: B017 - any database error: the point is that it stops
         migrate.main(["downgrade", "0007"])
-    with env.connect() as c:  # still at 0010, nothing half-undone
-        assert c.execute(text("select version_num from alembic_version")).scalar() == "0010"
+    with env.connect() as c:  # still at 0011, nothing half-undone
+        assert c.execute(text("select version_num from alembic_version")).scalar() == "0011"
 
 
 # ---- the production shape: a non-superuser owner, for whom row-level security applies --------
