@@ -10,6 +10,8 @@ Record notable changes under Unreleased in the same PR. No product release or ru
 
 ### Added
 
+- People mapping and display choice (ADR 0013, migration 0011): a `people` table (pseudonym to name only), a per-tenant `person_display` setting (`pseudonym` default, or `name`), `GET /v1/people/resolve`, admin-only `PUT /v1/admin/people/display`, and the `people-import` and `person-display` operator commands. Switches and name lookups are audited as counts. Not yet built: directory sync (Entra ID, Google) and the per-user connector mode.
+
 - Customer-hosted product requirements with stable REQ IDs and an indexed documentation set.
 - Architecture, customer roles/identity, scoped Assessment, provider integration, and token-accounting contracts.
 - Deployment/onboarding, full portability, customer-owned lifecycle, operations, and acceptance-test documentation.
