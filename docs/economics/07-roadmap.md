@@ -65,7 +65,7 @@ Connectors, in order of value and ease, each behind the framework in [connectors
 6. OpenAI usage and costs; Gemini and Perplexity as their documentation allows.
 7. Application and gateway telemetry.
 
-Progress: the **Anthropic connector is built in aggregate mode** (tested against a fake server and the synthetic samples, not the real API; no per-user mode), and the **AWS and Azure cost-export connectors are built** ([connectors](04-connectors.md#aws-and-azure-cost-export-connectors-implemented)) on synthetic exports only, with no scheduler, no streaming import and no Parquet; the other connectors below are not started.
+Progress: the **Codex and ChatGPT Enterprise connector is built in aggregate mode** (tested against a fake server and the synthetic samples, not the real API), the **Anthropic connector is built in aggregate mode** (tested against a fake server and the synthetic samples, not the real API; no per-user mode), and the **AWS and Azure cost-export connectors are built** ([connectors](04-connectors.md#aws-and-azure-cost-export-connectors-implemented)) on synthetic exports only, with no scheduler, no streaming import and no Parquet; the other connectors below are not started.
 
 Research status: the [vendor API research](09-vendor-api-research.md) (2026-11-10) fills in permissions, limits, revision windows and privacy flags for every source below, and lists what is still not found. Perplexity and the Gemini Developer API have no organization usage API in the pages read, so they stay manual import or gateway telemetry. Codex now has a documented route (the unified Daily Usage API; the Codex-only endpoint retires 2026-12-15). Microsoft 365 Copilot has no dollar cost API.
 

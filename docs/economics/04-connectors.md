@@ -133,6 +133,36 @@ python -m cfa_tokenomics.admin connector-check|connector-run [--dry-run]|connect
 - No scheduler, no health screen, no UI to add a connector. `connector-run` is idempotent and safe to run from cron.
 - Cost types other than tokens (web search, code execution, session usage) are stored as cost with no token quantity.
 
+## Codex and ChatGPT Enterprise connector (implemented, aggregate mode)
+
+Reads the unified Daily Usage API with `group=workspace`, using a read-only Admin key. **Tested against a fake server built from the vendor's OpenAPI schema and the synthetic sample set; nothing has been run against the real API** (R-30).
+
+```text
+python -m cfa_tokenomics.admin connector-add openai_codex TENANT_ID NAME SCOPE.json
+python -m cfa_tokenomics.admin connector-check|connector-run [--dry-run]|connector-status TENANT_ID NAME
+```
+
+**Settings:** `credential_ref` (`env:` or `file:`, as for the [Anthropic connector](#anthropic-connector-implemented-aggregate-mode)), `workspace_id` (required), `mode` (`aggregate`; `per_user` is refused until its storage exists), `lookback_days` (default 35), `final_after_days` (default 30, 7 to 90) and `billing_account_id`. The host `https://api.chatgpt.com/v1` is fixed in code. The key needs the `enterprise.analytics.usage` read scope.
+
+### How Codex cost is stored
+
+- **Credits and native USD are separate in the source and are never converted here.**
+- **Native USD** usage (`cost_usd`) is stored as cost with basis `observed`: the vendor reports it, though the API says it is not a final invoice amount. Its SubAccountId is `<workspace>:usd`.
+- **Credit-priced usage** is stored as cost only where the source gives `estimated_cost_usd`, which the API defines as an estimate at the workspace's *current credit overage rate*. It is stored with basis **`estimated`**, never `observed`, with the exact credits kept in `x_Credits`. Its SubAccountId is `<workspace>:credits`. Credits with no estimate are counted and left unpriced.
+- The two streams have different SubAccountIds so that one being revised never supersedes the other.
+- What the day's totals hold beyond the model rows is kept as an unattributed slice, so the model breakdown never understates a day.
+- **Text tokens** exist only for API-priced usage. They go to the usage ledger as `openai_codex` observations (`input` is uncached input, `cache_read` is cached input) where the source gave them. A missing field is unknown and produces nothing; a reported zero stays zero.
+- Amounts arrive as JSON numbers, so the client parses them straight into exact decimals, never through a float.
+- Activity counts (chats, messages) are not stored: the ledger holds token categories only.
+
+### Codex connector limits
+
+- **The correction window is unknown.** The API says recent rows may be corrected and gives no window, so cost is `provisional` until `final_after_days` after the **window's** last day (30 by default, an assumption). Finality comes from the window, not from each file's own latest day, so the two streams agree.
+- Today is never read: it is still being filled.
+- Aggregate mode only: no per-user rows, no per-user monthly usage or spend-cap endpoints, no plugin, skill or tool detail, and the Compliance API is never connected.
+- The credit estimate uses the workspace's *current* rate, so it can move when the rate changes; the credits themselves are exact and kept.
+- No scheduler, no health screen, no UI.
+
 ## Capability matrix
 
 `Tokens` means token counts by category. `Cost` means a dollar amount from the source. `Seats` means seat or licence data.

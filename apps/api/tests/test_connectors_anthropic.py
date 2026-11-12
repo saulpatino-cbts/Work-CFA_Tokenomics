@@ -15,6 +15,7 @@ from cfa_tokenomics import admin
 from cfa_tokenomics.connectors import anthropic as an
 from cfa_tokenomics.connectors import costexport as cx
 from cfa_tokenomics.connectors import credentials as cred
+from cfa_tokenomics.connectors.paged import MAX_ATTEMPTS
 from cfa_tokenomics.focus.ai import ai_token_report
 from cfa_tokenomics.focus.parse import parse_focus_csv
 from cfa_tokenomics.samples.generate import build_all
@@ -196,7 +197,7 @@ def test_a_rate_limit_is_waited_out_and_a_server_error_is_retried_a_bounded_numb
             "/v1/organizations/analytics/usage",
             [("starting_at", "2026-10-01T00:00:00Z"), ("ending_at", "2026-10-02T00:00:00Z")],
         )
-    assert len(srv2.requests) == an.MAX_ATTEMPTS
+    assert len(srv2.requests) == MAX_ATTEMPTS
 
 
 def test_a_rejected_credential_is_reported_without_echoing_the_key_or_the_response():

@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from ..focus import tables as T
 from . import anthropic as anth
+from . import codex as cdx
 from . import costexport as cx
 
 
@@ -101,7 +102,32 @@ class AnthropicKind:
         return anth.pull(db, tenant_id, row.id, cfg, client, now)
 
 
+class CodexKind:
+    def create(self, db, tenant_id, name, scope):
+        return cdx.create_connector(db, tenant_id, name, scope)
+
+    def prepare(self, row):
+        cfg = cdx.parse_scope(row.scope, row.credential_ref)
+        return cfg, cdx.build_client(cfg)
+
+    def check(self, prepared, now=None):
+        cfg, client = prepared
+        return cdx.check(cfg, client, now)
+
+    def dry_run(self, prepared, now=None):
+        cfg, _client = prepared
+        return [
+            f"would read {a:%Y-%m-%d} to {b:%Y-%m-%d} (workspace-wide daily usage)"
+            for a, b in cdx.windows(cfg, now)
+        ]
+
+    def pull(self, db, tenant_id, row, prepared, now=None):
+        cfg, client = prepared
+        return cdx.pull(db, tenant_id, row.id, cfg, client, now)
+
+
 KINDS: dict[str, Kind] = {
+    "openai_codex": CodexKind(),
     "aws": CostExportKind("aws"),
     "azure": CostExportKind("azure"),
     "anthropic": AnthropicKind(),
