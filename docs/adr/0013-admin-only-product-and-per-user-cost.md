@@ -1,12 +1,12 @@
 # 0013. Admin-only product: org-level and per-user cost are both core
 
-- **Status:** Accepted (owner's instruction of 2026-11-12: the product is for administrators only, tied to Entra ID first and Google Workspace second, with an admin and a finance-viewer tier; per-user cost is necessary alongside org-level cost). The pseudonymization and retention points below are **proposed and open** until the owner answers them.
+- **Status:** Accepted (owner's instruction of 2026-11-12: the product is for administrators only, tied to Entra ID first and Google Workspace second, with an admin and a finance-viewer tier; per-user cost is necessary alongside org-level cost). Pseudonymization was decided on 2026-11-12: pseudonyms by default, with an administrator option to show real names. Retention is still open.
 - **Date:** 2026-11-12
 - **Decision authority:** Owner
 - **Owners:** Security and privacy; access control; connectors
 - **Supersedes:** the privacy default in [ADR 0012](0012-privacy-modes-for-vendor-sources.md) (aggregate by default, per-user as a recorded opt-in). The rest of 0012 stands: keyed pseudonyms, fixed hosts, read-only credentials, content-bearing sources never connected.
 - **Issue:** None exists
-- **Implementation evidence:** this change adds only the two-role model (`authz.py`, migration 0010). Per-user connector mode, identity resolution and the directory sync are **not built**.
+- **Implementation evidence:** the two-role model (`authz.py`, migration 0010) and the people mapping with the display setting (`people.py`, migration 0011, `tests/test_people.py`). Per-user connector mode and the Entra ID and Google directory sync are **not built**; names enter today only through `people-import` (manual).
 
 ## Context
 
@@ -21,9 +21,12 @@ The product's purpose is to give administrators the cost and the value or return
 5. **Identity resolution** maps each vendor identifier (OpenAI user, Anthropic actor, cloud principal) to one canonical person taken from the directory, with administrator overrides for mismatches.
 6. **Scope.** Account grants (ADR 0008) already restrict a non-admin to listed accounts. Scoping a finance viewer further (for example by business unit) is intended and comes with the person model; admins are unrestricted.
 
-## Open (proposed, owner to decide)
+## Names or pseudonyms: decided
 
-- **Pseudonymize at rest, or store names?** Proposed: keep keyed pseudonyms in the stored facts, and let an administrator resolve a pseudonym to a person through the directory mapping, with every resolution written to the audit log. Storing names in the clear is simpler but widens what a database copy reveals.
+Stored usage and cost rows hold only keyed pseudonyms, always. A separate `people` table maps a pseudonym to a display name (a name and nothing else: no email, no directory id). A tenant setting `person_display` is `pseudonym` (the default) or `name`; an administrator switches it (`PUT /v1/admin/people/display`, or `person-display` in the operator CLI). In `name` mode the product shows the name for every pseudonym it can resolve and keeps showing the pseudonym, as unattributed, for any it cannot. Switching back hides names again at once. Showing names never copies a name into cost or usage data. Every switch is audited, and every lookup of names is audited as a count, never as the names.
+
+## Open (owner to decide)
+
 - **Retention** for person-level rows (ADR 0012 proposed 90 days; the customer sets it).
 
 ## Consequences

@@ -19,7 +19,7 @@ MUTABLE_TABLES = (
     "tenants", "business_units", "customers", "environments", "applications", "workloads",
     "application_customers", "price_books", "price_entries", "scenarios", "scenario_drivers",
     "connectors", "ingestion_runs", "allocation_runs", "account_grants", "collection_checkpoints",
-    "role_assignments", "usage_aggregate_observations", "usage_facts",
+    "role_assignments", "usage_aggregate_observations", "usage_facts", "people",
 )  # fmt: skip
 APPEND_ONLY_TABLES = (
     "value_assumptions", "calculation_nodes", "calculation_edges", "raw_files", "ingestion_rejects",

@@ -6,9 +6,13 @@ python -m cfa_tokenomics.admin assign-legacy-tenant TENANT_ID   rows that predat
 python -m cfa_tokenomics.admin project-usage TENANT_ID   build usage facts from the ledger
 python -m cfa_tokenomics.admin connector-add PROVIDER TENANT_ID NAME SCOPE.json
     (PROVIDER is aws, azure, anthropic or openai_codex)
+python -m cfa_tokenomics.admin person-display TENANT_ID pseudonym|name   what the product shows
+python -m cfa_tokenomics.admin people-import TENANT_ID FILE.csv KEY_REF   names for people (columns:
+    identifier,name; KEY_REF is env:NAME or file:/abs/path, the pseudonymization key)
 python -m cfa_tokenomics.admin connector-check|connector-run|connector-status TENANT_ID NAME
 """
 
+import csv
 import json
 import os
 import sys
@@ -17,12 +21,16 @@ from datetime import UTC, datetime
 
 from sqlalchemy import create_engine
 
+from . import people
 from .alloc.runner import allocation_summary, run_allocation
+from .authz import Principal, Role
+from .connectors import credentials
 from .connectors.costexport import connector_status
 from .connectors.registry import kind_for, load_row
 from .connectors.store import StoreError
 from .focus.importer import get_or_create_manual_connector, import_focus_file
 from .legacy_tenancy import assign_legacy_tenant
+from .privacy import Pseudonymizer
 from .store import create_tenant
 from .tenancy import app_role_grants_sql, tenant_session
 from .usage.facts import project_usage
@@ -48,6 +56,10 @@ def main(argv: list[str]) -> int:
         and len(argv) >= 3
     ):
         return _connector_cmd(argv[0], argv[1:])
+    if len(argv) == 3 and argv[0] == "person-display":
+        return _person_display(argv[1], argv[2])
+    if len(argv) == 4 and argv[0] == "people-import":
+        return _people_import(argv[1:])
     if len(argv) == 4 and argv[0] == "allocate":
         return _allocate(argv[1:])
     if len(argv) >= 3 and argv[0] == "import-focus":
@@ -89,6 +101,48 @@ def _project_usage(tenant: str) -> int:
         f"aggregates: {res.aggregate_inserted} new, {res.aggregate_revised} revised, "
         f"{res.aggregate_unchanged} unchanged"
     )
+    return 0
+
+
+def _operator() -> Principal:
+    who = os.environ.get("USER") or "operator"
+    return Principal(issuer="operator-cli", subject=who, role=Role.ADMIN)
+
+
+def _person_display(tenant: str, mode: str) -> int:
+    url = os.environ.get("CFA_DATABASE_URL")
+    if not url:
+        print("CFA_DATABASE_URL is required", file=sys.stderr)
+        return 2
+    try:
+        tenant_id = uuid.UUID(tenant)
+        with tenant_session(create_engine(url), tenant_id) as db:
+            print(people.set_display(db, _operator(), tenant_id, mode))
+    except (ValueError, people.PeopleError) as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def _people_import(args: list[str]) -> int:
+    url = os.environ.get("CFA_DATABASE_URL")
+    if not url:
+        print("CFA_DATABASE_URL is required", file=sys.stderr)
+        return 2
+    tenant, path, key_ref = args
+    try:
+        tenant_id = uuid.UUID(tenant)
+        pz = Pseudonymizer(credentials.resolve(credentials.check_ref(key_ref)).encode())
+        with open(path, newline="", encoding="utf-8") as fh:
+            reader = csv.DictReader(fh)
+            if not reader.fieldnames or {"identifier", "name"} - set(reader.fieldnames):
+                raise ValueError("the file needs the columns identifier and name")
+            rows = [(r["identifier"], r["name"]) for r in reader]
+        with tenant_session(create_engine(url), tenant_id) as db:
+            print(json.dumps(people.upsert_people(db, _operator(), tenant_id, pz, rows)))
+    except (OSError, ValueError, credentials.CredentialError) as exc:
+        print(f"refused: {exc}", file=sys.stderr)
+        return 1
     return 0
 
 
