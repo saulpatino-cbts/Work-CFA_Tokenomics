@@ -162,6 +162,17 @@ def test_corrections_are_excluded_from_tokens_and_shown_as_their_own_cost(world)
     assert m.correction_effective_cost == Decimal("-0.50")
 
 
+def test_a_correction_with_no_token_quantity_or_unit_still_shows_its_cost(world):
+    world.load(
+        line("3.00", "1000000", props=I_U),
+        line("-0.75", "", unit="", props=OUT, klass="Correction"),
+    )
+    m = model(world.report())
+    assert m.correction_effective_cost == Decimal("-0.75")  # the money is never hidden
+    assert m.input_tokens == Decimal(1_000_000) and m.output_tokens is None  # and it adds no tokens
+    assert m.effective_cost == Decimal(3)
+
+
 def test_only_ai_token_usage_rows_in_the_window_count(world):
     world.load(
         line("3.00", "1000000", props=I_U), line("9.00", "10", props=I_U, service_cat="Compute"),

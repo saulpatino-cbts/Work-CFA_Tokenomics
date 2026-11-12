@@ -4,7 +4,8 @@ python -m cfa_tokenomics.admin create-tenant NAME CURRENCY
 python -m cfa_tokenomics.admin app-role-sql ROLE     prints the grants for the runtime role
 python -m cfa_tokenomics.admin assign-legacy-tenant TENANT_ID   rows that predate tenancy
 python -m cfa_tokenomics.admin project-usage TENANT_ID   build usage facts from the ledger
-python -m cfa_tokenomics.admin connector-add aws|azure TENANT_ID NAME SCOPE_JSON_FILE
+python -m cfa_tokenomics.admin connector-add PROVIDER TENANT_ID NAME SCOPE.json
+    (PROVIDER is aws, azure, anthropic or openai_codex)
 python -m cfa_tokenomics.admin connector-check|connector-run|connector-status TENANT_ID NAME
 """
 
@@ -17,15 +18,8 @@ from datetime import UTC, datetime
 from sqlalchemy import create_engine
 
 from .alloc.runner import allocation_summary, run_allocation
-from .connectors.costexport import (
-    build_store,
-    check,
-    connector_status,
-    create_connector,
-    discover,
-    load_connector,
-    pull,
-)
+from .connectors.costexport import connector_status
+from .connectors.registry import kind_for, load_row
 from .connectors.store import StoreError
 from .focus.importer import get_or_create_manual_connector, import_focus_file
 from .legacy_tenancy import assign_legacy_tenant
@@ -109,8 +103,8 @@ def _connector_add(args: list[str]) -> int:
             scope = json.load(fh)
         tenant_id = uuid.UUID(tenant)
         with tenant_session(create_engine(url), tenant_id) as db:
-            cid = create_connector(db, tenant_id, provider, name, scope)
-    except (OSError, ValueError) as exc:  # includes bad JSON and ConfigError
+            cid = kind_for(provider).create(db, tenant_id, name, scope)
+    except (OSError, ValueError) as exc:  # includes bad JSON, ConfigError and CredentialError
         print(f"refused: {exc}", file=sys.stderr)
         return 1
     print(cid)
@@ -125,27 +119,26 @@ def _connector_cmd(command: str, args: list[str]) -> int:
     tenant_id, name = uuid.UUID(args[0]), args[1]
     try:
         with tenant_session(create_engine(url), tenant_id) as db:
-            cid, cfg, enabled = load_connector(db, name)
+            row = load_row(db, name)
             if command == "connector-status":
-                print(json.dumps(connector_status(db, cid), default=str, indent=2))
+                print(json.dumps(connector_status(db, row.id), default=str, indent=2))
                 return 0
-            if not enabled:
+            if not row.enabled:
                 print("refused: the connector is disabled", file=sys.stderr)
                 return 1
-            store = build_store(cfg)
+            kind = kind_for(row.provider_key)
+            prepared = kind.prepare(row)
             if command == "connector-check":
-                steps = check(cfg, store)
+                steps = kind.check(prepared)
                 for s in steps:
                     print(f"{'ok  ' if s.ok else 'FAIL'} {s.name}: {s.message}")
                 return 0 if all(s.ok for s in steps) else 1
             if "--dry-run" in args:
-                d = discover(cfg, store)
-                for r in d.selected:
-                    where, n = r.run_id or "(in place)", len(r.parts)
-                    print(f"would read {r.period} run {where}: {n} file(s)")
+                for line in kind.dry_run(prepared):
+                    print(line)
                 return 0
-            outcomes = pull(db, tenant_id, cid, cfg, store)
-    except (ValueError, StoreError) as exc:  # ConfigError is a ValueError
+            outcomes = kind.pull(db, tenant_id, row, prepared)
+    except (ValueError, StoreError) as exc:  # ConfigError and CredentialError are ValueErrors
         print(f"refused: {exc}", file=sys.stderr)
         return 1
     for o in outcomes:

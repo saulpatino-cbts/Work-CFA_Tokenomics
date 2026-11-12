@@ -46,6 +46,12 @@ Rules: `pull` is idempotent for a window; the cursor advances only after the raw
 
 **Limits.** It reduces what a file reveals; it does not prove anonymity. Dates, services, regions, SKUs, tag keys and the shape of spend remain, and someone who knows the customer could recognise them. It finds patterns, not names, so a person's name in a column you add with `--allow-columns` is not removed. **Review the output before sharing it**, and follow the [Data Classification Policy](https://connect.cbts.com/redir/44051) for anything customer-owned.
 
+## Privacy modes and sample data
+
+**Privacy.** Every connector that can see people runs in `aggregate` mode by default; `per_user` is an administrator opt-in with a recorded reason, and person identifiers are replaced at ingest by a keyed hash (`privacy.py`), never stored in the clear. Sources that carry prompt or conversation content are never connected. See [ADR 0012](../adr/0012-privacy-modes-for-vendor-sources.md). Only the pseudonymizer exists so far.
+
+**Sample data.** `python -m cfa_tokenomics.samples OUT_DIR [--month 2026-10] [--seed 7] [--identity]` writes a deterministic, fully synthetic set that describes one fictional cast: Example Co, twelve users (`user-0001` to `user-0012` at `example.test`) in three teams, three applications, an AWS sandbox account and an Azure sandbox subscription. It contains an AWS Data Exports tree and an Azure export tree (FOCUS-style CSV gzip, two parts each, with Usage, Tax, Credit, Purchase and Correction rows, tagged and untagged cost, and AI token rows using the FOCUS 1.5 draft's model and token properties), the unified OpenAI Daily Usage API (per user and workspace-wide, credits, USD and tokens kept separate), and the Anthropic usage and cost analytics shapes (by model and by actor, amounts as cents strings). `--identity` adds the 1.5 draft identity columns to the AWS rows so the importer's dropping of them can be tried. Every FOCUS row carries `x_SyntheticSample = true`. **The layouts and shapes follow vendor documentation and have not been checked against a real export or live API**, so these files test the product's assumptions, not the vendors' behaviour. FOCUS cost lines have no user dimension, so the cast's users link to cost only through the team and application tags.
+
 ## Manual FOCUS import (implemented)
 
 `python -m cfa_tokenomics.admin import-focus TENANT_ID FILE [--version 1.2] [--final] [--allow-partial]` imports a FOCUS CSV (plain or gzip) through a connector named `manual-focus-import`. It is the first connector and the way to put real cost data into the model before any API connector exists. **Tested on synthetic files only; no real export has been imported.**
@@ -111,6 +117,65 @@ There is no scheduler yet: `connector-run` is idempotent and safe to run from cr
 - **No Cost Explorer or Cost Management API.** These connectors read exports only. Cost Explorer's new Bedrock attributes and Azure's Query API are separate sources ([vendor research](09-vendor-api-research.md)).
 - **No scheduler, no health screen, no UI** to add a connector. Status is a command.
 - **Do not point two connectors at one export:** supersession is per connector.
+
+## Anthropic connector (implemented, aggregate mode)
+
+Reads the Admin API's usage and cost analytics endpoints (beta) with a read-only credential. **Tested against a fake server built from the documented response shapes and the synthetic sample set; nothing has been run against the real API, so bracket encoding of `group_by[]`, paging and the exact error behaviour are unverified** (R-29).
+
+```text
+python -m cfa_tokenomics.admin connector-add anthropic TENANT_ID NAME SCOPE.json
+python -m cfa_tokenomics.admin connector-check|connector-run [--dry-run]|connector-status TENANT_ID NAME
+```
+
+**Settings** (any other key is refused, so a key has nowhere to go): `credential_ref` (required), `mode` (`aggregate`, the default; `per_user` is **refused: its pseudonymized storage is not built**, [ADR 0012](../adr/0012-privacy-modes-for-vendor-sources.md)), `lookback_days` (1 to 365, default 35), `billing_account_id` (a label for the FOCUS billing account, default `anthropic`).
+
+**The credential is a reference, never a value.** `credential_ref` is `env:NAME` (an environment variable the deployment fills from the customer's secret store) or `file:/absolute/path` (a mounted secret file). It is stored in the connector's `credential_ref` column, resolved only when a request is made, and never logged, echoed in an error or placed in settings. The API host is fixed in code (`https://api.anthropic.com`), so a key can only be sent there. Use an Admin API key (Console), or an Analytics key with `read:analytics` (Claude Enterprise); workspace-scoped keys do not work.
+
+### What a run does
+
+- Reads whole UTC days up to the start of today, in windows of at most 31 days, grouping only by `model`, `workspace_id`, `service_tier`, `speed` and `context_window`. It **never groups by `actor`**, and refuses (storing nothing) any row that carries person-level fields anyway.
+- Requests are paced under the documented 60 per minute, retried a bounded number of times (honoring `Retry-After`), and a cursor that expires because the data was refreshed restarts the query. An unexpected response shape is an error, not a guess.
+- **Usage** goes to the usage ledger as `anthropic` observations from the `vendor_admin_api` source: `input` is Anthropic's *uncached* input, cache reads and writes keep their own categories (writes are the 5-minute plus 1-hour counts), `total` is the source's total. They are summed over tier, speed and context window because the ledger has no such dimensions.
+- **Cost** goes in as FOCUS-shaped rows through the FOCUS importer, so it has lineage, revision handling and finality. `amount` (after discounts, before credits) fills BilledCost, EffectiveCost and ContractedCost; `list_amount` fills ListCost; cents are converted to dollars exactly. Token counts are joined from the usage rows of the same group, so cost per million tokens works in the [AI token view](08-focus-1-5-readiness.md); `SkuPriceDetails` carries `ModelDeveloper`, `ModelId`, `TokenDirection` and `TokenCacheAction` (uncached, read, write).
+- **Days newer than the response's `data_refreshed_at` are left for a later run**, because they are partial or missing. Finality is `provisional` until about 7 days after month end, then `final`.
+- An unchanged window is not imported again; a revised one supersedes the earlier rows and keeps them as history.
+
+### Anthropic connector limits
+
+- **`BilledCost` is not the invoiced amount.** Credits are not visible in this API, so it is the pre-credit amount; each row says so (`x_BilledCostIsPreCredit`), and the invoice stays authoritative. Priority Tier commitment fees are not in this data, and neither is usage through Bedrock, Vertex or Foundry (that is in the cloud bill).
+- Aggregate mode only: no per-person usage, no Claude Code per-user analytics, no spend-limit or member endpoints.
+- No scheduler, no health screen, no UI to add a connector. `connector-run` is idempotent and safe to run from cron.
+- Cost types other than tokens (web search, code execution, session usage) are stored as cost with no token quantity.
+
+## Codex and ChatGPT Enterprise connector (implemented, aggregate mode)
+
+Reads the unified Daily Usage API with `group=workspace`, using a read-only Admin key. **Tested against a fake server built from the vendor's OpenAPI schema and the synthetic sample set; nothing has been run against the real API** (R-30).
+
+```text
+python -m cfa_tokenomics.admin connector-add openai_codex TENANT_ID NAME SCOPE.json
+python -m cfa_tokenomics.admin connector-check|connector-run [--dry-run]|connector-status TENANT_ID NAME
+```
+
+**Settings:** `credential_ref` (`env:` or `file:`, as for the [Anthropic connector](#anthropic-connector-implemented-aggregate-mode)), `workspace_id` (required), `mode` (`aggregate`; `per_user` is refused until its storage exists), `lookback_days` (default 35), `final_after_days` (default 30, 7 to 90) and `billing_account_id`. The host `https://api.chatgpt.com/v1` is fixed in code. The key needs the `enterprise.analytics.usage` read scope.
+
+### How Codex cost is stored
+
+- **Credits and native USD are separate in the source and are never converted here.**
+- **Native USD** usage (`cost_usd`) is stored as cost with basis `observed`: the vendor reports it, though the API says it is not a final invoice amount. Its SubAccountId is `<workspace>:usd`.
+- **Credit-priced usage** is stored as cost only where the source gives `estimated_cost_usd`, which the API defines as an estimate at the workspace's *current credit overage rate*. It is stored with basis **`estimated`**, never `observed`, with the exact credits kept in `x_Credits`. Its SubAccountId is `<workspace>:credits`. Credits with no estimate are counted and left unpriced.
+- The two streams have different SubAccountIds so that one being revised never supersedes the other.
+- What the day's totals hold beyond the model rows is kept as an unattributed slice, so the model breakdown never understates a day.
+- **Text tokens** exist only for API-priced usage. They go to the usage ledger as `openai_codex` observations (`input` is uncached input, `cache_read` is cached input) where the source gave them. A missing field is unknown and produces nothing; a reported zero stays zero.
+- Amounts arrive as JSON numbers, so the client parses them straight into exact decimals, never through a float.
+- Activity counts (chats, messages) are not stored: the ledger holds token categories only.
+
+### Codex connector limits
+
+- **The correction window is unknown.** The API says recent rows may be corrected and gives no window, so cost is `provisional` until `final_after_days` after the **window's** last day (30 by default, an assumption). Finality comes from the window, not from each file's own latest day, so the two streams agree.
+- Today is never read: it is still being filled.
+- Aggregate mode only: no per-user rows, no per-user monthly usage or spend-cap endpoints, no plugin, skill or tool detail, and the Compliance API is never connected.
+- The credit estimate uses the workspace's *current* rate, so it can move when the rate changes; the credits themselves are exact and kept.
+- No scheduler, no health screen, no UI.
 
 ## Capability matrix
 

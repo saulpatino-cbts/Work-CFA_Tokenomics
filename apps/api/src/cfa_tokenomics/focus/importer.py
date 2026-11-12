@@ -103,7 +103,10 @@ def import_focus_file(
     keep_identity_columns: bool = False,
     now: datetime | None = None,
     max_bytes: int = 100_000_000,
+    basis: str = "observed",
 ) -> ImportResult:
+    if basis not in ("observed", "estimated", "assumed"):
+        raise ValueError("basis must be observed, estimated or assumed")
     now = now or datetime.now(UTC)
     digest = hashlib.sha256(content).hexdigest()
     prior = db.execute(
@@ -183,7 +186,7 @@ def import_focus_file(
 
     fin = finality or _finality(parsed.rows, now, final_after_days)
     base = {
-        "tenant_id": tenant_id, "ingestion_run_id": run_id, "raw_file_id": raw_id, "basis": "observed",
+        "tenant_id": tenant_id, "ingestion_run_id": run_id, "raw_file_id": raw_id, "basis": basis,
         "finality": fin, "source_focus_version": declared_version, "mapper_version": C.MAPPER_VERSION,
     }  # fmt: skip
     superseded = 0
