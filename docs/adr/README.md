@@ -17,6 +17,7 @@ ADRs capture product boundaries and implementation choices. **Accepted** means t
 | [0009](0009-sku-source-dimensions-and-series.md) | Proposed (implemented; needs confirmation) | `sku` and `source_type` dimensions; bucketed series that never add sources. |
 | [0010](0010-vendor-and-genai-scope.md) | Accepted scope; nothing implemented | Vendor APIs for Claude Code, OpenAI Codex, Perplexity, Gemini, GitHub Copilot; cloud APIs; Microsoft Copilot via Graph and Viva. |
 | [0011](0011-ai-economics-platform.md) | Proposed | Reposition as an application-centric AI economics platform (FOCUS-aligned, provenance-first). |
+| [0012](0012-privacy-modes-for-vendor-sources.md) | Accepted | Vendor usage sources run in aggregate mode by default; per-user mode is a recorded admin opt-in with keyed pseudonyms; content-bearing sources are never connected. |
 
 ## Open technical decisions
 
