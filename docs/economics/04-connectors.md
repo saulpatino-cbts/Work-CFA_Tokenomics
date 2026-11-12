@@ -32,6 +32,20 @@ Rules: `pull` is idempotent for a window; the cursor advances only after the raw
 
 **Manual import is a first-class connector.** It accepts FOCUS files (CSV or Parquet, any version from 1.0), a generic CSV with a saved column mapping, and a usage template. It is the fastest route to real data, the fallback for sources with no API, and the way customers supply price sheets and invoices.
 
+## Sharing a real export safely: the sanitizer
+
+`python -m cfa_tokenomics.sanitize INPUT OUTPUT [--salt-file FILE] [--scale DECIMAL] [--keep-tag-values-for KEY,KEY] [--allow-columns COL,COL]` takes a real FOCUS CSV (plain or gzip) or a whole export folder and writes a copy that is safer to share for testing. It runs locally, calls nothing and writes only to a new path. **Tested on invented stand-ins for sensitive values, never on a real export.**
+
+- **Allow-list.** Only columns known to hold non-identifying values pass through (costs, quantities, dates, currency, categories, units, service and SKU names, regions, commitment categories). **Every other column is dropped**, including extension columns (`x_...`), free-text descriptions, `ChargeDescription`, and the FOCUS 1.5 identity columns. The report names the dropped columns, never their values.
+- **Pseudonyms.** Account, resource, invoice and commitment identifiers and names become consistent keyed pseudonyms (`acct-…`, `res-…`), so grouping, joins and allocation still work. The salt is random, never printed and never written to the report. With `--salt-file` the same salt (created `0600` if absent) is reused so pseudonyms match across runs; without it they are unlinkable between runs. **Run the whole folder in one invocation**, since parts of one export must share a salt.
+- **Scrubbing.** Emails, ARNs, GUIDs, 12-digit account numbers and IPv4 addresses inside kept text, tag keys and values and `SkuPriceDetails` are replaced. SKU identifiers (`SkuId`, `SkuPriceId`, `SkuMeter`) are public catalog ids and are left alone so they stay joinable to price lists.
+- **Tags.** Simple lower-case keys are kept; other keys and all values become pseudonyms, except values for keys named in `--keep-tag-values-for` (for example `app,env`, so tag allocation still reads naturally). Unreadable tags are dropped.
+- **Amounts are real unless scaled.** `--scale 0.37` multiplies cost and quantity columns by an exact decimal (unit prices are untouched, so cost still equals quantity times price within rounding at 18 decimal places), which keeps ratios and hides absolute spend. The factor is never printed or recorded.
+- **Leak check.** After writing, any email or ARN still anywhere in the output deletes it and fails the run. A failure on any file removes every file already written.
+- **Layout is preserved** (so the connector layouts still match); non-CSV files are skipped and listed.
+
+**Limits.** It reduces what a file reveals; it does not prove anonymity. Dates, services, regions, SKUs, tag keys and the shape of spend remain, and someone who knows the customer could recognise them. It finds patterns, not names, so a person's name in a column you add with `--allow-columns` is not removed. **Review the output before sharing it**, and follow the [Data Classification Policy](https://connect.cbts.com/redir/44051) for anything customer-owned.
+
 ## Privacy modes and sample data
 
 **Privacy.** Every connector that can see people runs in `aggregate` mode by default; `per_user` is an administrator opt-in with a recorded reason, and person identifiers are replaced at ingest by a keyed hash (`privacy.py`), never stored in the clear. Sources that carry prompt or conversation content are never connected. See [ADR 0012](../adr/0012-privacy-modes-for-vendor-sources.md). Only the pseudonymizer exists so far.
