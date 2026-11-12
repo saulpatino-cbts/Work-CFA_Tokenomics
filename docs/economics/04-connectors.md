@@ -117,7 +117,7 @@ There is no scheduler yet: `connector-run` is idempotent and safe to run from cr
 | **Microsoft 365 Copilot (Graph reports)** | **no** | active users, prompt counts, per-app last activity | **no** | licensed users only; licensing via Graph | none |
 | **Microsoft Graph licensing** | no | no | no | **yes** (`consumedUnits`, per-user license details) | none (needs a licence price) |
 | **OpenAI Usage and Costs API** | **yes** | requests | **yes** (daily only) | no | Vendor cost |
-| **OpenAI Codex (workspace analytics)** | **not found** (a Daily Usage Analytics API exists; its fields were not readable) | daily usage | not found | not found | not established |
+| **OpenAI Codex and ChatGPT Enterprise (Daily Usage API)** | **text tokens for API-priced usage only** (uncached, cached, output) | daily chats, messages, plugins, skills, tools | **credits and native USD, kept separate** (plus an estimate of the credit part); not an invoice | per-user monthly usage against caps (PII) | credits or USD as reported; Codex with an API key is in the OpenAI costs API |
 | **Google Gemini and Vertex AI** | Vertex: token metrics in Cloud Monitoring (beta). Gemini Developer API: per response only, no org API found | n/a | via Cloud Billing | no | Cloud Billing BigQuery export (a FOCUS export is in preview) |
 | **Perplexity** | per response only; no org API found | console only | console only | no | not established |
 | **Application and gateway telemetry** | **yes, per request** (if instrumented) | requests, sessions, users | no | no | none |
