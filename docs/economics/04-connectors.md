@@ -32,6 +32,12 @@ Rules: `pull` is idempotent for a window; the cursor advances only after the raw
 
 **Manual import is a first-class connector.** It accepts FOCUS files (CSV or Parquet, any version from 1.0), a generic CSV with a saved column mapping, and a usage template. It is the fastest route to real data, the fallback for sources with no API, and the way customers supply price sheets and invoices.
 
+## Privacy modes and sample data
+
+**Privacy.** Every connector that can see people runs in `aggregate` mode by default; `per_user` is an administrator opt-in with a recorded reason, and person identifiers are replaced at ingest by a keyed hash (`privacy.py`), never stored in the clear. Sources that carry prompt or conversation content are never connected. See [ADR 0012](../adr/0012-privacy-modes-for-vendor-sources.md). Only the pseudonymizer exists so far.
+
+**Sample data.** `python -m cfa_tokenomics.samples OUT_DIR [--month 2026-10] [--seed 7] [--identity]` writes a deterministic, fully synthetic set that describes one fictional cast: Example Co, twelve users (`user-0001` to `user-0012` at `example.test`) in three teams, three applications, an AWS sandbox account and an Azure sandbox subscription. It contains an AWS Data Exports tree and an Azure export tree (FOCUS-style CSV gzip, two parts each, with Usage, Tax, Credit, Purchase and Correction rows, tagged and untagged cost, and AI token rows using the FOCUS 1.5 draft's model and token properties), the unified OpenAI Daily Usage API (per user and workspace-wide, credits, USD and tokens kept separate), and the Anthropic usage and cost analytics shapes (by model and by actor, amounts as cents strings). `--identity` adds the 1.5 draft identity columns to the AWS rows so the importer's dropping of them can be tried. Every FOCUS row carries `x_SyntheticSample = true`. **The layouts and shapes follow vendor documentation and have not been checked against a real export or live API**, so these files test the product's assumptions, not the vendors' behaviour. FOCUS cost lines have no user dimension, so the cast's users link to cost only through the team and application tags.
+
 ## Manual FOCUS import (implemented)
 
 `python -m cfa_tokenomics.admin import-focus TENANT_ID FILE [--version 1.2] [--final] [--allow-partial]` imports a FOCUS CSV (plain or gzip) through a connector named `manual-focus-import`. It is the first connector and the way to put real cost data into the model before any API connector exists. **Tested on synthetic files only; no real export has been imported.**

@@ -5,7 +5,8 @@ queries follow the draft's own example queries and caveats (docs/economics/08-fo
 
 - Only ChargeCategory "Usage" rows of ServiceCategory "AI and Machine Learning" with ConsumedUnit "Tokens".
 - Token quantities exclude correction rows (ChargeClass not null), as the draft's token queries do;
-  corrections are reported as their own cost line so money is never hidden.
+  corrections are reported as their own cost line so money is never hidden. A correction in the AI
+  category is included whatever its unit, because a correction often carries cost but no token quantity.
 - Rows whose unit is token-like but not exactly "Tokens" ("1000 Tokens", "Token") are not summed and
   are counted in ``rows_with_other_token_units``.
 - Model identity and token direction and cache action come from SkuPriceDetails properties
@@ -50,7 +51,8 @@ _SQL = text(
     " sum(consumed_quantity) tokens, sum(pricing_quantity) pricing_quantity, "
     " sum(effective_cost) effective_cost, sum(billed_cost) billed_cost, count(*) lines "
     "from cur where charge_category = 'Usage' and service_category = 'AI and Machine Learning' "
-    " and consumed_unit = 'Tokens' and charge_period_start >= :s and charge_period_end <= :e "
+    " and (consumed_unit = 'Tokens' or charge_class is not null) "
+    " and charge_period_start >= :s and charge_period_end <= :e "
     "group by 1,2,3,4,5,6,7,8,9,10,11,12,13 order by 1,4,6,7,8,9 limit :lim"
 )
 
