@@ -40,7 +40,7 @@ def env(monkeypatch):
         oidc_audience=AUD,
         database_secret_ref="ref",
         database_url=SecretStr(URL),
-        oidc_reader_group="readers",
+        oidc_finance_group="readers",
         bootstrap_admin=f"{ISS}|root",
         default_tenant_id=TENANT,
     )

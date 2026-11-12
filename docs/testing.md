@@ -8,7 +8,7 @@
 | --- | --- |
 | REQ-001/009 | Fresh customer-run install with no vendor credentials/control plane, preflight failures, resumability, upgrade and recovery. |
 | REQ-002 | Secret redaction, local credential custody, rotation, scope and revocation tests. |
-| REQ-003 | Admin/user/reader allowed and denied API/worker/resource operations. |
+| REQ-003 | Admin/finance-viewer allowed and denied API/worker/resource operations. |
 | REQ-004/005 | Vendor denied by default; scope/identity/expiry/revocation/stream/import cases. |
 | REQ-006 | Independent Foundry, Bedrock, Vertex adapter contract and customer-authorized integration tests. |
 | REQ-007 | API-specific normalization, unknown values, retries, overlapping windows, revisions, and reconciliation. |
@@ -30,7 +30,7 @@ Synthetic fixtures may exercise behavior but must be visibly labeled test-only a
 
 ## Mandatory adversarial cases
 
-Attempt to access another workspace; write as reader; approve Assessment as vendor; use an expired/revoked grant; keep reading through an existing stream; reactivate support through import; reveal a credential through an error; submit hostile archive paths; inflate totals with overlap/replay; remove target administrators through imported roles; and run an old worker after migration cutover.
+Attempt to access another workspace; write as finance viewer; approve Assessment as vendor; use an expired/revoked grant; keep reading through an existing stream; reactivate support through import; reveal a credential through an error; submit hostile archive paths; inflate totals with overlap/replay; remove target administrators through imported roles; and run an old worker after migration cutover.
 
 Test that missing usage stays unknown, cache categories are not blindly added, aggregate observations do not gain invented request IDs, and charge estimates are not labeled actual bills.
 

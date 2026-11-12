@@ -36,8 +36,7 @@ class Settings(BaseSettings):
     # Role mapping from a customer-controlled claim. No match means no access.
     oidc_roles_claim: str = "groups"
     oidc_admin_group: str | None = None
-    oidc_user_group: str | None = None
-    oidc_reader_group: str | None = None
+    oidc_finance_group: str | None = None
     # First-admin / IdP-outage recovery: "<issuer>|<subject>", set by the customer operator.
     bootstrap_admin: str | None = None
 

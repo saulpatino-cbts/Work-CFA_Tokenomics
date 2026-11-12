@@ -10,7 +10,7 @@ These requirements capture the product owner's clarified scope. They supersede e
 | --- | --- | --- |
 | REQ-001 | Customer-hosted deployment only | Normal operation runs in the customer's environment without a mandatory vendor data/control plane. |
 | REQ-002 | Customer-controlled credentials | Customer provisions and controls OIDC/API credentials; vendor never receives customer secret values. |
-| REQ-003 | Customer admin/user/reader roles | Permissions enforced on the server and scoped to authorized resources. |
+| REQ-003 | Customer admin and finance-viewer roles (admin-only product, ADR 0013) | Permissions enforced on the server and scoped to authorized resources. |
 | REQ-004 | No standing vendor access | Vendor admin/support cannot read customer data by default. |
 | REQ-005 | Explicit Assessment authorization | Customer-approved scope, identity, duration, revocation, and audit trail govern access. |
 | REQ-006 | Three AI provider integrations | Foundry, Bedrock, and Vertex AI can be connected independently. |

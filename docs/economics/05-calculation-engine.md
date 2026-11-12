@@ -183,7 +183,7 @@ Scaling: 10× users and 10× tokens at the same prices makes AI cost $2,700 (lin
 
 ## HTTP API (implemented, Phase 1 slice 5)
 
-All routes are under `/v1`, run in a tenant-scoped session and need `economics:read` (reader, user, admin) or `economics:write` (user, admin). Decimals are sent as strings or integers; a float is refused with 422. Writes are audited.
+All routes are under `/v1`, run in a tenant-scoped session and need `economics:read` (finance viewer, admin) or `economics:write` (admin). Decimals are sent as strings or integers; a float is refused with 422. Writes are audited.
 
 | Route | Purpose |
 | --- | --- |

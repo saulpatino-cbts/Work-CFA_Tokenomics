@@ -43,7 +43,7 @@ class Api:
         self.tid = self.a
         settings = Settings(
             environment="production", oidc_issuer=ISS, oidc_audience=AUD, database_secret_ref="r",
-            database_url=SecretStr(URL), oidc_reader_group="readers", bootstrap_admin=f"{ISS}|root",
+            database_url=SecretStr(URL), oidc_finance_group="readers", bootstrap_admin=f"{ISS}|root",
             default_tenant_id=self.a,
         )  # fmt: skip
         app = create_app()

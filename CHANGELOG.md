@@ -4,6 +4,10 @@ Record notable changes under Unreleased in the same PR. No product release or ru
 
 ## [Unreleased]
 
+### Changed
+
+- **Breaking: admin-only roles (ADR 0013).** The roles are now `admin` and `finance_viewer` (read-only). `user` and `reader` are removed; existing assignments become `finance_viewer` (migration 0010). Replace `CFA_OIDC_USER_GROUP` and `CFA_OIDC_READER_GROUP` with `CFA_OIDC_FINANCE_GROUP`. Economics writes are admin-only. ADR 0012's aggregate-by-default privacy rule is superseded; per-user cost is a core view (per-user connector mode is not built yet).
+
 ### Added
 
 - Customer-hosted product requirements with stable REQ IDs and an indexed documentation set.

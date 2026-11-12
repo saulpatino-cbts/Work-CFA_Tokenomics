@@ -23,7 +23,7 @@ def test_roles_with_usage_read_allowed(role):
     assert _client(role).get("/v1/whoami").status_code == 200
 
 
-@pytest.mark.parametrize("role", [Role.USER, Role.READER])
+@pytest.mark.parametrize("role", [Role.FINANCE_VIEWER])
 @pytest.mark.parametrize(
     "perm",
     [
@@ -37,8 +37,15 @@ def test_non_admin_denied_privileged(role, perm):
     assert not is_allowed(Principal("i", "s", role), perm)
 
 
-def test_reader_cannot_write_records():
-    assert not is_allowed(Principal("i", "s", Role.READER), Permission.WRITE_RECORDS)
+def test_finance_viewer_is_read_only():
+    viewer = Principal("i", "s", Role.FINANCE_VIEWER)
+    assert not is_allowed(viewer, Permission.WRITE_RECORDS)
+    assert not is_allowed(viewer, Permission.ECONOMICS_WRITE)
+    assert is_allowed(viewer, Permission.ECONOMICS_READ)
+
+
+def test_there_is_no_end_user_role():
+    assert {r.value for r in Role} == {"admin", "finance_viewer"}
 
 
 def test_admin_has_all_permissions():

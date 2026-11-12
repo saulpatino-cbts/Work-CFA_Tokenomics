@@ -70,8 +70,7 @@ def map_role(claims: dict[str, Any], settings: Settings):
     groups = {raw} if isinstance(raw, str) else set(raw) if isinstance(raw, list) else set()
     for role, group in (
         (Role.ADMIN, settings.oidc_admin_group),
-        (Role.USER, settings.oidc_user_group),
-        (Role.READER, settings.oidc_reader_group),
+        (Role.FINANCE_VIEWER, settings.oidc_finance_group),
     ):
         if group and group in groups:
             return role
