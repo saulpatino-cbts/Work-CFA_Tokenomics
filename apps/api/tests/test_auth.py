@@ -18,8 +18,7 @@ SETTINGS = Settings(
     oidc_audience=AUD,
     database_secret_ref="ref",
     oidc_admin_group="cfa-admins",
-    oidc_user_group="cfa-users",
-    oidc_reader_group="cfa-readers",
+    oidc_finance_group="cfa-finance",
     bootstrap_admin=f"{ISS}|break-glass",
 )
 
@@ -42,8 +41,8 @@ def get(token, path="/v1/whoami", c=None):
     return (c or client()).get(path, headers=h)
 
 
-def test_valid_reader_token():
-    assert get(tok(groups=["cfa-readers"])).status_code == 200
+def test_valid_finance_viewer_token():
+    assert get(tok(groups=["cfa-finance"])).status_code == 200
 
 
 def test_no_header_is_401():

@@ -1,6 +1,6 @@
 # Roles and identity
 
-**Status:** required role names with a proposed least-privilege permission matrix. Final object/resource scopes must be approved before implementation.
+**Status:** two roles (admin, finance viewer) with a proposed least-privilege permission matrix. Final object/resource scopes must be approved before implementation.
 
 ## Separate identity flows
 
@@ -13,18 +13,22 @@
 
 OIDC sign-in does not itself grant cloud-provider permissions. An inference API key does not establish monitoring or billing access. Never reuse a shared provider key as a human administration credential.
 
-## Proposed permissions
+## Roles
 
-| Capability | Customer admin | Customer user | Customer reader | Vendor admin/support |
-| --- | --- | --- | --- | --- |
-| Identity and role mapping | Manage | No | No | No standing access |
-| Provider connections | Manage/test | Use approved scope | View permitted status | Approved Assessment metadata only |
-| Records/workspaces | Manage authorized scope | Create/change assigned scope | Read assigned scope | Approved read-only scope only |
-| Usage dashboards | Authorized customer scope | Assigned scope | Assigned scope | Active Assessment scope only |
-| Full export/import | Yes, explicit confirmation | No by default | No by default | No |
-| Retention/deletion policy | Customer controls | Explicit delegation only | No | No |
-| Grant/revoke Assessment | Yes | No by default | No | Cannot self-approve |
-| Reveal stored secret values | No retrieval by default | No | No | Never |
+The product is for administrators only ([ADR 0013](adr/0013-admin-only-product-and-per-user-cost.md)). There is no end-user role. Sign-in is the customer's directory (Entra ID first, then Google Workspace) through OIDC group claims.
+
+| Capability | Admin | Finance viewer | Vendor admin/support |
+| --- | --- | --- | --- |
+| Identity and role mapping | Manage | No | No standing access |
+| Provider and connector management | Manage/test | No | Approved Assessment metadata only |
+| Cost, usage and economics views (org and per user) | All | Read; limited by account grants | Active Assessment scope only |
+| Economics writes (applications, assumptions, allocation, scenarios) | Yes | No | No |
+| Full export/import | Yes, explicit confirmation | No | No |
+| Retention/deletion policy | Customer controls | No | No |
+| Grant/revoke Assessment | Yes | No | Cannot self-approve |
+| Reveal stored secret values | No retrieval by default | No | Never |
+
+`CFA_OIDC_ADMIN_GROUP` maps to Admin and `CFA_OIDC_FINANCE_GROUP` to Finance viewer. Earlier `user` and `reader` assignments became finance viewers (migration 0010); the `CFA_OIDC_USER_GROUP` and `CFA_OIDC_READER_GROUP` settings no longer exist.
 
 Admins configure secrets through protected write-only flows or local secret references. Customer cloud administrators may have separate infrastructure privileges; application roles must not pretend to restrict those independent privileges.
 

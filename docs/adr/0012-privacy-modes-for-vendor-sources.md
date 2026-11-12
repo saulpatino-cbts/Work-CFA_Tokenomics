@@ -2,6 +2,7 @@
 
 - **Status:** Accepted (as read from the owner's reply of 2026-11-12, "can we do both?": support both modes, aggregate as the default and per-user as an opt-in; the owner should confirm this wording on review)
 - **Date:** 2026-11-12
+- **Superseded in part by:** [ADR 0013](0013-admin-only-product-and-per-user-cost.md): per-user is no longer an opt-in; the product is admin-only and both views are core. Decisions 4 to 7 below still stand.
 - **Decision authority:** Owner
 - **Owners:** Security and privacy; connectors
 - **Requirements:** REQ-013 to REQ-022 (proposed), customer data custody ([ADR 0001](0001-customer-hosted-boundary.md))

@@ -10,7 +10,7 @@ What exists, and what it was built to do:
 
 | Area | What is built | Evidence |
 | --- | --- | --- |
-| Identity and access | OIDC bearer verification, group-to-role mapping (admin, user, reader), bootstrap admin, last-admin protection, per-identity account grants, audit events | `auth.py`, `authz.py`, `roles.py`, `scope.py`, migrations 0001, 0003 |
+| Identity and access | OIDC bearer verification, group-to-role mapping (admin, finance viewer; ADR 0013), bootstrap admin, last-admin protection, per-identity account grants, audit events | `auth.py`, `authz.py`, `roles.py`, `scope.py`, migrations 0001, 0003 |
 | Usage ledger | `usage_request_observations` (one row per model call routed through the app), `usage_aggregate_observations` (provider metric windows), collection checkpoints; idempotent writes; `sku` and `source_type` dimensions | `db.py`, `usage/ledger.py`, migrations 0002, 0004 |
 | Reconciliation | Rules for comparing app-routed requests with a provider aggregate without adding them (`app_only`, `provider_only`, `reconciled`, `app_exceeds_provider`) | `usage/reconcile.py`, ADR 0007 |
 | Read APIs | `GET /v1/usage` (reconciled rows), `GET /v1/usage/series` (bucketed, one token category per query) | `usage/query.py`, `usage/series.py` |

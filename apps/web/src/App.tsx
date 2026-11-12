@@ -29,7 +29,7 @@ function Shell({ auth }: { auth: AuthClient }) {
         const token = await auth.token();
         if (!token) return live && setSession({ kind: "signed-out" });
         const role = await whoami(token);
-        if (live) setSession({ kind: "ready", canWrite: role !== "reader" });
+        if (live) setSession({ kind: "ready", canWrite: role === "admin" });
       } catch (e) {
         const status = (e as { status?: number }).status;
         if (!live) return;

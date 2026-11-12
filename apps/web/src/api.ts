@@ -90,4 +90,4 @@ export const explain = (token: string, nodeId: string) => get<ExplainNode>(`/v1/
 export const allocationSummary = (token: string) =>
   get<{ summaries: CoverageSummary[] }>("/v1/allocation/summary", {}, token).then((r) => r.summaries);
 
-export const whoami = (token: string) => get<{ role: "admin" | "user" | "reader" }>("/v1/whoami", {}, token).then((r) => r.role);
+export const whoami = (token: string) => get<{ role: "admin" | "finance_viewer" }>("/v1/whoami", {}, token).then((r) => r.role);

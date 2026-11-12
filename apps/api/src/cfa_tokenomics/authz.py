@@ -1,6 +1,7 @@
 """Deny-by-default authorization (REQ-003, REQ-004; docs/access-control.md).
 
-The matrix mirrors the *proposed* permission table and still needs owner approval.
+The product is for administrators only (ADR 0013): a full admin, and a read-only finance viewer
+below it. There is no end-user role. The matrix still needs owner approval.
 Vendor support has no standing permission: it exists only through an active
 Assessment grant, which is not implemented yet, so it maps to nothing here.
 """
@@ -15,8 +16,7 @@ from .config import Settings, get_settings
 
 class Role(StrEnum):
     ADMIN = "admin"
-    USER = "user"
-    READER = "reader"
+    FINANCE_VIEWER = "finance_viewer"
 
 
 class Permission(StrEnum):
@@ -33,16 +33,8 @@ class Permission(StrEnum):
 
 _MATRIX: dict[Role, frozenset[Permission]] = {
     Role.ADMIN: frozenset(Permission),
-    Role.USER: frozenset(
-        {
-            Permission.VIEW_PROVIDERS,
-            Permission.WRITE_RECORDS,
-            Permission.READ_USAGE,
-            Permission.ECONOMICS_READ,
-            Permission.ECONOMICS_WRITE,
-        }
-    ),
-    Role.READER: frozenset(
+    # Read-only. Sees only what an account grant allows (scope.py); never writes, never manages.
+    Role.FINANCE_VIEWER: frozenset(
         {Permission.VIEW_PROVIDERS, Permission.READ_USAGE, Permission.ECONOMICS_READ}
     ),
 }
@@ -59,7 +51,7 @@ def is_allowed(principal: Principal, permission: Permission) -> bool:
     return permission in _MATRIX.get(principal.role, frozenset())
 
 
-_RANK = {Role.READER: 1, Role.USER: 2, Role.ADMIN: 3}
+_RANK = {Role.FINANCE_VIEWER: 1, Role.ADMIN: 2}
 
 
 def _highest(*roles: Role | None) -> Role | None:

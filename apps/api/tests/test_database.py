@@ -84,11 +84,11 @@ def test_db_constraint_rejects_unknown_role(db):
 
 def test_admin_assigns_role_and_it_takes_effect(db):
     c = api(settings())
-    r = call(c, "PUT", "root", json={"issuer": ISS, "subject": "ann", "role": "reader"})
+    r = call(c, "PUT", "root", json={"issuer": ISS, "subject": "ann", "role": "finance_viewer"})
     assert r.status_code == 204
     ok = c.get("/v1/whoami", headers={"Authorization": f"Bearer {token('ann')}"})
     assert ok.status_code == 200
-    # reader still cannot manage identity
+    # a finance viewer still cannot manage identity
     assert (
         call(c, "PUT", "ann", json={"issuer": ISS, "subject": "x", "role": "admin"}).status_code
         == 403
@@ -110,7 +110,9 @@ def test_last_admin_cannot_be_removed_or_demoted(db):
     c = api(settings())
     call(c, "PUT", "root", json={"issuer": ISS, "subject": "adm", "role": "admin"})
     assert (
-        call(c, "PUT", "root", json={"issuer": ISS, "subject": "adm", "role": "user"}).status_code
+        call(
+            c, "PUT", "root", json={"issuer": ISS, "subject": "adm", "role": "finance_viewer"}
+        ).status_code
         == 409
     )
     assert call(c, "DELETE", "root", params={"issuer": ISS, "subject": "adm"}).status_code == 409

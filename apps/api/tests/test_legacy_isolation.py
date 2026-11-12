@@ -38,7 +38,7 @@ def write_everything(db, who="ann"):
     ledger.record_request(db, req())
     ledger.upsert_aggregate(db, agg())
     ledger.save_checkpoint(db, "bedrock", "a", "cur")
-    db.add(RoleAssignment(issuer="i", subject=who, role="reader", created_by="x"))
+    db.add(RoleAssignment(issuer="i", subject=who, role="finance_viewer", created_by="x"))
     db.add(AccountGrant(issuer="i", subject=who, provider="bedrock", account="a", created_by="x"))
     db.add(AuditEvent(actor="x", action="test", target="t", detail={}))
     db.commit()
@@ -331,8 +331,8 @@ def test_downgrade_refuses_to_merge_tenants_that_share_a_key(env):
             ledger.save_checkpoint(db, "bedrock", "a", "c")
     with pytest.raises(Exception):  # noqa: B017 - any database error: the point is that it stops
         migrate.main(["downgrade", "0007"])
-    with env.connect() as c:  # still at 0009, nothing half-undone
-        assert c.execute(text("select version_num from alembic_version")).scalar() == "0009"
+    with env.connect() as c:  # still at 0010, nothing half-undone
+        assert c.execute(text("select version_num from alembic_version")).scalar() == "0010"
 
 
 # ---- the production shape: a non-superuser owner, for whom row-level security applies --------
@@ -395,3 +395,30 @@ def test_the_migration_itself_finalizes_an_empty_install_when_run_by_a_non_super
     migrate.main(["upgrade"])
     with env.connect() as c:
         assert legacy_tenancy.unassigned_tables(c) == []
+
+
+def test_migration_0010_turns_user_and_reader_into_finance_viewer(env):
+    """Nobody gains access and nobody keeps write access: user and reader both become read-only."""
+    a, _ = two_tenants(env)
+    migrate.main(["downgrade", "0009"])
+    with env.begin() as c:
+        c.execute(text("delete from role_assignments"))
+        for who, role in (("a", "admin"), ("u", "user"), ("r", "reader")):
+            c.execute(
+                text(
+                    "insert into role_assignments (issuer, subject, role, created_at, created_by, tenant_id) "
+                    "values ('i', :who, :role, now(), 'x', :t)"
+                ),
+                {"who": who, "role": role, "t": a},
+            )
+    migrate.main(["upgrade"])
+    with env.connect() as c:
+        got = dict(c.execute(text("select subject, role from role_assignments")).all())
+    assert got == {"a": "admin", "u": "finance_viewer", "r": "finance_viewer"}
+    migrate.main(["downgrade", "0009"])
+    with env.connect() as c:
+        assert (
+            c.execute(text("select role from role_assignments where subject = 'u'")).scalar()
+            == "reader"
+        )
+    migrate.main(["upgrade"])
