@@ -1,6 +1,6 @@
 # Contributing to Work-CFA_Tokenomics
 
-Read [requirements](docs/requirements.md), [accepted ADRs](docs/adr/README.md), and [AGENTS.md](AGENTS.md) before substantial work. This is a documentation-stage customer-hosted platform, not an implemented SaaS. No license is selected; confirm contribution/distribution expectations with the owner.
+Read [requirements](docs/requirements.md), [accepted ADRs](docs/adr/README.md), and [AGENTS.md](AGENTS.md) before substantial work. This is an early-stage, customer-hosted platform (one client per installation), not an implemented SaaS; its code is tested on synthetic data only. The software is proprietary (ADR 0014); confirm contribution and distribution expectations with the owner.
 
 ## Workflow
 
@@ -13,7 +13,7 @@ Read [requirements](docs/requirements.md), [accepted ADRs](docs/adr/README.md), 
 
 ## Product invariants
 
-Keep runtime data/credentials customer-controlled. Vendor identities have no standing customer access. Assessment cannot self-approve or silently expand scope. Customer admin/user/reader roles require backend enforcement. Preserve provider-specific token semantics and validated portability. Customer owns deletion/retention policy. Do not reintroduce commercial operations or earlier form-service assumptions.
+Keep runtime data/credentials customer-controlled. Vendor identities have no standing customer access. Assessment cannot self-approve or silently expand scope. The admin and finance_viewer roles require backend enforcement. Preserve provider-specific token semantics and validated portability. Customer owns deletion/retention policy. Do not reintroduce commercial operations or earlier form-service assumptions.
 
 Never commit real credentials, private keys, connection strings, customer archives, account identifiers, private endpoints, prompts/completions, or sensitive screenshots. Test fixtures must be sanitized/test-only and must not be represented as observed usage. Keep normal telemetry content-free and customer-local.
 

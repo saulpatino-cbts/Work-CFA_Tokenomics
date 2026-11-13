@@ -16,13 +16,14 @@ ADRs capture product boundaries and implementation choices. **Accepted** means t
 | [0008](0008-account-scoped-usage-access.md) | Proposed (implemented; needs confirmation) | Per-identity (provider, account) grants limit non-admin usage reads. |
 | [0009](0009-sku-source-dimensions-and-series.md) | Proposed (implemented; needs confirmation) | `sku` and `source_type` dimensions; bucketed series that never add sources. |
 | [0010](0010-vendor-and-genai-scope.md) | Accepted scope; nothing implemented | Vendor APIs for Claude Code, OpenAI Codex, Perplexity, Gemini, GitHub Copilot; cloud APIs; Microsoft Copilot via Graph and Viva. |
-| [0011](0011-ai-economics-platform.md) | Proposed | Reposition as an application-centric AI economics platform (FOCUS-aligned, provenance-first). |
+| [0011](0011-ai-economics-platform.md) | Accepted (working assumptions partly confirmed) | Reposition as an application-centric AI economics platform (FOCUS-aligned, provenance-first). |
 | [0012](0012-privacy-modes-for-vendor-sources.md) | Accepted (privacy default superseded by 0013) | Vendor usage sources run in aggregate mode by default; per-user mode is a recorded admin opt-in with keyed pseudonyms; content-bearing sources are never connected. |
-| [0013](0013-admin-only-product-and-per-user-cost.md) | Accepted (retention open) | Administrators only (admin and finance viewer, Entra ID then Google); org-level and per-user cost are both core; per-user cost is layered and labelled. |
+| [0013](0013-admin-only-product-and-per-user-cost.md) | Accepted (retention: client's choice, see 0014) | Administrators only (admin and finance viewer, Entra ID then Google); org-level and per-user cost are both core; per-user cost is layered and labelled. |
+| [0014](0014-license-support-retention-and-time-zone.md) | Accepted (owner statements; legal text pending) | Proprietary license, no support commitment, client-chosen retention, UTC with an administrator-chosen time zone. |
 
 ## Open technical decisions
 
-Stack, hosting/packaging and persistence are accepted in 0004-0006. Observation mode is accepted in 0007. Still open: aggregate grain per provider; Assessment transport; archive format and secret migration; compatible API/model versions; cost-data scope; and licensing. Propose records for these before implementing the affected boundary.
+Stack, hosting/packaging and persistence are accepted in 0004-0006. Observation mode is accepted in 0007. Still open: aggregate grain per provider; Assessment transport; archive format and secret migration; compatible API/model versions; cost-data scope; and the retention and long-term storage mechanism. Propose records for these before implementing the affected boundary.
 
 ## Workflow
 

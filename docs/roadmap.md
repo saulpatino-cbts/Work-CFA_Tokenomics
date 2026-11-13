@@ -25,7 +25,7 @@ The repository began as a governance/security template and is now an early imple
 | Guided setup | Proposed | Interactive flow and real verification tests. |
 | Full portability | Proposed | Archive decision and validated fresh restore. |
 | Operations and recovery | Proposed | Executable runbooks and tested recovery targets. |
-| Licensing and support policy | Undecided (R-14) | Owner decision before any distribution. |
+| Licensing, support, retention | Decided in ADR 0014: proprietary, no support commitment, client-chosen retention. Legal text and the retention design are not done (R-14). | Legal review; retention and long-term storage design. |
 
 The strongest open gap is real-world verification: every connector, the importer, the migrations and sign-in are untested outside synthetic data. See the [risk register](risk-register.md) (R-26, R-27, R-29, R-30).
 
@@ -39,7 +39,7 @@ These replace the original token-application milestones. They follow the [econom
 
 | Milestone | Scope | State |
 | --- | --- | --- |
-| 0. Prerequisites | Hosting, persistence, observation mode, scope (ADRs 0004 to 0007, 0010, 0011, 0013). One client per install, deployed from the Azure and AWS marketplaces or standalone (ADR 0011 assumption 1). | Largely decided. Open: license and support (R-14), retention, ADR 0011 assumptions 3 to 9, Assessment transport (R-02). |
+| 0. Prerequisites | Hosting, persistence, observation mode, scope (ADRs 0004 to 0007, 0010, 0011, 0013). One client per install, deployed from the Azure and AWS marketplaces or standalone (ADR 0011 assumption 1). | Largely decided. License (proprietary), support (none promised), retention (client's choice) and time zone (UTC, administrator-selectable) are recorded in ADR 0014, with legal text pending. Open: retention design, Assessment transport (R-02). |
 | 1. Skeleton | API, web app, migrations, CI, authorization | Done on synthetic data. |
 | 2. Economics foundation (Phase 1) | Calculation engine, data model, FOCUS import, allocation, economics API and screens, usage facts | Done on synthetic data. Acceptance needs a real FOCUS export (see [test readiness](economics/11-test-readiness.md)). |
 | 3. Real telemetry (Phase 2) | Cost-export and vendor connectors, per-user mode, directory sync, scheduler | Cost-export, Anthropic and Codex connectors built against fakes. The rest is not built. Needs real accounts and a readiness decision per connector. |

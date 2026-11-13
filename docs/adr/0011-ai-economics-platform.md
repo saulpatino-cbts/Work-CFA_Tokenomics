@@ -45,13 +45,13 @@ The owner approved the design and Phase 1 without answering the nine open decisi
 | --- | --- |
 | 1 | **Decided 2026-11-12 (owner).** Customer-hosted stays, **one client per installation**. It is deployed from the Azure and AWS marketplaces into each client's own subscription or account, and there is also a standalone, repository-based way to host it, still one client per install. CBTS does not operate one installation for several clients. `tenant_id` and row-level security stay as defence in depth inside the single install. |
 | 2 | **Confirmed 2026-11-12.** REQ-012 is read as allowing price, margin and marketplace **modelling** only; payment processing, invoicing, subscription billing operations and marketplace metering stay out. |
-| 3 | "Customer" means a buyer of an application the tenant sells. |
-| 4 | **No real data has been supplied.** Phase 1 builds against synthetic, clearly labelled fixtures. Acceptance criterion 1 (import a real FOCUS export) stays **unmet** until a real export is provided. |
-| 5 | Target FOCUS 1.4; adopt the 1.5 token conventions after ratification. |
-| 6 | No default realization or cashability factors; they must be entered with a rationale. |
-| 7 | One base currency per tenant; dated FX rates; no summing across currencies. |
-| 8 | Aggregate per-user data by default; privacy review before any per-user source. |
-| 9 | `AGENTS.md` is updated in the Phase 1 documentation slice. |
+| 3 | **Confirmed 2026-11-12.** "Customer" means a buyer of an application the tenant sells. |
+| 4 | **Revised 2026-11-12 (owner).** The owner has no FOCUS data and less token data. Build and test on synthetic, clearly labelled data, and **fabricate fuller test data towards the end of the beta**, incorporating the FOCUS template information needed. Acceptance criterion 1 (import a real FOCUS export) stays **unmet** until a real export exists; fabricated data does not meet it. |
+| 5 | **Revised 2026-11-12 (owner).** Only the FOCUS 1.5 token information is needed, **even while 1.5 is a draft**. Target 1.5 token conventions now and label what rests on the draft; keep reading 1.0 and later cost files. |
+| 6 | No default realization or cashability factors; they must be entered with a rationale. **Researched 2026-11-12** ([note](../economics/12-realization-factors-research.md)): no authoritative default exists, so this stands. |
+| 7 | **Confirmed 2026-11-12.** One base currency per tenant; dated FX rates; no summing across currencies. All of a client's corporate data consolidates into the one installation. |
+| 8 | **Superseded** by [ADR 0013](0013-admin-only-product-and-per-user-cost.md): per-user cost is core, with pseudonyms by default. |
+| 9 | **Done.** `AGENTS.md` was updated in Phase 1 and rewritten for the current state on 2026-11-12. |
 
 ## Alternatives considered
 

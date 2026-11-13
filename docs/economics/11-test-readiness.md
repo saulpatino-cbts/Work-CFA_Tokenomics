@@ -24,7 +24,13 @@ The 1,000-row `focus_sample.csv` (FOCUS 1.0 layout, about 755 KB) was run throug
 
 The `ProviderName` alias to `ServiceProviderName` was applied, and `PublisherName` and `Id` were reported as unknown columns. The larger 10,000 and 100,000 row files were not tested (the 10,000 row download failed in transit).
 
-Reading: the importer's refusal to coerce is working as designed, but real-world files may not match its strictness. **Owner decision needed:** keep strict and require sources to emit timezone-marked timestamps (`--allow-partial` would only skip the rejected rows, so a file like this would import nothing), or add an explicit, recorded, per-source option that declares the timezone of a timestamp that lacks one (for example "treat as UTC"). Nothing was changed in the parser. The second option would be a new documented behaviour, not a silent fix.
+Reading: the importer's refusal to coerce was working as designed, but real files do not match its strictness. The owner decided on 2026-11-12: **read an unzoned timestamp as UTC unless the administrator chose another zone** ([ADR 0014](../adr/0014-license-support-retention-and-time-zone.md)).
+
+### After the fix (run, not assumed)
+
+The parser now reads an unzoned timestamp as UTC by default (a zone stated in the file is never overridden), records the assumption on each affected row, accepts `UTC`, fixed offsets and named zones, treats an unknown zone as an error, and keeps the old strict behaviour available. It also reads the literal `NULL` in optional number, timestamp and JSON columns as unknown (never zero); a required column holding `NULL` is still rejected. Re-running the same 1,000-row sample: **993 rows accepted, 7 rejected** (a required `ContractedCost` of `NULL`, which is correct to reject). `tests/test_focus_parse.py` passes (45 passed, 1 skipped; the skip is the named-zone test, which needs the `tzdata` package that is pinned in `pyproject.toml` but not installed on this machine). The database-backed importer and connector tests were **not run** (no test database or dependencies here).
+
+Not done: the per-tenant administrator time zone setting (today the zone is chosen per import with `--timezone`) and the larger 10,000 and 100,000 row samples.
 
 ## 2. Connector readiness
 
@@ -51,7 +57,7 @@ Deliberately last (milestone 5 in the [roadmap](../roadmap.md)). Entra ID first,
 
 ## 5. Suggested order
 
-1. Owner chooses the timestamp rule (section 1) and the source of the first real export.
+1. Done: timestamp rule (section 1). Fabricate fuller synthetic data towards the end of the beta, using the FOCUS template information; a real export remains needed for acceptance.
 2. Import the real export by hand; allocate it to one application; compare allocated plus unallocated to the line totals.
 3. Confirm which vendors the first client uses; test only those connectors.
 4. First install from a marketplace or standalone package; rehearse the migration on it before its first upgrade.

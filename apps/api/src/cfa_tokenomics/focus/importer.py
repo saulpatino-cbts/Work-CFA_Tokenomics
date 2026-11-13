@@ -101,6 +101,7 @@ def import_focus_file(
     final_after_days: int = 7,
     allow_partial: bool = False,
     keep_identity_columns: bool = False,
+    assume_timezone: str | None = "UTC",
     now: datetime | None = None,
     max_bytes: int = 100_000_000,
     basis: str = "observed",
@@ -160,7 +161,11 @@ def import_focus_file(
 
     try:
         parsed: ParseResult = parse_focus_csv(
-            content, declared_version, max_bytes, keep_identity_columns=keep_identity_columns
+            content,
+            declared_version,
+            max_bytes,
+            keep_identity_columns=keep_identity_columns,
+            assume_timezone=assume_timezone,
         )
     except FileError as exc:
         finish("failed", str(exc))

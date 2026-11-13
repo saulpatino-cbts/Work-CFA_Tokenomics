@@ -99,11 +99,6 @@ def test_missing_required_columns_fail_the_whole_file_and_name_them():
             "too_many_decimals",
             "ContractedCost",
         ),
-        (
-            "1,1,1,1,Usage,2026-01-01T00:00:00,2026-01-02T00:00:00Z,USD",
-            "timestamp_without_timezone",
-            "ChargePeriodStart",
-        ),
         ("1,1,1,1,Usage,yesterday,2026-01-02T00:00:00Z,USD", "bad_timestamp", "ChargePeriodStart"),
         (
             "1,1,1,1,Usage,2026-01-02T00:00:00Z,2026-01-02T00:00:00Z,USD",
@@ -296,3 +291,60 @@ def test_provider_split_allocation_columns_are_typed_and_json_columns_parse():
     assert v["allocated_method_id"] == "split-v1" and v["allocated_resource_id"] == "pod-7"
     assert v["allocated_method_details"] == {"Elements": [{"AllocatedRatio": 0.25}]}
     assert v["allocated_tags"] == {"team": "pay"} and r.rows[0].extensions == {}
+
+
+# --- timestamps that carry no timezone (owner decision 2026-11-12: UTC unless a zone is chosen) ---
+
+NAIVE = "1.5,1.5,2,1.8,Usage,2026-01-01 05:00:00,2026-01-01 06:00:00,USD"
+
+
+def test_a_timestamp_without_a_zone_is_read_as_utc_by_default_and_the_assumption_is_recorded():
+    r = parse_focus_csv(csv(NAIVE))
+    assert r.rejects == []
+    assert r.rows[0].values["charge_period_start"] == datetime(2026, 1, 1, 5, tzinfo=UTC)
+    assert r.assumed_timezone == "UTC" and r.naive_timestamps_assumed == 2
+    assert r.rows[0].extensions["_assumed_timezone"] == "UTC"
+
+
+def test_a_stated_offset_is_never_overridden_and_leaves_no_assumption():
+    r = parse_focus_csv(csv(OK), assume_timezone="+05:30")
+    assert r.rows[0].values["charge_period_start"] == datetime(2026, 1, 1, tzinfo=UTC)
+    assert r.assumed_timezone is None and r.naive_timestamps_assumed == 0
+    assert "_assumed_timezone" not in r.rows[0].extensions
+
+
+def test_a_chosen_fixed_offset_is_applied_to_unzoned_timestamps():
+    r = parse_focus_csv(csv(NAIVE), assume_timezone="-06:00")
+    assert r.rows[0].values["charge_period_start"] == datetime(2026, 1, 1, 11, tzinfo=UTC)
+    assert r.assumed_timezone == "-06:00"
+
+
+def test_a_named_zone_is_applied_when_the_zone_database_is_available():
+    pytest.importorskip("tzdata")  # the pinned dependency; some hosts have no system zone data
+    r = parse_focus_csv(csv(NAIVE), assume_timezone="America/Chicago")
+    assert r.rows[0].values["charge_period_start"] == datetime(2026, 1, 1, 11, tzinfo=UTC)
+
+
+def test_strict_mode_still_rejects_an_unzoned_timestamp_when_no_zone_is_assumed():
+    r = parse_focus_csv(csv(NAIVE), assume_timezone=None)
+    assert r.rows == []
+    assert {x.reason for x in r.rejects} == {"timestamp_without_timezone"}
+
+
+@pytest.mark.parametrize("bad", ["Mars/Phobos", "+25:00", "+05:75", "", "local"])
+def test_an_unknown_or_invalid_timezone_is_an_error_not_a_silent_utc(bad):
+    with pytest.raises(FileError):
+        parse_focus_csv(csv(NAIVE), assume_timezone=bad)
+
+
+def test_the_literal_null_in_an_optional_typed_column_is_unknown_not_zero_and_not_a_reject():
+    head = HEAD + ",ListUnitPrice,Tags"
+    r = parse_focus_csv(csv(OK + ",NULL,NULL", head=head))
+    assert r.rejects == []
+    v = r.rows[0].values
+    assert "list_unit_price" not in v and "tags" not in v
+
+
+def test_the_literal_null_in_a_required_column_is_still_rejected():
+    r = parse_focus_csv(csv("1.5,1.5,2,NULL,Usage,2026-01-01T00:00:00Z,2026-01-02T00:00:00Z,USD"))
+    assert r.rows == [] and reasons(r) == [(2, "not_a_number", "ContractedCost")]

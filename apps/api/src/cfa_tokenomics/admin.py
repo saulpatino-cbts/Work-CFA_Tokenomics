@@ -232,6 +232,7 @@ def _import_focus(args: list[str]) -> int:
         return 2
     tenant_id, path = uuid.UUID(args[0]), args[1]
     version = args[args.index("--version") + 1] if "--version" in args else "unknown"
+    zone = args[args.index("--timezone") + 1] if "--timezone" in args else "UTC"
     with open(path, "rb") as fh:
         content = fh.read()
     with tenant_session(create_engine(url), tenant_id) as db:
@@ -239,7 +240,7 @@ def _import_focus(args: list[str]) -> int:
         res = import_focus_file(
             db, tenant_id, cid, os.path.basename(path), content, declared_version=version,
             finality="final" if "--final" in args else None,
-            allow_partial="--allow-partial" in args,
+            allow_partial="--allow-partial" in args, assume_timezone=zone,
         )  # fmt: skip
     print(
         f"{res.status}: imported={res.rows_imported} rejected={res.rows_rejected} "
