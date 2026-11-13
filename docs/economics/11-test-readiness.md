@@ -28,7 +28,7 @@ Reading: the importer's refusal to coerce was working as designed, but real file
 
 ### After the fix (run, not assumed)
 
-The parser now reads an unzoned timestamp as UTC by default (a zone stated in the file is never overridden), records the assumption on each affected row, accepts `UTC`, fixed offsets and named zones, treats an unknown zone as an error, and keeps the old strict behaviour available. It also reads the literal `NULL` in optional number, timestamp and JSON columns as unknown (never zero); a required column holding `NULL` is still rejected. Re-running the same 1,000-row sample: **993 rows accepted, 7 rejected** (a required `ContractedCost` of `NULL`, which is correct to reject). `tests/test_focus_parse.py` passes (45 passed, 1 skipped; the skip is the named-zone test, which needs the `tzdata` package that is pinned in `pyproject.toml` but not installed on this machine). The database-backed importer and connector tests were **not run** (no test database or dependencies here).
+The parser now reads an unzoned timestamp as UTC by default (a zone stated in the file is never overridden), records the assumption on each affected row, accepts `UTC`, fixed offsets and named zones, treats an unknown zone as an error, and keeps the old strict behaviour available. It also reads the literal `NULL` in optional number, timestamp and JSON columns as unknown (never zero); a required column holding `NULL` is still rejected. Re-running the same 1,000-row sample: **993 rows accepted, 7 rejected** (a required `ContractedCost` of `NULL`, which is correct to reject). `tests/test_focus_parse.py` passes (45 passed, 1 skipped; the skip is the named-zone test, which needs the `tzdata` package that is pinned in `pyproject.toml` but not installed on this machine). The database-backed importer and connector tests could not run on this machine, but the pull request's CI run (PostgreSQL 16, ruff, 544 tests then 545 with the rehearsal below) passed them, including the named-zone test.
 
 Not done: the per-tenant administrator time zone setting (today the zone is chosen per import with `--timezone`) and the larger 10,000 and 100,000 row samples.
 
@@ -49,7 +49,12 @@ None of the four connectors has run against a real service. "Do they work for wh
 
 Migration `0008` adds a tenant to the older tables (roles, grants, audit, usage observations). If an installation already holds rows from before that migration, those rows have no tenant, stay invisible, and `/readyz` reports `legacy_tenant_unassigned` until an operator runs `python -m cfa_tokenomics.admin assign-legacy-tenant TENANT_ID`. An empty install is finalized by the migration itself.
 
-A rehearsal means doing that on a copy of a real install that has data, comparing row counts before and after. Since every install is for one client and no install with data exists yet, **this risk is dormant**. It becomes live the first time an existing install is upgraded. It can wait until a first real install exists, and should happen before that first upgrade.
+**Done (2026-11-13, in CI on PostgreSQL 16, synthetic data):**
+
+- `tests/test_legacy_isolation.py` already covered the mechanics with one row per table: old rows invisible until assigned, assignment finalizes, downgrade round trip, refusal to merge tenants that share a key, `/readyz` states.
+- New `tests/test_migration_rehearsal.py` adds volume: it builds a pre-tenancy install, fills every legacy table with 20,000 synthetic rows (`CFA_REHEARSAL_ROWS` changes this), upgrades, assigns a tenant, and checks that row counts match before and after, no row is left without a tenant, the tenant sees every row, another tenant sees none, and a second assignment does nothing. It also checks that migration `0010` folded the old `user` and `reader` roles into `finance_viewer`. It passed in CI (545 tests passed, none skipped). Timings are printed by the test but were not captured from CI, so no duration is claimed here.
+
+**Not done:** a rehearsal on a copy of a *real* install, which is what closes R-26. Nothing in a synthetic run shows how long it takes on real volumes or whether real data holds anything the synthetic rows do not. With one client per install and no install holding data yet, that remains dormant until the first real install is upgraded.
 
 ## 4. Real identity provider test
 
