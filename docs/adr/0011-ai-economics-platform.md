@@ -35,7 +35,7 @@ Reposition the product as an **application-centric AI economics platform** and d
 | [0009](0009-sku-source-dimensions-and-series.md) SKU and source | **Folded into** the FOCUS-based charge model. |
 | [0010](0010-vendor-and-genai-scope.md) vendor scope | **Stays** and is extended by the connector matrix. |
 
-REQ-012 ("no commercial operations") needs a clarification the owner must approve: **modelling** prices, margins and marketplace economics is in scope; payment processing, invoicing, subscription billing operations and marketplace metering are not.
+REQ-012 ("no commercial operations") needed a clarification, which the owner accepted on 2026-11-12: **modelling** prices, margins and marketplace economics is in scope; payment processing, invoicing, subscription billing operations and marketplace metering are not.
 
 ## Working assumptions for Phase 1
 
@@ -44,7 +44,7 @@ The owner approved the design and Phase 1 without answering the nine open decisi
 | # | Working assumption |
 | --- | --- |
 | 1 | Customer-hosted stays; `tenant_id` and row-level security are enforced from the first new table; whether CBTS operates it for several clients is undecided. |
-| 2 | REQ-012 is read as allowing price, margin and marketplace **modelling** only; payment processing, invoicing, subscription billing operations and marketplace metering stay out. |
+| 2 | **Confirmed 2026-11-12.** REQ-012 is read as allowing price, margin and marketplace **modelling** only; payment processing, invoicing, subscription billing operations and marketplace metering stay out. |
 | 3 | "Customer" means a buyer of an application the tenant sells. |
 | 4 | **No real data has been supplied.** Phase 1 builds against synthetic, clearly labelled fixtures. Acceptance criterion 1 (import a real FOCUS export) stays **unmet** until a real export is provided. |
 | 5 | Target FOCUS 1.4; adopt the 1.5 token conventions after ratification. |

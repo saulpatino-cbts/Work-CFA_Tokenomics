@@ -2,26 +2,36 @@
 
 ## Current status
 
-The repository began as a governance/security template. This documentation foundation defines the customer-hosted product; it does not implement application code, connectors, infrastructure, migrations, or runtime tests. No production release or deployment command exists.
+*Refreshed 2026-11-12 from the changelog, ADRs and risk register. No tests or builds were re-run for this refresh.*
+
+The repository began as a governance/security template and is now an early implementation: an API (`apps/api`) and a web app (`apps/web`) exist. All behaviour is tested on synthetic data only. Nothing has run against a real identity provider, vendor API, cloud export or install with data. No production release or deployment command exists.
 
 | Area | Status | Next evidence |
 | --- | --- | --- |
-| Product boundaries and role names | Documented | Owner review of requirements and accepted ADRs. |
-| Permission matrix and Assessment lifecycle | Proposed detailed contract | Scope approval, transport ADR, negative tests. |
-| Runtime and hosting | Accepted (ADRs 0004-0006) | Install templates and a tested fresh install. |
-| Web app | Started (`apps/web`): telemetry page against the read APIs; OIDC sign-in written but untested against a real IdP | Real-IdP test; setup wizard (needs a setup API); accessibility review. |
-| Vendor and Gen AI sources | Scope accepted (ADR 0010); nothing implemented | Per-vendor API research, then adapters. |
-| API skeleton | Started (`apps/api`) | Real-IdP test, usage ledger, first CI run on GitHub. |
-| Marketplace distribution | Gap analysis only | See [marketplace](marketplace.md). |
-| Provider adapters | Bedrock metric normalizer only (no live calls, no credentials, no scheduler); Foundry and Vertex not started | Live collection with customer-granted access; adapters for the other two. |
-| Usage ledger/reconciliation | Started: tables, migration, reconciliation rules, tests (synthetic data) | Live-provider verification; UI. Read APIs exist (`GET /v1/usage`, `GET /v1/usage/series`) with account scoping (ADR 0008) and SKU/source dimensions (ADR 0009). |
+| Product boundaries | Documented; the product is admin-only (ADR 0013) | Owner review of requirements and ADRs. |
+| Roles and identity | Implemented: `admin` and `finance_viewer` (ADR 0013, breaking change from `user` and `reader`), OIDC verification, IdP group mapping, audit log. Not tested against a real IdP. | Real-IdP test (Entra ID first, Google Workspace second); directory sync not built. |
+| Assessment lifecycle | Proposed detailed contract; not built | Scope approval, transport ADR (R-02), negative tests. |
+| Runtime and hosting | Accepted (ADRs 0004-0006); multi-stage container image and CI exist | Install templates and a tested fresh install. |
+| Tenancy and data isolation | Implemented: forced row-level security on every table, legacy tables isolated (migrations 0005 to 0009). Not run on a real install with data (R-26). Per-application scoping missing (R-25). | Rehearsal on a copy of a real install; scoping ADR and denial tests. |
+| Economics engine (ADR 0011, accepted) | Phase 1 slices 1 to 7 done on synthetic data: exact-decimal calculation library, application data model, FOCUS CSV import, allocation, economics API with explain view, screens, usage facts. See [economics roadmap](economics/07-roadmap.md). | A real FOCUS export imported and allocated; estimate-versus-observed variance (unmet). |
+| Cost sources | AWS Data Exports and Azure Cost Management export connectors built against stubbed storage (R-27). Manual FOCUS CSV import works; no Parquet or streaming. | An authorized run against a real export from each cloud. |
+| Vendor and Gen AI sources (ADR 0010, 0012) | Anthropic and Codex/ChatGPT Enterprise connectors built in aggregate mode against fake servers (R-29, R-30). Vendor API research documented. Not built: Perplexity, Gemini, GitHub Copilot, Microsoft Copilot via Graph and Viva, per-user mode. | An authorized run per connector; close the *not found* items in the research note. |
+| Privacy | Pseudonymizer, per-tenant pseudonym/name display setting and people mapping built (ADR 0012, 0013). Raw FOCUS copy still keeps the 1.5 identity columns (R-17). Retention open. | Customer privacy review; decision on the raw copy and on retention. |
+| FOCUS 1.5 / AI token view | `GET /v1/cost/ai-tokens` built from an unratified working draft (R-20, R-28). Ratification is scheduled for 2026-12-03. | December checklist in [FOCUS 1.5 readiness](economics/08-focus-1-5-readiness.md). |
+| Web app | Portfolio, application detail, explain drawer and telemetry page. OIDC sign-in untested against a real IdP; brand approval pending. No scenario, pricing or FinOps screens; no setup wizard. | Real-IdP test; setup API and wizard; accessibility review. |
+| Usage ledger and reconciliation | Implemented with account scoping (ADR 0008, proposed), SKU and source dimensions (ADR 0009, proposed). Only the Bedrock metric normalizer exists for cloud telemetry (no live calls); Foundry and Vertex not started. | Live collection with customer-granted access; confirm ADRs 0008 and 0009. |
+| Export sanitizer and samples | Built and tested on invented values; reduces but does not prove anonymity | Owner review of sanitized output before any real file is shared. |
+| Marketplace distribution | Gap analysis only; price and margin work is modelling only | See [marketplace](marketplace.md). |
 | Guided setup | Proposed | Interactive flow and real verification tests. |
 | Full portability | Proposed | Archive decision and validated fresh restore. |
 | Operations and recovery | Proposed | Executable runbooks and tested recovery targets. |
+| Licensing and support policy | Undecided (R-14) | Owner decision before any distribution. |
+
+The strongest open gap is real-world verification: every connector, the importer, the migrations and sign-in are untested outside synthetic data. See the [risk register](risk-register.md) (R-26, R-27, R-29, R-30).
 
 ## Redesign proposal (2026-11-07)
 
-The owner's brief reframes the product as an application-centric AI economics platform. The assessment, target architecture and four-phase roadmap are in [docs/economics](economics/README.md), with [ADR 0011](adr/0011-ai-economics-platform.md) proposed. Until it is decided, the milestones below describe the token application only.
+The owner's brief reframes the product as an application-centric AI economics platform. The assessment, target architecture and four-phase roadmap are in [docs/economics](economics/README.md), with [ADR 0011](adr/0011-ai-economics-platform.md) proposed. ADR 0011 is now accepted and Phase 1 is largely built (see Current status). The milestones below are the original token-application plan and predate the redesign; they are kept for traceability and need reconciling with the [economics roadmap](economics/07-roadmap.md).
 
 ## Milestone 0: resolve prerequisites
 
