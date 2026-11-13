@@ -24,6 +24,8 @@ AI usage -> tokens -> infrastructure -> cloud cost -> application cost -> busine
 | - | [FOCUS 1.5 readiness](08-focus-1-5-readiness.md) (December 2026 release preparation) | 4 |
 | - | [Vendor API research](09-vendor-api-research.md) (Phase 2 preparation, documentation-sourced, nothing run) | 4 |
 | - | [Tokenomics vocabulary](10-tokenomics-vocabulary.md) (seven-layer stack and Big-T notation: proposal, no formulas) | 4 |
+| - | [Test readiness](11-test-readiness.md) (what real data and accounts each component needs before it can be verified) | 1, 2 |
+| - | [Realization factors research](12-realization-factors-research.md) (why no default factor ships; unverified sources) | 5, 6 |
 
 Decision record: [ADR 0011](../adr/0011-ai-economics-platform.md). New requirements: [REQ-013 to REQ-022](../requirements.md#owner-stated-scope-2026-11-07-pending-adr-0011).
 

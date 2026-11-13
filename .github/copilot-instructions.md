@@ -4,7 +4,7 @@ Follow [AGENTS.md](../AGENTS.md) and [CONTRIBUTING.md](../CONTRIBUTING.md). Read
 
 ## Writing changes
 
-This is a customer-hosted platform at documentation-foundation stage. Do not invent a working runtime or choose unresolved architecture silently. Keep customer credentials/data local, preserve customer-owned lifecycle policy, enforce roles, and give vendor support no access outside an explicit Assessment grant.
+This is a customer-hosted platform (one client per installation) with an API and web app that are tested on synthetic data only. Do not claim a verified or released product, and do not choose unresolved architecture silently. Keep customer credentials/data local, preserve customer-owned lifecycle policy, enforce the admin and finance_viewer roles, and give vendor support no access outside an explicit Assessment grant.
 
 Provider usage requires source-specific normalization, deduplication, and visible coverage. Import/export must validate integrity and authority and must not reactivate historical access. No commercial workflows or vendor retention timer.
 

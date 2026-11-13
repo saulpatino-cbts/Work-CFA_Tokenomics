@@ -8,7 +8,7 @@ Customer-hosted cloud and AI FinOps platform with Microsoft Foundry, Amazon Bedr
 
 - Deploy the platform only in the customer's environment.
 - Keep customer data, credentials, configuration, and operational telemetry under customer control.
-- Support customer **admins**, **users**, and **readers** with server-enforced permissions.
+- Support customer **admins** and read-only **finance viewers** with server-enforced permissions (ADR 0013).
 - Give vendor administrators/support **no standing customer-data access**. A customer-authorized **Assessment** grants only explicitly approved scope for a limited period.
 - Connect Foundry, Bedrock, and Vertex AI without requiring the customer to use all three.
 - Measure model-token usage with provider-specific semantics, visible coverage, and no double-counting.
@@ -53,4 +53,4 @@ Use focused branches and pull requests. Preserve customer isolation, credential 
 
 Existing security/review configurations are inherited from the repository template. Their presence is not proof that third-party apps, private reporting, repository rules, or paid security features are enabled. See [maintainer setup](docs/TEMPLATE.md).
 
-No license has been selected. Do not describe this project as open source or assume redistribution rights until the owner makes that decision. Report vulnerabilities using the [security policy](.github/SECURITY.md).
+The software is proprietary ([ADR 0014](docs/adr/0014-license-support-retention-and-time-zone.md)); it is not open source and no redistribution right is granted. License text is pending legal review. No support level is promised. Report vulnerabilities using the [security policy](.github/SECURITY.md).

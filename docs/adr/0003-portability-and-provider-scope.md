@@ -28,3 +28,7 @@ Exercise all three adapters with API-specific tests and authorized integration e
 ## Revisit trigger
 
 New provider/API semantics, broader billing scope, changed archive format, or credential portability requirements need explicit compatibility decisions and migration tests.
+
+## Amendment (2026-11-12)
+
+The three providers (Foundry, Bedrock, Vertex AI) are no longer the whole source scope. [ADR 0010](0010-vendor-and-genai-scope.md) adds vendor APIs and Microsoft Copilot, and [ADR 0011](0011-ai-economics-platform.md) makes the product application-centric AI economics. The provider-specific accounting rules above, and the portability decision, still apply to every source. The "Initial observation mode" open item is decided by [ADR 0007](0007-observation-mode-and-reconciliation.md). This note changes no decision above.
