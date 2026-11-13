@@ -33,25 +33,18 @@ The strongest open gap is real-world verification: every connector, the importer
 
 The owner's brief reframes the product as an application-centric AI economics platform. The assessment, target architecture and four-phase roadmap are in [docs/economics](economics/README.md), with [ADR 0011](adr/0011-ai-economics-platform.md) proposed. ADR 0011 is now accepted and Phase 1 is largely built (see Current status). The milestones below are the original token-application plan and predate the redesign; they are kept for traceability and need reconciling with the [economics roadmap](economics/07-roadmap.md).
 
-## Milestone 0: resolve prerequisites
+## Milestones (reconciled 2026-11-12)
 
-Choose initial hosting/runtime, persistence, observation mode, Assessment transport, credential migration policy, licensing, and customer scope model. Convert open decisions into reviewed ADRs. Confirm whether initial cost scope includes billing ingestion, estimates, or tokens only.
+These replace the original token-application milestones. They follow the [economics roadmap](economics/07-roadmap.md) and ADR 0011. Order matters: real data before real connectors, sign-in testing near the end.
 
-## Milestone 1: application skeleton
-
-Create the selected runtime/frontend/backend structure, reproducible local development, configuration validation, health endpoint, persistence migrations, tests, and CI. Implement customer OIDC and resource authorization before exposing provider data. No fake working install commands or empty success checks.
-
-## Milestone 2: first vertical slice
-
-Choose one provider for incremental delivery, implement its adapter and usage ledger, verify setup, and display provenance/freshness/coverage. Test secret custody, pagination, retries, deduplication, and role denial. Selecting one first does not remove Foundry/Bedrock/Vertex from required baseline scope.
-
-## Milestone 3: full baseline
-
-Add the remaining provider adapters; test provider-specific normalization and reconciliation. Implement and verify Assessment, guided onboarding, customer data controls, full export/import, and permission-safe restoration.
-
-## Milestone 4: deployment readiness
-
-Publish a supported customer-run install/upgrade/recovery package, verify artifact provenance, complete threat review and usability tests, exercise failure runbooks, and document supported versions/limits. Promote to pilot only with actual acceptance evidence.
+| Milestone | Scope | State |
+| --- | --- | --- |
+| 0. Prerequisites | Hosting, persistence, observation mode, scope (ADRs 0004 to 0007, 0010, 0011, 0013). One client per install, deployed from the Azure and AWS marketplaces or standalone (ADR 0011 assumption 1). | Largely decided. Open: license and support (R-14), retention, ADR 0011 assumptions 3 to 9, Assessment transport (R-02). |
+| 1. Skeleton | API, web app, migrations, CI, authorization | Done on synthetic data. |
+| 2. Economics foundation (Phase 1) | Calculation engine, data model, FOCUS import, allocation, economics API and screens, usage facts | Done on synthetic data. Acceptance needs a real FOCUS export (see [test readiness](economics/11-test-readiness.md)). |
+| 3. Real telemetry (Phase 2) | Cost-export and vendor connectors, per-user mode, directory sync, scheduler | Cost-export, Anthropic and Codex connectors built against fakes. The rest is not built. Needs real accounts and a readiness decision per connector. |
+| 4. Commercialization (Phase 3) | Price, margin and marketplace modelling (modelling only) and the remaining screens | Not started. |
+| 5. Deployment readiness (Phase 4) | Marketplace packages for Azure and AWS, a standalone install, upgrade and recovery, full export/import, Assessment, a threat review. Real identity provider test (Entra ID first, Google Workspace second), deliberately late. | Not started. |
 
 ## Scope discipline
 

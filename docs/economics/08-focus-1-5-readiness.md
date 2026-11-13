@@ -82,6 +82,22 @@ When 1.5 is announced, re-verify and update:
 6. Whether Azure and AWS exports move to 1.4 or 1.5 (Azure's FOCUS export was documented as 1.2-preview, AWS as 1.0 and 1.2 when last read).
 7. Update `focus/columns.py`, the data model, this note, and risk R-20.
 
+## December checklist status (2026-11-12)
+
+Checked from public pages only. Nothing here replaces the ratified text, which does not exist yet. Search results are summaries; the official pages should be read before any item is closed.
+
+| # | Item | Status |
+| --- | --- | --- |
+| 1 | Ratification date | **Not done.** The FOCUS site says 1.5 publishes in December 2026; no ratification date was found. The 3 December date in this note is therefore unconfirmed. The scope list is closed to new items. 1.4 was ratified on 2026-06-04 and 1.3 on 2025-12-04. |
+| 2 | Final column list and operating-model conditions | **Blocked** until ratification. |
+| 3 | `SkuPriceDetails` properties and values | **Blocked.** A public summary of the 1.5 scope page says one merged Core item leaves `SkuPriceDetails` requirements unchanged and adds no new columns; it does not say whether that item is the token properties. This conflicts in tone with the owner-supplied draft and is **unresolved**: re-read the official 1.5 page and the draft side by side. |
+| 4 | Currency changes | **Blocked.** |
+| 5 | Migration guide and Validator support | **Partly known.** A 1.3 to 1.4 migration guide is listed in 1.5 Core scope. Validator support is not checked. |
+| 6 | Azure and AWS export versions | **Checked.** AWS Data Exports offers FOCUS 1.2 (generally available 2025-11-19, a new export must be created) and still lists FOCUS 1.0 with AWS columns; one AWS page describes its table as 1.0 plus three columns, a discrepancy to verify. Azure's FOCUS 1.2 export was still described as 1.2-preview (a few gaps unfilled); no 2026 general-availability announcement was found. Neither emits 1.4 or 1.5 as far as found. |
+| 7 | Update `focus/columns.py`, data model, this note, R-20 | **Not done**; nothing to change until ratification. |
+
+Consequence for this repository: the importer targets 1.4 and accepts 1.0 and later, and the real sources emit 1.0 to 1.2, so 1.2 input matters more than 1.5 right now.
+
 ## Version facts confirmed from the specification history
 
 - `ProviderName` was **replaced by `ServiceProviderName`** (added in 1.3). `ProviderName` and `PublisherName` were deprecated in 1.3 and removed in 1.4. `PublisherName` has no one-to-one successor (`HostProviderName` is only one of several), so it is **not** mapped; it is kept as an extension.
