@@ -38,7 +38,7 @@ The owner's brief reframes the product as an application-centric AI economics pl
 | REQ-021 | Enterprise security | Tenant isolation, RBAC, SSO, secret management, audit, connector health, retention, ingestion traceability; no credential in client code. |
 | REQ-022 | Executive experience | Economics-first dashboards answering the ten executive questions; tokens are drill-down. |
 
-**Proposed clarification of REQ-012:** modelling prices, margins and marketplace economics is in scope; payment processing, invoicing customers, subscription billing operations and marketplace metering remain out of scope.
+**Clarification of REQ-012 (accepted 2026-11-12, owner instruction):** modelling prices, margins and marketplace economics is in scope; payment processing, invoicing customers, subscription billing operations and marketplace metering remain out of scope.
 
 ## Intended outcomes
 

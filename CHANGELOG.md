@@ -6,7 +6,7 @@ Record notable changes under Unreleased in the same PR. No product release or ru
 
 ### Changed
 
-- Refreshed the status table in `docs/roadmap.md` to match the implemented state (admin-only roles, economics Phase 1, cost and vendor connectors, tenancy). R-19 in the risk register now reflects that ADR 0011 is accepted (the REQ-012 clarification is still marked proposed). Documentation only; no code changed and no checks re-run.
+- Refreshed the status table in `docs/roadmap.md` to match the implemented state (admin-only roles, economics Phase 1, cost and vendor connectors, tenancy). The REQ-012 clarification (price, margin and marketplace modelling in scope; payment processing, invoicing, subscription billing operations and marketplace metering out) is accepted, and R-19 is narrowed to the remaining unconfirmed ADR 0011 assumptions and ADR 0003. Documentation only; no code changed and no checks re-run.
 - **Breaking: admin-only roles (ADR 0013).** The roles are now `admin` and `finance_viewer` (read-only). `user` and `reader` are removed; existing assignments become `finance_viewer` (migration 0010). Replace `CFA_OIDC_USER_GROUP` and `CFA_OIDC_READER_GROUP` with `CFA_OIDC_FINANCE_GROUP`. Economics writes are admin-only. ADR 0012's aggregate-by-default privacy rule is superseded; per-user cost is a core view (per-user connector mode is not built yet).
 
 ### Added
