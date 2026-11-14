@@ -25,7 +25,7 @@ The repository began as a governance/security template and is now an early imple
 | Guided setup | Proposed | Interactive flow and real verification tests. |
 | Full portability | Proposed | Archive decision and validated fresh restore. |
 | Operations and recovery | Proposed | Executable runbooks and tested recovery targets. |
-| Licensing, support, retention | Decided in ADR 0014: proprietary, no support commitment, client-chosen retention. Legal text and the retention design are not done (R-14). | Legal review; retention and long-term storage design. |
+| Licensing, support, retention | Decided in ADR 0014: proprietary, no support commitment, client-chosen retention. Legal text and the retention design are not done (R-14). | Legal review; owner decisions on [ADR 0015](adr/0015-retention-controls-and-time-zone-setting.md) (proposed design for retention and the time zone setting). |
 
 The strongest open gap is real-world verification: every connector, the importer, the migrations and sign-in are untested outside synthetic data. See the [risk register](risk-register.md) (R-26, R-27, R-29, R-30).
 

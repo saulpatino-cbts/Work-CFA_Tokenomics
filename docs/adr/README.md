@@ -20,6 +20,7 @@ ADRs capture product boundaries and implementation choices. **Accepted** means t
 | [0012](0012-privacy-modes-for-vendor-sources.md) | Accepted (privacy default superseded by 0013) | Vendor usage sources run in aggregate mode by default; per-user mode is a recorded admin opt-in with keyed pseudonyms; content-bearing sources are never connected. |
 | [0013](0013-admin-only-product-and-per-user-cost.md) | Accepted (retention: client's choice, see 0014) | Administrators only (admin and finance viewer, Entra ID then Google); org-level and per-user cost are both core; per-user cost is layered and labelled. |
 | [0014](0014-license-support-retention-and-time-zone.md) | Accepted (owner statements; legal text pending) | Proprietary license, no support commitment, client-chosen retention, UTC with an administrator-chosen time zone. |
+| [0015](0015-retention-controls-and-time-zone-setting.md) | Proposed | Per-layer retention (no policy means keep), operator-run purge with a separate delete-only role, optional archive first; tenant time zone setting. |
 
 ## Open technical decisions
 
