@@ -13,7 +13,7 @@ RUN npm run build
 FROM web AS web-test
 RUN npm run typecheck && npm test && npm audit --audit-level=high
 
-FROM python:3.13-slim
+FROM python:3.15-slim
 ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
 WORKDIR /app
 COPY apps/api/pyproject.toml ./
